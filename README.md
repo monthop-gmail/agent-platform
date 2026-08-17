@@ -4,7 +4,16 @@
 
 ชื่อนี้ไม่ผูก vendor, ไม่ผูก Cloudflare และไม่จำกัดตัวเองไว้แค่ backend — repo นี้เป็น **core platform** ที่ product/application repo อื่น ๆ มา consume
 
+## ⚠️ repo นี้ไม่ implement
+
+repo นี้มีหน้าที่ **คุมภาพรวมและปรับปรุงโครง module** เท่านั้น — เก็บ architecture, module boundary, contract และ decision record
+
+**code จริงอยู่ใน product/application repo** ที่ consume platform นี้ (ดู [Ecosystem](#ecosystem))
+ถ้าจะเพิ่ม service, build tooling หรือ implementation ใด ๆ ให้ไปที่ repo ปลายทาง ไม่ใช่ที่นี่
+
 ## Modules
+
+แต่ละ directory เก็บ **นิยามขอบเขต** ของ module นั้น ไม่ใช่ code
 
 | Module | หน้าที่ |
 | --- | --- |
@@ -58,8 +67,12 @@ monthop-gmail/
 
 ## Status
 
-🚧 Early scaffold — โครงสร้าง module ยังเป็น placeholder ยังไม่มี implementation
+โครง module รอบแรกวางแล้ว — ยังอยู่ในขั้นตอนปรับปรุงขอบเขตและ boundary ระหว่าง module
 
 ## Reference
 
 - [`ref/repo-naming-agent-platform.md`](./ref/repo-naming-agent-platform.md) — เหตุผลและตัวเลือกอื่นที่พิจารณาก่อนเลือกชื่อ `agent-platform`
+
+## License
+
+[MIT](./LICENSE)

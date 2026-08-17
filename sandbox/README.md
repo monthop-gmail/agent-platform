@@ -8,4 +8,4 @@ execution environment ที่ isolate สำหรับ code และ tool �
 - filesystem และ artifact handling
 
 ## Status
-🚧 Placeholder — ยังไม่มี implementation
+นิยามขอบเขตเท่านั้น — repo นี้ไม่ implement, code จริงอยู่ใน product repo ที่ consume module นี้
