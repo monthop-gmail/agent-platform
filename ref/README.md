@@ -32,6 +32,7 @@
 | [`agent-platform-adr-review.md`](agent-platform-adr-review.md) | รีวิวหลังทำ Phase 0–1 (8.8/10) + **5 จุดที่ต้องแก้ก่อน Accept ADR** — เพิ่ม `contracts/capability/`, แยก provider entity/registry, ทบทวน runtime loop, กติกา conformance, นิยาม `modules/` |
 | [`agent-platform-adr-review-2.md`](agent-platform-adr-review-2.md) | รีวิวรอบสอง (9.1/10) — **approve architecture direction** · เหลือ 3 งานก่อนเปิด `contracts/`: README consistency, capability first-class, conformance เป็นข้อกำหนด + เสนอ canonical architecture diagram |
 | [`agent-platform-adr-review-3.md`](agent-platform-adr-review-3.md) | รีวิวรอบสาม (9.5/10) — **architecture review ผ่าน** · สั่งหยุดเพิ่ม ADR แล้วเข้า Decision Gate + **มีตัวเลือกที่แนะนำครบทั้ง 10 ADR** |
+| [`agent-platform-adr-decisions.md`](agent-platform-adr-decisions.md) | **ชุด Decision ที่เคาะจาก Platform Owner** ครบ 10 ADR + Authority · แยกสถานะ ADR-0006 เป็น versioning `ACCEPTED` / ownership `PENDING` (ติด devfactory-core) และแผนเดินต่อโดยไม่รอ #6 |
 
 ### repo ที่มีอยู่จริงแล้ว
 
