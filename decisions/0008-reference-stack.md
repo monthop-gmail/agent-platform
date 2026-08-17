@@ -58,6 +58,8 @@
 
 ห้ามมีใน repo นี้: `package.json` · `pyproject.toml` · `Dockerfile` · `docker-compose.yml` · lockfile · typed SDK ทุกภาษา
 
+> **ข้อยกเว้นเดียว** — [`conformance/`](../conformance/) ตาม [ADR-0011](0011-conformance-automation.md) · ตรวจสอบอย่างเดียว ห้าม generate ห้ามแก้ไฟล์ · dependency pin ใน workflow ไม่ใช่ในไฟล์ manifest
+
 ## Consequences ถ้าเลือก A
 
 * `contracts/` มีแต่ `.yaml` / `.json` — ห้ามมี `package.json`, `pyproject.toml`, `Dockerfile` ใน repo นี้

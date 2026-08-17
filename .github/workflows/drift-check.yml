@@ -1,0 +1,50 @@
+name: drift check
+
+# ตรวจว่า contract ที่ derive มายังตรงกับ semantics ของ repo ต้นทาง
+# และ consumers.md ยังตรงกับ manifest จริงของ consumer
+#
+# ขอบเขตถูกจำกัดโดย ADR-0011 — workflow นี้ตรวจอย่างเดียว
+# ห้าม generate · ห้าม commit · ห้าม deploy · ห้ามเรียก service อื่นนอกจาก raw.githubusercontent.com
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'contracts/**'
+      - 'profiles/**'
+      - 'architecture/consumers.md'
+      - 'conformance/**'
+      - '.github/workflows/drift-check.yml'
+  pull_request:
+    paths:
+      - 'contracts/**'
+      - 'profiles/**'
+      - 'architecture/consumers.md'
+      - 'conformance/**'
+  schedule:
+    # ทุกวัน 02:00 UTC — จับกรณีที่ repo ต้นทางขยับ semantics_version
+    # โดยที่ไม่มีอะไรใน repo นี้เปลี่ยน ซึ่ง push/PR trigger จับไม่ได้
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  drift:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install checker dependencies
+        # pin ไว้ตรงนี้แทนที่จะมี requirements.txt หรือ lockfile ใน repo
+        # เพราะ ADR-0008 ห้ามไฟล์ dependency manifest ใน agent-platform
+        run: pip install --no-cache-dir 'pyyaml==6.*' 'jsonschema==4.*' 'referencing==0.*'
+
+      - name: Run drift check
+        run: python3 conformance/drift_check.py

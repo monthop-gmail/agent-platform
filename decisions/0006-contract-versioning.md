@@ -4,6 +4,7 @@
 **Date:** 2026-08-17 · ownership resolved 2026-08-18
 **Depends on:** ADR-0001
 **Blocking:** —
+**Superseded in part by:** [ADR-0011](0011-conformance-automation.md) — คำตอบ "ตรวจตอน contract change ก่อน ยังไม่ทำ CI" ถูกแทนที่ด้วยการ automate เมื่อ 2026-08-18
 
 ## Context
 

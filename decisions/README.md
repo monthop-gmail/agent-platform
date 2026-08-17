@@ -28,6 +28,7 @@ ADR ในโฟลเดอร์นี้เป็น **authority** ของ�
 | [0008](0008-reference-stack.md) | Reference stack | **A** — tech-neutral (YAML/JSON Schema) | ✅ Accepted |
 | [0009](0009-capability-model.md) | Capability model | **A** — capability / declaration / requirement | ✅ Accepted |
 | [0010](0010-risk-approval-taxonomy.md) | Risk & approval taxonomy | **A** — `action_risk` / `authority` / `severity` | ✅ Accepted |
+| [0011](0011-conformance-automation.md) | Conformance automation | **C** — `conformance/` เป็นข้อยกเว้นเดียวของ ADR-0008 · supersede คำตอบ "ตรวจด้วยคน" ใน 0006 | ✅ Accepted |
 
 การเคาะบันทึกไว้ที่ [issue #1–#10](https://github.com/monthop-gmail/agent-platform/issues?q=is%3Aissue+label%3Aadr) — **ไฟล์บันทึกว่าตัดสินอะไร issue บันทึกว่าใครตัดสินและเมื่อไหร่**
 

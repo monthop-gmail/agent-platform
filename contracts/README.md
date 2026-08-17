@@ -35,7 +35,7 @@ canonical schema ที่ทุก repo ใน ecosystem ต้องใช้�
 
 ทั้งสองไฟล์มีบล็อก `derived_from` ที่ pin `semantics_version` ของ [`contract-semantics.yaml`](https://github.com/monthop-gmail/devfactory-core/blob/main/contract-semantics.yaml) — **pin `semantics_version` ไม่ใช่ commit SHA** เพราะ RFC เป็น prose การแก้คำผิดจะปลุก alarm โดยไม่มีอะไร drift จริง
 
-`semantics_version` ที่ไม่ตรงกับต้นทาง = out of conformance ไม่ว่า `CHANGELOG.md` จะเขียนว่าอะไร · ตอนนี้ตรวจด้วยคนตอนแก้ contract ยังไม่ทำ CI ([เหตุผลใน ADR-0006](../decisions/0006-contract-versioning.md))
+`semantics_version` ที่ไม่ตรงกับต้นทาง = out of conformance ไม่ว่า `CHANGELOG.md` จะเขียนว่าอะไร — **ตรวจอัตโนมัติทุก PR และรายวัน** โดย [`conformance/drift_check.py`](../conformance/) ([ADR-0011](../decisions/0011-conformance-automation.md))
 
 ## กติกา
 

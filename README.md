@@ -17,6 +17,7 @@ repo นี้มีหน้าที่ **คุมภาพรวมและ
 | --- | --- | --- |
 | [`contracts/`](./contracts) | canonical schema (YAML + JSON Schema) | ✅ ผูกพัน |
 | [`profiles/`](./profiles) | ชุด config ต่อประเภทงาน — instance ของ `contracts/profile/v1` | ✅ ผูกพัน |
+| [`conformance/`](./conformance) | drift check — **ข้อยกเว้นเดียวที่มี code ได้** ([ADR-0011](./decisions/0011-conformance-automation.md)) | 🔧 เครื่องมือ |
 | [`decisions/`](./decisions) | ADR ระดับ ecosystem — ศัพท์และขอบเขตที่ตกลงกันแล้ว | ✅ ผูกพัน |
 | [`architecture/`](./architecture) | คำอธิบาย, mapping, ผลวิเคราะห์ repo อื่น | 📄 อธิบาย |
 | [`planes/`](./planes) | นิยามขอบเขตของแต่ละ plane | 📄 อธิบาย |
@@ -92,6 +93,8 @@ monthop-gmail/
 **[`profiles/`](./profiles)** — `coding` `security` `knowledge` `enterprise` `workflow` `autonomous` · validate ผ่าน `contracts/profile/v1` ทั้งหมด
 
 **[`planes/`](./planes)** — ย้ายจาก module dirs เดิมตาม [module mapping](./architecture/module-mapping.md) เรียบร้อย (`agent-harness` แยกเป็น `harness` + `evals`)
+
+**drift check อัตโนมัติ** — ทุก PR · ทุก push เข้า `main` · และรายวันเพื่อจับกรณีที่ repo ต้นทางขยับ `semantics_version` ฝ่ายเดียว
 
 การสื่อสารข้ามทีมใช้ GitHub: **issue** สำหรับเคาะ ADR และขอแก้ contract · **PR** สำหรับรีวิว (comment ที่บรรทัด ไม่ใช่เขียนเรียงความ) · **milestone** สำหรับดูว่าติดเฟสไหน
 
