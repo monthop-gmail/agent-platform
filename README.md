@@ -80,17 +80,17 @@ monthop-gmail/
 
 **Phase 0 — Decisions First** ตาม [decisions-first plan](./ref/agent-platform-decisions-first-plan.md)
 
-ADR ทั้ง 10 ตัวร่างแล้ว (Context + Options + Recommendation) ยังเป็น `Proposed` ทั้งหมด — **รอเคาะ** ดู [`decisions/`](./decisions)
+ADR ร่างครบแล้ว (Context + Options + Recommendation) ยังเป็น `Proposed` ทั้งหมด — **รอเคาะ** ดู [`decisions/`](./decisions)
 
-ถัดไปหลัง ADR ผ่าน: `contracts/` P0 → `profiles/` → ย้าย 10 module ตาม [module mapping](./architecture/module-mapping.md)
+ถัดไปหลัง ADR ผ่าน: `contracts/` P0 → `profiles/` → ย้าย module ตาม [module mapping](./architecture/module-mapping.md)
 
 ## Reference
 
-- [`decisions/`](./decisions) — ADR 8 ตัวและลำดับที่ควรเคาะ
-- [`architecture/module-mapping.md`](./architecture/module-mapping.md) — 10 module ปัจจุบัน → โครงเป้าหมาย (ยังไม่ย้าย)
+- [`decisions/`](./decisions) — ADR ทั้งหมดและลำดับที่ควรเคาะ
+- [`architecture/module-mapping.md`](./architecture/module-mapping.md) — module ปัจจุบัน → โครงเป้าหมาย (ยังไม่ย้าย)
 - [`architecture/devfactory-core-rfc-extraction.md`](./architecture/devfactory-core-rfc-extraction.md) — ดึง RFC ของ `devfactory-core` มาเป็น canonical contract อะไรได้แค่ไหน
-- [`ref/`](./ref) — บันทึกดิบ 12 ไฟล์ พร้อมสารบัญและตารางข้อขัดแย้งที่รู้แล้ว
-- [`ref/existing-repos.md`](./ref/existing-repos.md) — inventory ของ repo ที่มีอยู่จริง 3 ตัว
+- [`ref/`](./ref) — บันทึกดิบ พร้อมสารบัญและตารางข้อขัดแย้งที่รู้แล้ว
+- [`ref/existing-repos.md`](./ref/existing-repos.md) — inventory ของ repo ที่มีอยู่จริง
 
 ## License
 
