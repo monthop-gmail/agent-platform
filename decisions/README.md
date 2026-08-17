@@ -14,7 +14,7 @@ ADR ในโฟลเดอร์นี้เป็น **authority** ของ�
 
 ## สถานะปัจจุบัน
 
-ทั้ง 8 ตัวเป็น `Proposed` — ช่อง **Decision ยังว่าง รอเคาะ** แต่ละไฟล์มี Context + Options + Recommendation ให้แล้ว
+ทั้ง 10 ตัวเป็น `Proposed` — ช่อง **Decision ยังว่าง รอเคาะ** แต่ละไฟล์มี Context + Options + Recommendation ให้แล้ว
 
 | ADR | เรื่อง | ปัญหาที่แก้ | Blocking อะไร |
 | --- | --- | --- | --- |
@@ -26,6 +26,8 @@ ADR ในโฟลเดอร์นี้เป็น **authority** ของ�
 | [0006](0006-contract-versioning.md) | Contract versioning | ใครเป็นเจ้าของ contract, แก้ยังไง | contracts ทั้งหมด |
 | [0007](0007-multi-tenancy.md) | Multi-tenancy | tenant model 3 แบบใน 3 เอกสาร | `contracts/identity/` |
 | [0008](0008-reference-stack.md) | Reference stack | Cloudflare vs Python vs Node | น้อยสุด (contract ไม่ผูก tech) |
+| [0009](0009-capability-model.md) | Capability model | capability กระจาย 4 รูปแบบ ไม่มีเจ้าของ | `contracts/capability/`, routing ทุกตัว |
+| [0010](0010-risk-approval-taxonomy.md) | Risk & approval taxonomy | `LOW/MEDIUM/HIGH/CRITICAL` มี 3 ความหมาย | `contracts/policy/`, `contracts/approval/` |
 
 ## ลำดับที่ควรเคาะ
 
@@ -34,16 +36,18 @@ ADR ในโฟลเดอร์นี้เป็น **authority** ของ�
   ↓
 0002 (ชื่อ) ── 0004 (ศัพท์ provider)
   ↓                ↓
-0003 (gateway) ── 0005 (runtime)      ← vocabulary/boundary gate
+0003 (gateway) ── 0005 (runtime) ── 0009 (capability)   ← vocabulary/boundary gate 🔒
   ↓
-0006 (versioning) ── 0007 (tenancy)
+0006 (versioning + conformance) ── 0007 (tenancy) ── 0010 (risk/authority)
   ↓
 0008 (stack)
   ↓
 contracts/ P0
 ```
 
-**0003 + 0004 + 0005 คือ vocabulary/boundary gate** ตาม [decisions-first plan](../ref/agent-platform-decisions-first-plan.md) Phase 2 — ห้ามเขียน `contracts/` ก่อนสามตัวนี้ Accepted ไม่งั้น schema จะฝังศัพท์ที่ยังไม่ตกลง
+**0003 + 0004 + 0005 + 0009 คือ vocabulary/boundary gate** ตาม [decisions-first plan](../ref/agent-platform-decisions-first-plan.md) Phase 2 และ [ADR review](../ref/agent-platform-adr-review.md) — ห้ามเขียน `contracts/` ก่อนสี่ตัวนี้ Accepted ไม่งั้น schema จะฝังศัพท์ที่ยังไม่ตกลง
+
+0009 อยู่ใน gate เพราะ [ADR-0005 option C2](0005-agent-runtime-boundary.md) ทำให้ execution เดินได้ 2 เส้นทาง — ต้องมี capability declaration บอกว่าเส้นทางไหนรองรับอะไร ไม่ใช่ของเพิ่มเติมทีหลัง
 
 ## ที่มา
 

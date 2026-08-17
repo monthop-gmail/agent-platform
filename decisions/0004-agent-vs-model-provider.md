@@ -36,10 +36,40 @@ Agent Platform    abstraction/orchestration ที่ทำให้สองช
 
 กฎที่ตามมา:
 
-* `contracts/model/` = inference contract (messages, streaming, token usage)
-* `contracts/provider/` = ทั้งสองชั้นใช้ interface ร่วม แต่ประกาศ `provider_kind: model | agent`
 * `agent-runtime` **ห้าม** import provider ตรง ๆ ต้องผ่าน adapter (ตาม contract-review)
 * `Agent ≠ Model` — task schema ห้าม hard-code model list ([`distributed-gateway` Phase 3](../ref/distributed-multi-agent-gateway-blueprint.md))
+
+## โครง contract — แยก entity ออกจาก registry
+
+`provider_kind: model | agent` เป็น **field เดียวไม่พอ** เพราะสองชั้นมี shape ต่างกันจริง ไม่ใช่ต่างแค่ label:
+
+```text
+contracts/
+├── provider/
+│   ├── provider.yaml            base — identity, auth, endpoint, quota, status
+│   ├── model-provider.yaml      extends base — models[], context window, pricing, modality
+│   └── agent-provider.yaml      extends base — models[], tools[], workspace, shell, git, session
+│
+├── model/
+│   └── inference.yaml           messages, streaming, tool_call, token usage
+│
+└── capability/                  ดู ADR-0009 — capability ไม่ใช่ field ของ provider
+```
+
+เหตุผลที่ต้องแยก — shape ไม่เท่ากัน:
+
+```text
+Anthropic (model provider)        Claude Code (agent provider)
+ ├── models                        ├── models
+ └── capabilities                  ├── tools
+                                   ├── workspace
+                                   ├── shell
+                                   └── git
+```
+
+ถ้าใช้ไฟล์เดียวโดยแยกด้วย `provider_kind` จะได้ schema ที่ field ครึ่งหนึ่งเป็น optional และไม่มี validation ที่มีความหมาย — ปัญหาเดียวกับ Option B ด้านล่าง
+
+**`provider` ≠ `capability`** — provider คือ *ใครให้บริการ* ส่วน capability คือ *ทำอะไรได้* ตัวหนึ่งประกาศ อีกตัวหนึ่งเป็นสิ่งที่ router ใช้ค้นหา จึงต้องเป็น contract แยกกัน ([ADR-0009](0009-capability-model.md))
 
 * ✅ 2 ref ฉบับล่าสุดเห็นตรงกัน และเป็นเวอร์ชันที่ทีมรีวิวแล้ว
 * ✅ อธิบายกรณี Nous Portal ได้ — เป็น *aggregator* ที่ให้ model หลายตัวผ่าน OAuth เดียว → `provider_kind: model` แต่ `is_aggregator: true`
@@ -72,6 +102,9 @@ Agent Platform    abstraction/orchestration ที่ทำให้สองช
 
 * `ref/ai-subscription-oauth-gateway-blueprint.md` §6/§7 ที่แยก `providers/` กับ `runtimes/` ยังใช้ได้ — แค่เปลี่ยนชื่อเป็น `model-providers/` กับ `agent-providers/`
 * `profiles/` แต่ละตัวต้องระบุ `agent-provider` ที่ใช้ (ตาม decisions-first plan Phase 4)
+* `contracts/provider/` มี 3 ไฟล์ (base + 2 specialization) ไม่ใช่ไฟล์เดียว
+* Nous Portal = `model-provider` ที่ `is_aggregator: true` — ประกาศ model ที่ให้บริการได้ 300+ ตัวโดยไม่ต้องมี provider entry แยกทุกตัว
+* `agent-backend-os` ถ้ามี native runtime ก็ลงทะเบียนเป็น `agent-provider` ตัวหนึ่งเหมือนกัน (ดู [ADR-0005](0005-agent-runtime-boundary.md) option C2) — ไม่มี provider ที่เป็น "ของเรา" แบบพิเศษ
 
 ## Sources
 

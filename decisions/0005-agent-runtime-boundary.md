@@ -64,30 +64,84 @@ Sandbox                     ที่ที่ command/code รันจริ�
 
 * ❌ workflow ต้อง durable/resumable ข้าม process ส่วน harness เป็น policy ภายใน request — คนละ lifetime
 
+## แยก Agent Execution ออกเป็นส่วนย่อยก่อน
+
+คำว่า "runtime" ถูกใช้เรียกก้อนเดียวที่จริง ๆ มี 5 ส่วนแยกกันได้:
+
+```text
+Agent
+  │
+  ▼
+Agent Execution
+  ├── orchestration loop     ใครตัดสินว่ารอบถัดไปทำอะไร
+  ├── provider execution     ใครเรียก model / agent provider จริง
+  ├── tool calls             ใครแปลง tool call เป็น action
+  ├── state                  session, memory, context ถูกเก็บที่ไหน
+  └── lifecycle              spawn / resume / cancel / timeout
+```
+
+ประโยชน์คือแต่ละส่วนตอบได้ว่า **platform เป็นเจ้าของหรือ provider เป็นเจ้าของ** โดยไม่ต้องเลือกทั้งก้อน:
+
+| ส่วน | Claude Code / OpenCode (external) | agent ที่เราเขียนเอง |
+| --- | --- | --- |
+| orchestration loop | provider ทำเอง (มองไม่เห็นข้างใน) | platform runtime ทำ |
+| provider execution | provider ทำเอง | platform เรียก model provider |
+| tool calls | provider ทำเอง + platform ตรวจผ่าน gateway | platform ทำ |
+| state | provider ถือ session ของตัวเอง | platform ถือ |
+| lifecycle | platform สั่งผ่าน adapter (`cancel()`) | platform ถือ |
+
 ## Options — platform สร้าง runtime เองหรือไม่
 
-### A2. ไม่สร้าง — platform เป็นเจ้าของ contract, runtime มาจาก agent provider (แนะนำ ถ้า ADR-0001 = A)
+### C2. Platform Runtime = native runtime + external agent provider ใต้ contract เดียว (แนะนำ)
 
-* ✅ สอดคล้อง ADR-0001 (repo นี้ไม่ implement) และ knowledge-platform §5
-* ✅ ใช้ของที่มีอยู่จริง (Claude Code, Codex, OpenCode) ได้ทันทีตาม ADR-0004
-* ⚠️ ต้องยอมรับว่า runtime ภายนอกไม่ได้ implement contract ครบ → ต้องมี capability declaration (`supports(...)` ตาม `ai-subscription-oauth-gateway §7`)
+```text
+contracts/execution/   ← execution contract เดียว ทั้งสองทางต้องทำตาม
+        │
+   ┌────┴─────────────────────┐
+   ▼                          ▼
+native runtime          external agent provider
+(agent-backend-os)      (Claude Code / OpenCode / Hermes / Codex)
+```
 
-### B2. สร้าง runtime กลางเอง (Durable Objects ตาม backend-os §6)
+* ✅ **agent ที่ทีมเขียนเองไม่เป็น citizen ชั้นสอง** — ไม่ต้องห่อตัวเองเป็น "provider ปลอม" เพื่อจะรันได้
+* ✅ ครอบกรณีที่ agent ไม่มี loop ของตัวเอง (agent ที่เป็นแค่ prompt + tool set) — native runtime ให้ loop
+* ✅ ไม่ขัด ADR-0001 เพราะ **native runtime ไม่ได้อยู่ใน repo นี้** — อยู่ใน `agent-backend-os` ส่วน repo นี้ถือแค่ contract
+* ✅ ไม่ผูก vendor — Cloudflare/DO เป็นทางเลือก implementation ของ native runtime ตัวหนึ่ง ไม่ใช่ข้อบังคับ
+* ⚠️ contract ต้องออกแบบให้ทั้งสองฝั่งเติมได้ไม่เท่ากัน → ต้องพึ่ง capability declaration ([ADR-0009](0009-capability-model.md)) ระบุว่าเส้นทางไหนรองรับอะไร
+* ⚠️ execution ที่ผ่าน external provider จะ observe ได้หยาบกว่า (มองไม่เห็น step ข้างใน) → `contracts/event/` ต้องยอมรับ trace ที่ไม่มี step ย่อย
 
-* ✅ ควบคุม state/resume/budget ได้เต็มที่
-* ❌ ผูก Cloudflare (ขัดหลัก "ไม่ผูก vendor" ที่ทั้ง 4 blueprint ย้ำ) — เว้นว่าจะทำเป็น provider หนึ่งใน `agent-backend-os`
-* ❌ ขัด ADR-0001 ถ้าจะสร้างใน repo นี้
+### A2. ไม่สร้างเลย — runtime มาจาก agent provider เท่านั้น
+
+* ✅ สอดคล้อง ADR-0001 ตรงตัวที่สุด และตรงกับ knowledge-platform §5
+* ✅ ใช้ของที่มีอยู่จริงได้ทันที ไม่ต้องเขียน runtime
+* ❌ **agent ที่ทีมเขียนเองไม่มีที่ยืน** — ต้องแพ็กตัวเองเป็น agent provider ทั้งที่เป็น agent ธรรมดา
+* ❌ agent ง่าย ๆ (prompt + tool 2 ตัว) ต้องมี process/CLI ของตัวเองเพื่อจะเป็น provider → ต้นทุนไม่สมเหตุสมผล
+
+### B2. สร้าง native runtime เท่านั้น (Durable Objects ตาม backend-os §6)
+
+* ✅ ควบคุม state/resume/budget/trace ได้เต็มที่และสม่ำเสมอ
+* ❌ ทิ้งของที่มีอยู่จริง (Claude Code, Codex, OpenCode) ซึ่งเป็นเหตุผลตั้งต้นของ `ai-subscription-oauth-gateway` และ `distributed-gateway`
+* ❌ ถ้า implement ใน repo นี้ = ขัด ADR-0001
 
 ## Decision
 
 > _(รอเคาะ — ต้องตอบ 2 ส่วน: 4 ชั้น และ platform สร้าง runtime เองหรือไม่)_
 
-## Consequences ถ้าเลือก A + A2
+## Consequences ถ้าเลือก A + C2
 
-* module `agent-runtime/` ใน repo นี้ = เอกสาร contract ของ runtime ไม่ใช่ที่รอ code
+* module `agent-runtime/` ใน repo นี้ = เอกสารขอบเขต + `contracts/execution/` ไม่ใช่ที่รอ code · native runtime ไปอยู่ `agent-backend-os`
 * module `agent-harness/` = execution policy · เพิ่ม `evals/` แยกออกมา หรือระบุใน module mapping (ADR ไม่ตัดสินให้)
+* `contracts/execution/` ต้องมี **execution mode** ระบุว่างานนี้เดินทางไหน:
+
+```yaml
+execution_mode: native | provider        # ใครถือ orchestration loop
+provider: claude-code | null             # null = native runtime
+observability_depth: step | turn         # provider มักได้แค่ turn
+```
+
 * `contracts/execution/` ต้องมี state machine ระดับ task/execution เอง เพราะ RFC-0001 ครอบแค่ระดับ job และเขียนไว้เองว่า task-level ยังเป็น Future Work — ดู [extraction §4](../architecture/devfactory-core-rfc-extraction.md)
 * ต้องตอบ open question ที่ RFC-0001 ทิ้งไว้: **retry semantics ของ FAILED** และ **parallel task substates**
+* กฎที่ต้องคงไว้ทั้งสองเส้นทาง (จาก RFC-0004): execution ไม่ตัดสิน governance · ไม่แตะ backend resource ตรง · ไม่ถือ provider credential เอง — external provider ก็ต้องผ่าน gateway เหมือนกัน ไม่มีสิทธิ์พิเศษเพราะเป็นของ vendor
 
 ## Sources
 

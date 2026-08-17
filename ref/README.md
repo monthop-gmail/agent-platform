@@ -49,7 +49,8 @@
 | platform สร้าง runtime เองไหม (backend-os §6 vs knowledge §5) | [0005](../decisions/0005-agent-runtime-boundary.md) |
 | tenant model 2/3/5 ชั้น | [0007](../decisions/0007-multi-tenancy.md) |
 | Cloudflare vs Python vs Node | [0008](../decisions/0008-reference-stack.md) |
-| risk level `LOW/MEDIUM/HIGH/CRITICAL` คนละความหมาย (backend-os §9 vs navi Phase 4) | ยังไม่มี ADR |
+| risk level `LOW/MEDIUM/HIGH/CRITICAL` คนละความหมาย (backend-os §9 vs navi Phase 4) | [0010](../decisions/0010-risk-approval-taxonomy.md) |
+| capability มี 4 รูปแบบ (oauth-gateway §7/§8 vs distributed-gateway Phase 3) | [0009](../decisions/0009-capability-model.md) |
 
 ## หมายเหตุ
 

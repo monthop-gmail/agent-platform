@@ -80,7 +80,7 @@ monthop-gmail/
 
 **Phase 0 — Decisions First** ตาม [decisions-first plan](./ref/agent-platform-decisions-first-plan.md)
 
-ADR ทั้ง 8 ตัวร่างแล้ว (Context + Options + Recommendation) ยังเป็น `Proposed` ทั้งหมด — **รอเคาะ** ดู [`decisions/`](./decisions)
+ADR ทั้ง 10 ตัวร่างแล้ว (Context + Options + Recommendation) ยังเป็น `Proposed` ทั้งหมด — **รอเคาะ** ดู [`decisions/`](./decisions)
 
 ถัดไปหลัง ADR ผ่าน: `contracts/` P0 → `profiles/` → ย้าย 10 module ตาม [module mapping](./architecture/module-mapping.md)
 

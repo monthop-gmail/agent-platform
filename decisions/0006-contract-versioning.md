@@ -73,6 +73,69 @@ devfactory-core · navi-security-agent · enterprise-knowledge · agent-fleet ·
 * ✅ ทีมเดินเร็ว ไม่ต้องรอ approve
 * ❌ กลับไปสู่ปัญหาเดิม (schema เดียวกันคนละ field) ซึ่งเป็นเหตุผลที่สร้าง repo นี้
 
+## กติกา conformance (บังคับ)
+
+ADR-0001 ระบุว่า contract-only มีความเสี่ยง drift — กติกานี้เป็นกลไกกัน drift และเป็น **ข้อบังคับของ consumer ทุกตัว** ไม่ใช่ข้อแนะนำ
+
+```text
+                  agent-platform
+                        │
+                        │ contract v1
+                        ▼
+        ┌───────────────┼───────────────┐
+        ▼               ▼               ▼
+ devfactory-core  navi-security-   enterprise-
+                     agent          knowledge
+        │               │               │
+   conformance     conformance     conformance
+      test            test            test
+```
+
+repo ที่อ้างว่า consume contract ต้องมี:
+
+1. ไฟล์ประกาศ version ที่ใช้ — `contract.lock` (หรือเทียบเท่า) ระบุ `contracts/<name>/v<N>` ที่ pin ไว้
+2. conformance test ที่รันใน CI และ validate payload จริงกับ schema ที่ pin
+3. ผลลัพธ์ test เป็นเงื่อนไขของ release — fail = ปล่อยไม่ได้
+
+repo ที่ไม่มี 3 ข้อนี้ถือว่า **ยังไม่ใช่ consumer** และ platform ไม่รับประกันความเข้ากันได้ให้
+
+### นิยาม breaking change
+
+เปลี่ยนอย่างใดอย่างหนึ่งต่อไปนี้ = breaking → ขึ้น major ใหม่:
+
+```text
+ลบ field · เปลี่ยนชื่อ field · เปลี่ยน type
+เพิ่ม required field ใหม่ · เปลี่ยน field จาก optional → required
+ลบค่าออกจาก enum · เปลี่ยนความหมายของค่าเดิม
+เปลี่ยน default ที่ทำให้พฤติกรรมเดิมเปลี่ยน
+เข้มขึ้นใน validation (เช่น ลด maxLength, เพิ่ม pattern)
+```
+
+ไม่ breaking (ทำได้ภายใน major เดิม):
+
+```text
+เพิ่ม optional field · เพิ่มค่าใน enum ที่ consumer ต้องเผื่อไว้แล้ว
+ผ่อน validation · เพิ่มเอกสาร/ตัวอย่าง
+```
+
+### Compatibility
+
+* consumer ต้องเผื่อ **unknown field** ได้ — ห้าม fail เมื่อเจอ field ที่ยังไม่รู้จัก
+* consumer ต้องเผื่อ **unknown enum value** โดย fallback ที่ปลอดภัย (สำหรับ policy/risk ให้ fallback ไปทาง deny/escalate ไม่ใช่ allow)
+* producer ห้ามพึ่งพาว่า consumer จะอ่าน field ใหม่ได้ทันที
+
+### Deprecation
+
+```text
+ประกาศ deprecated ใน CHANGELOG + field flag
+        ↓  ต่ำสุด 1 minor release และแจ้ง consumer ที่ pin ไว้ทุกตัว
+ยังต้องรองรับต่อไปควบคู่ version ใหม่
+        ↓  ต่ำสุด 90 วันหลัง vN+1 พร้อมใช้
+ปิด vN ได้เมื่อ consumer ทุกตัวย้ายครบ (ตรวจจาก contract.lock)
+```
+
+vN ที่ยังมี consumer pin อยู่ **ห้ามปิด** ไม่ว่าครบกำหนดหรือไม่
+
 ## Decision
 
 > _(รอเคาะ — ต้องตอบ 2 ส่วน: รูปแบบ version และความเป็นเจ้าของ)_
@@ -81,8 +144,9 @@ devfactory-core · navi-security-agent · enterprise-knowledge · agent-fleet ·
 
 * `contracts/*/vN/CHANGELOG.md` เป็นสิ่งบังคับ
 * ทุก contract มี field `contract_version` ใน payload เพื่อให้ audit ย้อนได้ว่าใช้เวอร์ชันไหน
-* repo ลูกควรมี conformance test ที่อ้าง version — เป็นกลไกกัน drift ที่ ADR-0001 ต้องการ
+* repo ลูก **ต้อง** มี `contract.lock` + conformance test ใน CI ตามกติกาด้านบน — repo ที่ไม่มีไม่ถือเป็น consumer
 * ต้องนัดคุยกับ Architecture Owner ของ `devfactory-core` ก่อนเขียน `contracts/approval/` และ `contracts/event/`
+* platform ต้องเก็บ **consumer registry** — รู้ว่า repo ไหน pin version ไหน ไม่งั้นตัดสินใจปิด vN ไม่ได้ (เก็บที่ `architecture/consumers.md`)
 
 ## สถานะ ref เทียบกับ contract
 

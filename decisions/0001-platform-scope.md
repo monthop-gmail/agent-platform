@@ -27,7 +27,7 @@
 
 ### A. Contract & architecture only (แนะนำ)
 
-repo เก็บ `contracts/` `architecture/` `decisions/` `profiles/` และ `modules/` ที่เป็นเอกสาร — ไม่มี runtime code, ไม่มี build, ไม่มี dependency manifest
+repo เก็บ `contracts/` `architecture/` `decisions/` `profiles/` และโฟลเดอร์เอกสารขอบเขต — ไม่มี runtime code, ไม่มี build, ไม่มี dependency manifest
 
 * ✅ ตรงกับคำสั่งเจ้าของ repo และ ref 2 ฉบับล่าสุด
 * ✅ contract เปลี่ยนช้ากว่า code → repo นิ่ง ทำหน้าที่ authority ได้
@@ -51,16 +51,46 @@ repo เก็บ `contracts/` `architecture/` `decisions/` `profiles/` แล�
 * ❌ เส้นแบ่ง "เล็ก" ไม่ชัด มีโอกาสโตเป็น B โดยไม่มีใครสังเกต
 * ⚠️ ถ้าเลือกทางนี้ต้องเขียน CORE_BOUNDARY ที่ระบุเพดานเป็นตัวเลข (เช่น ห้ามมี service, ห้ามมี DB, ห้ามมี CI deploy)
 
+## Options — ชื่อโฟลเดอร์เอกสารขอบเขต
+
+10 directory ปัจจุบันจะกลายเป็นเอกสารทั้งหมด ต้องตั้งชื่อโฟลเดอร์ให้คนใหม่ไม่ถามว่า *"ทำไมมีแต่ markdown?"*
+
+### A2. `planes/` (แนะนำ)
+
+```text
+planes/
+├── gateway.md
+├── runtime.md
+├── knowledge.md
+└── ...
+```
+
+* ✅ ชื่อบอกเองว่าเป็น **ขอบเขตของ plane** ไม่ใช่ที่เก็บ code — ไม่ต้องพึ่ง README มาอธิบาย
+* ✅ ตรงกับศัพท์ที่ `devfactory-core` ใช้อยู่แล้ว (Control / Orchestration / Execution / Observability plane)
+* ❌ ต่างจากคำว่า `modules/` ที่ [`ref/agent-platform-contract-review.md`](../ref/agent-platform-contract-review.md) เสนอไว้
+
+### B2. `modules/` + ประกาศนิยามชัดใน README
+
+* ✅ ตรงกับที่ ref เสนอ ทีมที่อ่าน review มาแล้วจำได้
+* ❌ คำว่า module สื่อถึง code unit โดยธรรมชาติ → ต้องอธิบายทุกครั้งที่มีคนใหม่เข้ามา
+
+**ไม่ว่าจะเลือกชื่อไหน นิยามต้องเป็นข้อเดียวกัน:**
+
+> โฟลเดอร์นี้คือ **Plane Boundary Documentation** — เอกสารระบุขอบเขต ความรับผิดชอบ และสิ่งที่ห้ามทำของแต่ละ plane
+> **ไม่ใช่** ที่เก็บ implementation และ **ไม่ใช่** ที่รอ code มาลง
+> code ของ plane นั้นอยู่ใน repo ลูกที่ระบุไว้ในหัวไฟล์
+
 ## Decision
 
-> _(รอเคาะ)_
+> _(รอเคาะ — ต้องตอบ 2 ส่วน: scope และชื่อโฟลเดอร์เอกสารขอบเขต)_
 
 ## Consequences ถ้าเลือก A
 
 * ต้องเขียน `CORE_BOUNDARY.md` ของ platform เอง ตามแบบ `devfactory-core`
-* `modules/` 10 ตัวปัจจุบันเปลี่ยนสถานะเป็น "เอกสารขอบเขต" อย่างเป็นทางการ ไม่ใช่ที่รอ code
+* 10 directory ปัจจุบันเปลี่ยนสถานะเป็น **Plane Boundary Documentation** อย่างเป็นทางการ ไม่ใช่ที่รอ code — ทุกไฟล์ต้องระบุที่หัวว่า *"implementation อยู่ที่ repo ไหน"*
 * implementation ทั้งหมดไปอยู่ repo ลูก → ต้องตอบ ADR-0002 ว่า repo ลูกชื่ออะไร
-* ต้องมีกลไกกัน drift: repo ลูกต้องมี conformance test ที่อ้าง contract version (ADR-0006)
+* ต้องมีกลไกกัน drift: repo ลูกต้องมี conformance test ที่อ้าง contract version — เป็น **ข้อบังคับ** ไม่ใช่ข้อแนะนำ ดู [ADR-0006](0006-contract-versioning.md)
+* ห้ามมีไฟล์เหล่านี้ใน repo: `package.json` · `pyproject.toml` · `Dockerfile` · `docker-compose.yml` · lockfile ([ADR-0008](0008-reference-stack.md))
 
 ## Sources
 
