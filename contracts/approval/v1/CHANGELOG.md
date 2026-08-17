@@ -1,5 +1,12 @@
 # approval/v1
 
+## v1.0.1 — 2026-08-18
+- `derived_from.semantics_version` `1.0` → `1.1` ตามต้นทางที่ขยับจาก [RFC-0009](https://github.com/monthop-gmail/devfactory-core/blob/main/rfcs/0009-vocabulary-extension.md)
+- **`$defs.Decision` ยังเป็นชุดปิดเหมือนเดิม — ไม่มีอะไรเปลี่ยนในสัญญา** RFC-0009 เปิดเฉพาะ `event/v1` `EventType`
+- เพิ่มคำอธิบายว่าทำไมที่นี่ต่างจาก `event/v1`: การเพิ่ม decision outcome เปิดทางให้ execution
+  เดินโดยไม่มี `APPROVE` ของคนได้ ส่วนการเพิ่ม event type ทำแบบนั้นไม่ได้
+- แก้เฉพาะ description และ pointer — schema ไม่ขยับ
+
 ## v1.0.0 — 2026-08-18
 - เขียนได้หลัง [`devfactory-core` RFC-0005](https://github.com/monthop-gmail/devfactory-core/blob/main/rfcs/0005-platform-contract-authority.md) แยก authority เป็น semantics / wire schema — ไม่ติด `external-authority-pending` อีกต่อไป
 - semantics มาจาก `devfactory-core` `contract-semantics.yaml` `semantics_version: "1.0"`

@@ -1,5 +1,14 @@
 # event/v1
 
+## v1.1.0 — 2026-08-18
+- **`EventType` เปลี่ยนจากชุดปิดเป็นชุดเปิด** — 7 ค่าเดิมเป็น *ขั้นต่ำที่ต้องมี* ไม่ใช่ชุดทั้งหมด
+- **เพิ่ม event type ใหม่เป็น additive** ทำได้ผ่าน ADR ที่ repo นี้ ไม่ต้องมี RFC ที่ `devfactory-core`
+  ตาม [RFC-0009](https://github.com/monthop-gmail/devfactory-core/blob/main/rfcs/0009-vocabulary-extension.md) ซึ่งแก้ Rule 2 ของ ADR-0006
+- ลบ · เปลี่ยนชื่อ · เปลี่ยนความหมาย ของ 7 ค่าเดิม ยังเป็น semantic change เหมือนเดิม
+- guarantee ทั้ง 8 ข้อไม่เปลี่ยน · ไม่มี field ใดเพิ่ม ลบ หรือเปลี่ยน type
+- `derived_from.semantics_version` `1.0` → `1.1`
+- **ไม่ breaking** — payload ที่ถูกต้องกับ v1.0.0 ยังถูกต้องกับ v1.1.0 ทุกตัว ชุดค่าที่ยอมรับกว้างขึ้นเท่านั้น
+
 ## v1.0.0 — 2026-08-18
 - เขียนได้หลัง [`devfactory-core` RFC-0005](https://github.com/monthop-gmail/devfactory-core/blob/main/rfcs/0005-platform-contract-authority.md) แยก authority เป็น semantics / wire schema
 - semantics มาจาก `devfactory-core` `contract-semantics.yaml` `semantics_version: "1.0"` (RFC-0003 + RFC-0008)
