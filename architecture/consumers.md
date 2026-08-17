@@ -9,14 +9,14 @@
 vN ยังมีใคร pin อยู่ไหม  → ปิด vN ได้หรือยัง
 ```
 
-## สถานะปัจจุบัน — 2026-08-17
+## สถานะปัจจุบัน — 2026-08-18
 
-> ⚠️ **ยังไม่มี repo ไหนเป็น consumer** — [`contracts/` v1 เขียนแล้ว](../contracts) แต่ยังไม่มี repo ไหนประกาศ `platform-contract.yaml` และรัน conformance test ตาม [ADR-0006](../decisions/0006-contract-versioning.md)
-> ตารางนี้จึงเป็นโครงที่รอเติม ไม่ใช่รายงานสถานะจริง — `—` หมายถึงยังไม่ได้ pin อะไร
+> ⚠️ **ยังไม่มี repo ไหนเป็น consumer** — `devfactory-core` มี `platform-contract.yaml` แล้ว แต่ ADR-0006 บังคับครบ 3 ข้อ (manifest · conformance test ใน CI ที่ validate payload จริง · release gate) และอีก 2 ข้อยังไม่มีเพราะ repo นั้นยังไม่มี code
+> ตารางนี้จึงยังไม่ใช่รายงานสถานะจริง — `—` หมายถึงยังไม่ได้ pin อะไร
 
 | Repo | Manifest | Status | Contracts ที่ pin | last_verified | หมายเหตุ |
 | --- | --- | --- | --- | --- | --- |
-| [`devfactory-core`](https://github.com/monthop-gmail/devfactory-core) | 📝 ร่างแล้ว ยังไม่ push | `unknown` | *(ร่าง)* `identity/v1` `execution/v1` `policy/v1` `error/v1` | — | **consumer นำร่อง** — ยัง conform ไม่ได้เพราะ repo ยังไม่มี code จึงไม่มี payload ให้ validate · ผลวิเคราะห์: [`consumer-devfactory-core.md`](consumer-devfactory-core.md) |
+| [`devfactory-core`](https://github.com/monthop-gmail/devfactory-core) | ✅ [`platform-contract.yaml`](https://github.com/monthop-gmail/devfactory-core/blob/main/platform-contract.yaml) | `unknown` | `identity/v1` `execution/v1` `policy/v1` `error/v1` | — | **consumer นำร่อง** — ยัง conform ไม่ได้เพราะ repo ยังไม่มี code จึงไม่มี payload ให้ validate · ช่องว่างทั้ง 6 มี RFC ปิดแล้ว ([#10](https://github.com/monthop-gmail/devfactory-core/pull/10)) · authority ตาม [RFC-0005](https://github.com/monthop-gmail/devfactory-core/blob/main/rfcs/0005-platform-contract-authority.md) · ผลวิเคราะห์: [`consumer-devfactory-core.md`](consumer-devfactory-core.md) |
 | [`navi-ims`](https://github.com/monthop-gmail/navi-ims) | ❌ ไม่มี | `unknown` | — | — | default branch `master` · Odoo 19 · เป็น system of record ไม่ใช่ agent consumer โดยตรง |
 | [`ai-web-harness`](https://github.com/monthop-gmail/ai-web-harness) | ❌ ไม่มี | `unknown` | — | — | scaffold stage · อยู่ชั้น orchestration เหนือ gateway |
 | `navi-security-agent` | — | ยังไม่มี repo | — | — | Phase 0 ต้องการ event + policy contract |
@@ -43,10 +43,15 @@ vN ยังมีใคร pin อยู่ไหม  → ปิด vN ได�
 
 | Contract | v1 pinned by | v2 pinned by | ปิด v1 ได้? |
 | --- | --- | --- | --- |
-| `identity` `agent` `capability` `provider` `model` | *(ยังไม่มีใคร)* | — | ไม่มี v2 |
-| `tool` `mcp` `execution` `policy` `artifact` `error` `profile` | *(ยังไม่มีใคร)* | — | ไม่มี v2 |
+| `identity` | `devfactory-core` ⚠️ declared | — | ไม่มี v2 |
+| `execution` | `devfactory-core` ⚠️ declared | — | ไม่มี v2 |
+| `policy` | `devfactory-core` ⚠️ declared | — | ไม่มี v2 |
+| `error` | `devfactory-core` ⚠️ declared | — | ไม่มี v2 |
+| `agent` `capability` `provider` `model` | *(ยังไม่มีใคร)* | — | ไม่มี v2 |
+| `tool` `mcp` `artifact` `profile` | *(ยังไม่มีใคร)* | — | ไม่มี v2 |
 
-v1 ทุกตัวยังไม่มี consumer pin — เมื่อมี repo แรกขึ้นทะเบียน ให้แตกเป็นบรรทัดต่อ contract
+⚠️ **declared** = ประกาศ pin ใน `platform-contract.yaml` แล้ว แต่ยังไม่ผ่าน conformance (`status: unknown`)
+declared ยังไม่ทำให้เป็น consumer ตาม ADR-0006 — **แต่มีผลกับการตัดสินใจปิด version** เพราะมี repo ที่พึ่งพา v1 นั้นอยู่จริงแล้ว
 
 **กฎ:** vN ที่ยังมี consumer pin อยู่ **ห้ามปิด** ไม่ว่าครบกำหนด 90 วันหรือไม่
 
@@ -56,16 +61,27 @@ v1 ทุกตัวยังไม่มี consumer pin — เมื่อ�
 
 **สรุป: contract ไม่ต้องแก้** ทุกช่องว่างที่เจออยู่ฝั่ง consumer ไม่ใช่ฝั่ง contract
 
-| เจอ | ระดับ |
-| --- | --- |
-| ไม่มี `tenant_id` ที่ไหนเลย ทั้งที่ ADR-0007 บังคับ | 🔴 high — ต้องมี RFC ใหม่ที่ repo นั้น |
-| RFC-0001 `FAILED` terminal แต่ execution retry ได้ — job-level retry ยังไม่มีคำตอบ | 🟠 medium |
-| RFC-0001 ไม่มี `cancelled` / `timed_out` | 🟠 medium |
-| execution ที่รออนุมัติกลางคัน มองไม่เห็นจากระดับ job | 🟠 medium |
-| RFC-0003 บังคับ `job_id` — เข้ากันได้ทางเดียว | 🟡 low |
-| `packages/proxy` = outbound provider access → ชนกับชื่อ `model-gateway` | 🟡 low |
+`devfactory-core` ตอบครบทั้ง 6 ข้อแล้วเมื่อ 2026-08-18 — [issue #8](https://github.com/monthop-gmail/devfactory-core/issues/8) · [PR #10](https://github.com/monthop-gmail/devfactory-core/pull/10)
+
+| เจอ | ระดับ | ปิดด้วย |
+| --- | --- | --- |
+| ไม่มี `tenant_id` ที่ไหนเลย ทั้งที่ ADR-0007 บังคับ | 🔴 high | RFC-0006 — ใช้ `identity/v1` ตรง ๆ · `tenant_id` required บน job/decision/event · isolation ระดับ storage · single-tenant ใช้ `default` |
+| RFC-0001 `FAILED` terminal แต่ execution retry ได้ — job-level retry ยังไม่มีคำตอบ | 🟠 medium | RFC-0007 — `FAILED` ยัง terminal · recovery = job ใหม่ที่มี `supersedes_job_id` |
+| RFC-0001 ไม่มี `cancelled` / `timed_out` | 🟠 medium | RFC-0007 — เพิ่มเป็น terminal ระดับ job |
+| execution ที่รออนุมัติกลางคัน มองไม่เห็นจากระดับ job | 🟠 medium | RFC-0007 — state `AWAITING_APPROVAL` + field `awaiting_from` |
+| RFC-0003 บังคับ `job_id` — เข้ากันได้ทางเดียว | 🟡 low | RFC-0008 — `job_id` optional · subject required · ห้ามสร้าง `job_id` ปลอม |
+| `packages/proxy` = outbound provider access → ชนกับชื่อ `model-gateway` | 🟡 low | RFC-0005 — เปลี่ยนชื่อเป็น `packages/provider-proxy` + `apps/control-api` · internal ทั้งคู่ |
 
 ⚠️ **ยังไม่ใช่ conformance จริง** — เป็น *document alignment* เพราะ `devfactory-core` ไม่มี code ให้ validate · ถ้าต้องการ conformance ที่พิสูจน์ด้วย payload จริง consumer ที่มี code อยู่แล้วคือ `navi-ims`
+
+### `approval/` และ `event/` ไม่ติด external-authority-pending แล้ว
+
+[RFC-0005](https://github.com/monthop-gmail/devfactory-core/blob/main/rfcs/0005-platform-contract-authority.md) ตัดสินเรื่อง ownership ที่ ADR-0006 ค้างไว้ โดย**แยก semantics ออกจาก schema** แทนการยกทั้งก้อน:
+
+* **semantics** (decision/event vocabulary + guarantees) อยู่ที่ `devfactory-core`
+* **canonical wire schema** อยู่ที่ `agent-platform` — เพิ่ม field ระดับ platform (`tenant_id` `correlation_id` `policy_id` `expires_at` `action_risk` …) ได้ผ่าน ADR ที่นี่อย่างเดียว ไม่ต้องรอ RFC
+
+ส่วน semantics อยู่ในรูปที่เครื่องอ่านได้ที่ [`contract-semantics.yaml`](https://github.com/monthop-gmail/devfactory-core/blob/main/contract-semantics.yaml) — มี `frozen` block ต่อ contract, `platform_may_add_freely`, และ template ของ `derived_from` ที่ ADR-0006 ต้องการ · ตรวจ drift ด้วย `semantics_version` ไม่ใช่ commit SHA ของไฟล์ RFC
 
 ## วิธีขึ้นทะเบียน
 
