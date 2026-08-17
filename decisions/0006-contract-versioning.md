@@ -91,13 +91,56 @@ ADR-0001 ระบุว่า contract-only มีความเสี่ย�
       test            test            test
 ```
 
-repo ที่อ้างว่า consume contract ต้องมี:
+repo ที่อ้างว่า consume contract **ต้อง** มีทั้ง 3 ข้อ:
 
-1. ไฟล์ประกาศ version ที่ใช้ — `contract.lock` (หรือเทียบเท่า) ระบุ `contracts/<name>/v<N>` ที่ pin ไว้
-2. conformance test ที่รันใน CI และ validate payload จริงกับ schema ที่ pin
-3. ผลลัพธ์ test เป็นเงื่อนไขของ release — fail = ปล่อยไม่ได้
+1. **manifest** ที่ root — `platform-contract.yaml` ประกาศว่า pin contract อะไรไว้และผล conformance ล่าสุด
+2. **conformance test** ที่รันใน CI และ validate payload จริงกับ schema ที่ pin ไว้
+3. **release gate** — test fail = ปล่อยไม่ได้ และต้องอัปเดต `last_verified` ทุกครั้งที่รันผ่าน
 
-repo ที่ไม่มี 3 ข้อนี้ถือว่า **ยังไม่ใช่ consumer** และ platform ไม่รับประกันความเข้ากันได้ให้
+repo ที่ไม่มีครบ 3 ข้อถือว่า **ยังไม่ใช่ consumer** และ platform ไม่รับประกันความเข้ากันได้ให้
+
+### `platform-contract.yaml`
+
+```yaml
+platform_contract_version: "0.1"      # รุ่นของ contract set ทั้งชุด
+
+contracts:                            # pin ระดับ major ต่อ contract
+  - agent/v1
+  - execution/v1
+  - policy/v1
+  - event/v1
+
+conformance:
+  status: passing                     # passing | failing | unknown | waived
+  last_verified: 2026-08-17           # วันที่ CI รันผ่านล่าสุด
+```
+
+| field | บังคับ | ความหมาย |
+| --- | --- | --- |
+| `platform_contract_version` | ✅ | รุ่นของ contract set ที่ยึด — ใช้ตอบว่า repo นี้ตามหลังกี่รุ่น |
+| `contracts[]` | ✅ | รายการ `<name>/v<N>` ที่ pin · ประกาศเฉพาะที่ใช้จริง ไม่ใช่ทั้งหมด |
+| `conformance.status` | ✅ | `passing` / `failing` / `unknown` (ยังไม่เคยรัน) / `waived` (ยกเว้นชั่วคราว ต้องมี ADR หรือ issue อ้าง) |
+| `conformance.last_verified` | ✅ | ถ้าเก่ากว่า 90 วัน platform ถือเป็น `unknown` ไม่ว่าเขียนว่า passing |
+
+`last_verified` เป็น field ที่ทำให้ตารางสถานะมีความหมาย — `status: passing` ที่ไม่มีวันที่บอกไม่ได้ว่าผ่านเมื่อไหร่และยังจริงอยู่หรือไม่
+
+### ตารางสถานะ consumer
+
+platform รวม manifest ของทุก repo ไว้ที่ [`architecture/consumers.md`](../architecture/consumers.md) เพื่อตอบ 2 คำถามที่ตอบไม่ได้ถ้าไม่มี registry:
+
+```text
+ใครยังไม่ conform            → ต้องตามใคร ก่อนปล่อย contract version ใหม่
+vN ยังมีใคร pin อยู่ไหม       → ปิด vN ได้หรือยัง
+```
+
+ตัวอย่างสิ่งที่ตารางต้องบอกได้:
+
+```text
+devfactory-core        ✓ passing   agent/v1 execution/v1
+navi-security-agent    ✓ passing   event/v1 policy/v1
+enterprise-knowledge   ✓ passing   tool/v1
+farm-agent             ? unknown   —
+```
 
 ### นิยาม breaking change
 
@@ -131,7 +174,7 @@ repo ที่ไม่มี 3 ข้อนี้ถือว่า **ยัง
         ↓  ต่ำสุด 1 minor release และแจ้ง consumer ที่ pin ไว้ทุกตัว
 ยังต้องรองรับต่อไปควบคู่ version ใหม่
         ↓  ต่ำสุด 90 วันหลัง vN+1 พร้อมใช้
-ปิด vN ได้เมื่อ consumer ทุกตัวย้ายครบ (ตรวจจาก contract.lock)
+ปิด vN ได้เมื่อ consumer ทุกตัวย้ายครบ (ตรวจจาก architecture/consumers.md)
 ```
 
 vN ที่ยังมี consumer pin อยู่ **ห้ามปิด** ไม่ว่าครบกำหนดหรือไม่
@@ -144,9 +187,10 @@ vN ที่ยังมี consumer pin อยู่ **ห้ามปิด** 
 
 * `contracts/*/vN/CHANGELOG.md` เป็นสิ่งบังคับ
 * ทุก contract มี field `contract_version` ใน payload เพื่อให้ audit ย้อนได้ว่าใช้เวอร์ชันไหน
-* repo ลูก **ต้อง** มี `contract.lock` + conformance test ใน CI ตามกติกาด้านบน — repo ที่ไม่มีไม่ถือเป็น consumer
+* repo ลูก **ต้อง** มี `platform-contract.yaml` + conformance test ใน CI ตามกติกาด้านบน — repo ที่ไม่มีไม่ถือเป็น consumer
 * ต้องนัดคุยกับ Architecture Owner ของ `devfactory-core` ก่อนเขียน `contracts/approval/` และ `contracts/event/`
-* platform ต้องเก็บ **consumer registry** — รู้ว่า repo ไหน pin version ไหน ไม่งั้นตัดสินใจปิด vN ไม่ได้ (เก็บที่ `architecture/consumers.md`)
+* platform ต้องเก็บ [`architecture/consumers.md`](../architecture/consumers.md) ให้เป็นปัจจุบัน — ตัดสินใจปิด vN ไม่ได้ถ้าไม่รู้ว่าใคร pin อยู่
+* `waived` ต้องมีวันหมดอายุ — ยกเว้นถาวรไม่มี ถ้าจะยกเว้นนานกว่า 1 major ต้องเขียน ADR
 
 ## สถานะ ref เทียบกับ contract
 

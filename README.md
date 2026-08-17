@@ -41,6 +41,8 @@ repo นี้มีหน้าที่ **คุมภาพรวมและ
 
 ## Architecture
 
+ภาพย่อระดับ ecosystem — ภาพเต็มที่แสดง capability routing และการแยก provider สองชั้นอยู่ที่ [`architecture/platform-architecture.md`](./architecture/platform-architecture.md)
+
 ```text
                   agent-platform
                         │
@@ -87,6 +89,8 @@ ADR ร่างครบแล้ว (Context + Options + Recommendation) ย�
 ## Reference
 
 - [`decisions/`](./decisions) — ADR ทั้งหมดและลำดับที่ควรเคาะ
+- [`architecture/platform-architecture.md`](./architecture/platform-architecture.md) — canonical diagram (`Proposed`) พร้อมกำกับว่าชั้นไหนรอ ADR ตัวไหน
+- [`architecture/consumers.md`](./architecture/consumers.md) — ทะเบียน consumer และสถานะ conformance
 - [`architecture/module-mapping.md`](./architecture/module-mapping.md) — module ปัจจุบัน → โครงเป้าหมาย (ยังไม่ย้าย)
 - [`architecture/devfactory-core-rfc-extraction.md`](./architecture/devfactory-core-rfc-extraction.md) — ดึง RFC ของ `devfactory-core` มาเป็น canonical contract อะไรได้แค่ไหน
 - [`ref/`](./ref) — บันทึกดิบ พร้อมสารบัญและตารางข้อขัดแย้งที่รู้แล้ว
