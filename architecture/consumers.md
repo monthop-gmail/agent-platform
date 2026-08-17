@@ -11,8 +11,8 @@ vN ยังมีใคร pin อยู่ไหม  → ปิด vN ได�
 
 ## สถานะปัจจุบัน — 2026-08-17
 
-> ⚠️ **ยังไม่มี repo ไหนเป็น consumer** เพราะ `contracts/` ยังไม่ถูกสร้าง (รอ vocabulary gate ตาม [`decisions/`](../decisions))
-> ตารางนี้จึงเป็นโครงที่รอเติม ไม่ใช่รายงานสถานะจริง — `—` หมายถึงยังไม่มีอะไรให้ pin
+> ⚠️ **ยังไม่มี repo ไหนเป็น consumer** — [`contracts/` v1 เขียนแล้ว](../contracts) แต่ยังไม่มี repo ไหนประกาศ `platform-contract.yaml` และรัน conformance test ตาม [ADR-0006](../decisions/0006-contract-versioning.md)
+> ตารางนี้จึงเป็นโครงที่รอเติม ไม่ใช่รายงานสถานะจริง — `—` หมายถึงยังไม่ได้ pin อะไร
 
 | Repo | Manifest | Status | Contracts ที่ pin | last_verified | หมายเหตุ |
 | --- | --- | --- | --- | --- | --- |
