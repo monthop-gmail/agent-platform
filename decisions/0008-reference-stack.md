@@ -67,7 +67,7 @@
 
 ## หมายเหตุลำดับ
 
-ADR นี้ **urgent น้อยที่สุดในชุด 8 ตัว** ถ้า ADR-0001 = A เพราะ repo ที่ไม่ implement ไม่ต้องเลือก stack — แต่ต้องเคาะก่อนเริ่มเขียน `contracts/` เพื่อไม่ให้มีใครเผลอ commit typed SDK ลง repo นี้
+ADR นี้ **urgent น้อยที่สุดในชุด** ถ้า ADR-0001 = A เพราะ repo ที่ไม่ implement ไม่ต้องเลือก stack — แต่ต้องเคาะก่อนเริ่มเขียน `contracts/` เพื่อไม่ให้มีใครเผลอ commit typed SDK ลง repo นี้
 
 ## Sources
 

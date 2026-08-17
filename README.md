@@ -85,13 +85,13 @@ monthop-gmail/
 
 ยกเว้นข้อเดียว: **ADR-0006 ownership** ยัง `Pending` — `agent-platform` ยังไม่ใช่ canonical owner ของ shared contract จนกว่า Architecture Owner ของ [`devfactory-core`](https://github.com/monthop-gmail/devfactory-core) จะยืนยัน ([issue #6](https://github.com/monthop-gmail/agent-platform/issues/6))
 
-**[`contracts/` v1 เขียนแล้ว 11 ตัว](./contracts)** — `identity` `agent` `capability` `provider` `model` `tool` `mcp` `execution` `policy` `artifact` `error` · ทั้งหมด validate ผ่าน JSON Schema draft 2020-12 และ cross-ref ระหว่างไฟล์ resolve ครบ
+**[`contracts/` v1 เขียนแล้ว](./contracts)** — `identity` `agent` `capability` `provider` `model` `tool` `mcp` `execution` `policy` `artifact` `error` `profile` · ทั้งหมด validate ผ่าน JSON Schema draft 2020-12 และ cross-ref ระหว่างไฟล์ resolve ครบ
 
 `approval/` และ `event/` **ยังไม่เขียน** — ติดสถานะ `external-authority-pending` เพราะมาจาก RFC ของ `devfactory-core` ที่ authority ยังไม่ย้าย
 
-**[`profiles/` 6 ตัว](./profiles)** — `coding` `security` `knowledge` `enterprise` `workflow` `autonomous` · validate ผ่าน `contracts/profile/v1` ทั้งหมด
+**[`profiles/`](./profiles)** — `coding` `security` `knowledge` `enterprise` `workflow` `autonomous` · validate ผ่าน `contracts/profile/v1` ทั้งหมด
 
-**[`planes/` 11 ตัว](./planes)** — ย้ายจาก module dirs เดิมตาม [module mapping](./architecture/module-mapping.md) เรียบร้อย (`agent-harness` แยกเป็น `harness` + `evals`)
+**[`planes/`](./planes)** — ย้ายจาก module dirs เดิมตาม [module mapping](./architecture/module-mapping.md) เรียบร้อย (`agent-harness` แยกเป็น `harness` + `evals`)
 
 การสื่อสารข้ามทีมใช้ GitHub: **issue** สำหรับเคาะ ADR และขอแก้ contract · **PR** สำหรับรีวิว (comment ที่บรรทัด ไม่ใช่เขียนเรียงความ) · **milestone** สำหรับดูว่าติดเฟสไหน
 

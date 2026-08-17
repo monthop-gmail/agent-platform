@@ -64,9 +64,9 @@ ADR ในโฟลเดอร์นี้เป็น **authority** ของ�
   ↓
 0008 (stack) ✅
   ↓
-contracts/ P0  ← เริ่มได้แล้ว
+contracts/ P0 ✅ ── profiles/ ✅ ── planes/ ✅
 ```
 
 ## ที่มา
 
-Context ในแต่ละ ADR ดึงจาก [`../ref/`](../ref/) (11 ไฟล์ raw) และจากการอ่าน repo จริง 3 ตัว — สรุปไว้ที่ [`../architecture/devfactory-core-rfc-extraction.md`](../architecture/devfactory-core-rfc-extraction.md) และ [`../ref/existing-repos.md`](../ref/existing-repos.md)
+Context ในแต่ละ ADR ดึงจาก [`../ref/`](../ref/) และจากการอ่าน repo ที่มีอยู่จริง — สรุปไว้ที่ [`../architecture/devfactory-core-rfc-extraction.md`](../architecture/devfactory-core-rfc-extraction.md) และ [`../ref/existing-repos.md`](../ref/existing-repos.md)
