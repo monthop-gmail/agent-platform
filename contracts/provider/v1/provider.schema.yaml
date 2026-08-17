@@ -1,0 +1,77 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://schemas.agent-platform.internal/provider/v1/provider.schema.yaml
+title: Provider (base)
+description: >-
+  ฐานร่วมของ model provider และ agent provider (ADR-0004)
+  สองชั้นนี้ไม่ได้ต่างกันแค่ label แต่ shape ต่างกันจริง จึงแยกเป็นไฟล์ specialization
+  ห้ามใช้ไฟล์นี้เดี่ยว ๆ — ต้องใช้ผ่าน model-provider หรือ agent-provider
+
+$defs:
+  ProviderKind:
+    description: >-
+      model = ให้บริการ inference · agent = ให้บริการ execution (มี loop/tool/state ของตัวเอง)
+      "Claude" ปรากฏได้ทั้งสองฝั่งเพราะเป็นสองสิ่ง (ADR-0004)
+    enum: [model, agent]
+
+  AuthType:
+    description: >-
+      credential class — OAuth ของ subscription ไม่ใช่ api_key และใช้แทนกันไม่ได้
+      (ดู ref/ai-subscription-oauth-gateway-blueprint.md)
+    enum:
+      - api_key
+      - oauth
+      - device_code
+      - service_account
+      - external_cli_credential
+
+  ProviderStatus:
+    enum: [active, degraded, disabled, deprecated]
+
+type: object
+required: [provider_id, kind, display_name, auth, status]
+properties:
+  provider_id:
+    $ref: https://schemas.agent-platform.internal/identity/v1/identity.schema.yaml#/$defs/Id
+  kind:
+    $ref: '#/$defs/ProviderKind'
+  display_name:
+    type: string
+  auth:
+    type: object
+    required: [type]
+    properties:
+      type:
+        $ref: '#/$defs/AuthType'
+      scopes:
+        type: array
+        items: { type: string }
+      credential_ref:
+        type: string
+        description: >-
+          ตัวชี้ไปยัง secret store — **ห้ามใส่ค่า credential จริงในฟิลด์นี้**
+          และห้ามส่ง credential ผ่าน task payload
+      expires_at:
+        type: string
+        format: date-time
+  endpoint:
+    type: string
+    format: uri
+  status:
+    $ref: '#/$defs/ProviderStatus'
+  is_aggregator:
+    type: boolean
+    default: false
+    description: >-
+      provider ที่ให้บริการ model ของเจ้าอื่นผ่าน credential เดียว เช่น Nous Portal, OpenRouter
+      ทำให้ประกาศ model จำนวนมากได้โดยไม่ต้องมี provider entry แยกทุกตัว
+  quota:
+    type: object
+    properties:
+      requests_per_minute: { type: integer, minimum: 0 }
+      tokens_per_day: { type: integer, minimum: 0 }
+      budget_usd_per_day: { type: number, minimum: 0 }
+  capability_declaration_ref:
+    type: string
+    description: >-
+      ตัวชี้ไปยัง capability/v1/declaration ของ provider นี้
+      **ห้ามมี field `capabilities` ในไฟล์ provider โดยตรง** (ADR-0009)

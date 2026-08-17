@@ -1,0 +1,88 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://schemas.agent-platform.internal/policy/v1/policy-decision.schema.yaml
+title: Policy Decision
+description: >-
+  ผลการประเมินของ policy engine (ADR-0010)
+  **ไม่ใช่สิ่งเดียวกับ approval** — policy บอกว่า "ต้องขออนุมัติไหม"
+  ส่วน approval คือคำตัดสินของผู้มีอำนาจ ซึ่งอยู่ใน approval/ (ยัง pending)
+
+$defs:
+  Effect:
+    enum: [allow, deny]
+
+  Authority:
+    description: >-
+      ใครต้องอนุมัติก่อนลงมือ (ADR-0010) — มีความหมายเมื่อ `effect: allow` เท่านั้น
+      consumer ที่เจอค่าที่ไม่รู้จักต้อง fallback เป็น `human_command_only`
+    enum:
+      - auto                  # ทำได้เลย
+      - notify                # ทำได้เลย แต่ต้องแจ้ง
+      - approval_required     # ต้องมีผู้มีอำนาจอนุมัติก่อน
+      - human_command_required  # AI เสนอได้อย่างเดียว คนต้องเป็นผู้สั่ง
+
+  Constraint:
+    description: เหตุผลเชิงปริมาณที่ทำให้ถูกปฏิเสธหรือถูกจำกัด
+    enum: [none, rate_limited, budget_exceeded, quota_exhausted, out_of_window]
+
+Request:
+  type: object
+  required: [context, subject, action]
+  properties:
+    context:
+      $ref: https://schemas.agent-platform.internal/identity/v1/identity.schema.yaml#/$defs/RequestContext
+    subject:
+      type: object
+      description: ใครจะทำ
+      required: [principal]
+      properties:
+        principal:
+          $ref: https://schemas.agent-platform.internal/identity/v1/identity.schema.yaml#/$defs/Principal
+        agent_id:
+          $ref: https://schemas.agent-platform.internal/identity/v1/identity.schema.yaml#/$defs/AgentId
+    action:
+      type: object
+      description: จะทำอะไร
+      required: [type]
+      properties:
+        type:
+          enum: [tool_call, model_call, execution_start, artifact_write, delegation]
+        tool_id:
+          $ref: https://schemas.agent-platform.internal/tool/v1/tool.schema.yaml#/$defs/ToolId
+        action_risk:
+          $ref: https://schemas.agent-platform.internal/capability/v1/capability.schema.yaml#/$defs/ActionRisk
+        resource:
+          type: string
+          description: สิ่งที่ถูกกระทำ เช่น `github:monthop-gmail/agent-platform#12`
+
+Decision:
+  type: object
+  required: [effect, authority, policy_id, evaluated_at]
+  properties:
+    effect:
+      $ref: '#/$defs/Effect'
+    authority:
+      $ref: '#/$defs/Authority'
+    constraint:
+      $ref: '#/$defs/Constraint'
+      default: none
+    action_risk:
+      $ref: https://schemas.agent-platform.internal/capability/v1/capability.schema.yaml#/$defs/ActionRisk
+      description: >-
+        ค่าที่ใช้ประกอบการตัดสิน — บันทึกไว้ด้วยเพื่อให้ audit ย้อนหลังรู้ว่าตัดสินจากอะไร
+        ไม่ใช่แค่ผลลัพธ์ (ต่อยอดจาก backend-os §14 ที่มีแค่ `policy_result`)
+    policy_id:
+      type: string
+    reason:
+      type: string
+    evaluated_at:
+      type: string
+      format: date-time
+    expires_at:
+      type: string
+      format: date-time
+      description: decision ที่หมดอายุแล้วต้องประเมินใหม่ ห้ามนำกลับมาใช้ซ้ำ
+
+  description: >-
+    การ mapping `action_risk × tenant/profile → authority` ต้องเป็น config
+    ห้าม hard-code ใน implementation — tenant หนึ่งอาจให้ high = approval_required
+    ขณะที่อีก tenant ให้ high = human_command_required

@@ -1,0 +1,123 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://schemas.agent-platform.internal/execution/v1/execution.schema.yaml
+title: Execution
+description: >-
+  หนึ่งครั้งของการรัน agent — ครอบทั้ง 2 เส้นทางตาม ADR-0005 C2
+  native runtime (platform ถือ loop) และ external agent provider (provider ถือ loop)
+  ทั้งสองทางใช้ contract เดียวกัน เพื่อไม่ให้ agent ที่เขียนเองเป็น citizen ชั้นสอง
+
+  ระดับชั้น: job (devfactory-core RFC-0001) > execution (ไฟล์นี้) > step (event/, ยัง pending)
+
+$defs:
+  ExecutionMode:
+    description: ใครถือ orchestration loop
+    enum: [native, provider]
+
+  ExecutionState:
+    description: >-
+      state machine ระดับ execution — platform เป็นเจ้าของเอง
+      RFC-0001 ของ devfactory-core ครอบแค่ระดับ job และระบุเองว่า task-level เป็น Future Work
+    enum:
+      - pending            # รับเข้าระบบแล้ว ยังไม่ประเมิน policy
+      - authorizing        # กำลังประเมิน policy/capability
+      - awaiting_approval  # policy บอกว่าต้องอนุมัติก่อน
+      - queued             # ผ่านแล้ว รอ worker/provider ว่าง
+      - running
+      - succeeded
+      - failed
+      - cancelled
+      - timed_out
+      - rejected           # policy ปฏิเสธ หรือ approval ถูก reject
+
+type: object
+required: [execution_id, context, execution_mode, state, created_at]
+properties:
+  execution_id:
+    $ref: https://schemas.agent-platform.internal/identity/v1/identity.schema.yaml#/$defs/ExecutionId
+  context:
+    $ref: https://schemas.agent-platform.internal/identity/v1/identity.schema.yaml#/$defs/ExecutionContext
+  job_id:
+    $ref: https://schemas.agent-platform.internal/identity/v1/identity.schema.yaml#/$defs/Id
+    description: >-
+      งานระดับบนที่ execution นี้สังกัด — optional เพราะไม่ใช่ทุก execution เกิดจาก job
+      (chat turn, retrieval, observer event ไม่มี job)
+      ⚠️ ความหมายของ job state ยัง `external-authority-pending` จนกว่า ADR-0006 ownership จะได้ข้อสรุป
+  execution_mode:
+    $ref: '#/$defs/ExecutionMode'
+  provider_id:
+    type: [string, "null"]
+    description: null = native runtime · มีค่า = external agent provider
+  state:
+    $ref: '#/$defs/ExecutionState'
+  capability_requirement:
+    $ref: https://schemas.agent-platform.internal/capability/v1/requirement.schema.yaml
+  policy_decision:
+    $ref: https://schemas.agent-platform.internal/policy/v1/policy-decision.schema.yaml#/Decision
+  observability_depth:
+    enum: [step, turn]
+    description: >-
+      external provider มักให้ได้แค่ turn — consumer ต้องยอมรับ trace ที่ไม่มี step ย่อย
+      ห้ามถือว่า execution ที่ไม่มี step คือ execution ที่ไม่ได้ทำอะไร
+  attempt:
+    type: integer
+    minimum: 1
+    default: 1
+  max_attempts:
+    type: integer
+    minimum: 1
+    default: 1
+  parent_execution_id:
+    $ref: https://schemas.agent-platform.internal/identity/v1/identity.schema.yaml#/$defs/ExecutionId
+    description: ใช้กับ sub-agent / delegation — สิทธิ์ของลูกต้องไม่กว้างกว่าพ่อ
+  artifacts:
+    type: array
+    items:
+      $ref: https://schemas.agent-platform.internal/artifact/v1/artifact.schema.yaml
+  usage:
+    $ref: https://schemas.agent-platform.internal/model/v1/inference.schema.yaml#/$defs/Usage
+  error:
+    $ref: https://schemas.agent-platform.internal/error/v1/error.schema.yaml
+  created_at:
+    type: string
+    format: date-time
+  started_at:
+    type: string
+    format: date-time
+  ended_at:
+    type: string
+    format: date-time
+
+transitions:
+  description: >-
+    เส้นทางที่อนุญาต — การเปลี่ยน state นอกรายการนี้ถือว่าผิด contract
+    ทุกการเปลี่ยน state ต้องมี event บันทึก ไม่มี silent state change
+  pending: [authorizing, cancelled]
+  authorizing: [queued, awaiting_approval, rejected, failed]
+  awaiting_approval: [queued, rejected, timed_out, cancelled]
+  queued: [running, cancelled, timed_out]
+  running: [succeeded, failed, timed_out, cancelled, awaiting_approval]
+  succeeded: []
+  failed: [queued]
+  timed_out: [queued]
+  cancelled: []
+  rejected: []
+
+retry_policy:
+  description: >-
+    ตอบ open question ที่ RFC-0001 ทิ้งไว้เรื่อง retry semantics ของ FAILED
+  rules:
+    - retry ได้เฉพาะจาก `failed` และ `timed_out` เท่านั้น
+    - retry ได้ต่อเมื่อ `error.retryable: true` และ `attempt < max_attempts`
+    - execution ที่เรียก tool ซึ่ง `idempotent: false` ห้าม retry อัตโนมัติ ต้องให้คนสั่ง
+    - การ retry สร้าง `attempt` ใหม่ภายใต้ `execution_id` เดิม ไม่ใช่ execution ใหม่
+    - "`rejected` และ `cancelled` เป็น terminal — retry ไม่ได้ ต้องสร้าง execution ใหม่"
+    - policy decision ที่ `expires_at` ผ่านแล้ว ต้องประเมินใหม่ก่อน retry เสมอ
+
+parallel_substates:
+  description: >-
+    ตอบ open question ที่ RFC-0001 ทิ้งไว้เรื่อง parallel task substates
+  rules:
+    - งานคู่ขนานทำโดยสร้าง execution ลูกที่มี `parent_execution_id` ไม่ใช่ substate ในตัวเดียว
+    - execution พ่ออยู่ `running` จนกว่าลูกทุกตัวจะเข้าสถานะ terminal
+    - ลูกล้มหนึ่งตัวไม่บังคับให้พ่อล้ม — ผู้เรียกกำหนดเองว่าเป็น all-or-nothing หรือ partial
+    - สิทธิ์และ budget ของลูกถูกจำกัดโดยของพ่อเสมอ

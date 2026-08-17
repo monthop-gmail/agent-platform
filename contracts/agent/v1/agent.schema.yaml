@@ -1,0 +1,64 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://schemas.agent-platform.internal/agent/v1/agent.schema.yaml
+title: Agent
+description: >-
+  นิยามของ agent หนึ่งตัว — ตัวตน บทบาท สิ่งที่ใช้ได้ และกรอบอำนาจ
+  agent ไม่ผูกกับ provider ตัวใดตัวหนึ่ง การเลือกว่าใครรันเป็นหน้าที่ของ routing ตาม capability
+
+type: object
+required: [agent_id, tenant_id, workspace_id, name, instructions]
+properties:
+  agent_id:
+    $ref: https://schemas.agent-platform.internal/identity/v1/identity.schema.yaml#/$defs/AgentId
+  tenant_id:
+    $ref: https://schemas.agent-platform.internal/identity/v1/identity.schema.yaml#/$defs/TenantId
+  workspace_id:
+    $ref: https://schemas.agent-platform.internal/identity/v1/identity.schema.yaml#/$defs/WorkspaceId
+  name:
+    type: string
+  role:
+    type: string
+    description: บทบาทสั้น ๆ เช่น `security-analyst` — ใช้ผูกกับ policy profile
+  instructions:
+    type: string
+    description: >-
+      คำสั่งประจำตัว — เป็น configuration ไม่ใช่ที่เก็บ credential หรือข้อมูลลับ
+  capability_requirement:
+    $ref: https://schemas.agent-platform.internal/capability/v1/requirement.schema.yaml
+    description: >-
+      agent บอกว่าต้องการอะไร ไม่ใช่ระบุ provider — ADR-0009
+      ถ้าจำเป็นต้อง pin provider จริง ให้ใช้ `constraints.pin_provider` และเขียนเหตุผลกำกับ
+  tools:
+    type: array
+    description: tool ที่ agent นี้ **ขอ** ใช้ — การอนุญาตจริงเป็นของ policy
+    items:
+      $ref: https://schemas.agent-platform.internal/tool/v1/tool.schema.yaml#/$defs/ToolId
+  mcp_servers:
+    type: array
+    items:
+      $ref: https://schemas.agent-platform.internal/identity/v1/identity.schema.yaml#/$defs/Id
+  policy_profile:
+    type: string
+    description: ชื่อชุด policy ที่ใช้กับ agent นี้ — ดู profiles/
+  delegation:
+    type: object
+    description: agent นี้เรียก agent อื่นได้หรือไม่
+    properties:
+      enabled: { type: boolean, default: false }
+      allowed_agents:
+        type: array
+        items:
+          $ref: https://schemas.agent-platform.internal/identity/v1/identity.schema.yaml#/$defs/AgentId
+      max_depth:
+        type: integer
+        minimum: 1
+        default: 1
+        description: กันไม่ให้ delegation วนลึกจนควบคุมต้นทุนไม่ได้
+  budget:
+    type: object
+    properties:
+      max_cost_usd_per_execution: { type: number, minimum: 0 }
+      max_cost_usd_per_day: { type: number, minimum: 0 }
+  status:
+    enum: [active, disabled]
+    default: active

@@ -1,0 +1,55 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://schemas.agent-platform.internal/mcp/v1/mcp-server.schema.yaml
+title: MCP Server Registration
+description: >-
+  การลงทะเบียน MCP server เข้ากับ platform
+  แยกจาก tool/v1 เพราะ MCP เป็น **transport ที่ส่ง tool มาให้** ไม่ใช่ตัว tool เอง
+
+type: object
+required: [server_id, transport, tenant_id]
+properties:
+  server_id:
+    $ref: https://schemas.agent-platform.internal/identity/v1/identity.schema.yaml#/$defs/Id
+  tenant_id:
+    $ref: https://schemas.agent-platform.internal/identity/v1/identity.schema.yaml#/$defs/TenantId
+  workspace_id:
+    $ref: https://schemas.agent-platform.internal/identity/v1/identity.schema.yaml#/$defs/WorkspaceId
+  display_name:
+    type: string
+  transport:
+    type: object
+    required: [type]
+    properties:
+      type:
+        enum: [stdio, http, sse, websocket]
+      command:
+        type: array
+        items: { type: string }
+        description: ใช้กับ stdio — คำสั่งที่รันในsandbox ไม่ใช่บนเครื่อง host โดยตรง
+      url:
+        type: string
+        format: uri
+  auth:
+    type: object
+    properties:
+      type:
+        $ref: https://schemas.agent-platform.internal/provider/v1/provider.schema.yaml#/$defs/AuthType
+      credential_ref:
+        type: string
+        description: ตัวชี้ไป secret store — ห้ามใส่ค่าจริง
+  exposes:
+    type: array
+    description: >-
+      tool ที่ server นี้ให้ — ต้องขึ้นทะเบียนเป็น tool/v1 ทุกตัวก่อนใช้งานได้
+      tool ที่ server ประกาศแต่ยังไม่ขึ้นทะเบียนถือว่า **ไม่มี**
+    items:
+      $ref: https://schemas.agent-platform.internal/tool/v1/tool.schema.yaml#/$defs/ToolId
+  trust:
+    enum: [first_party, verified_third_party, untrusted]
+    default: untrusted
+    description: >-
+      untrusted ต้องรันใน sandbox และห้ามได้ capability `network_egress` โดยไม่มี allowlist
+      ข้อมูลที่ MCP server ส่งกลับถือเป็น input ที่ไม่น่าเชื่อถือเสมอ ไม่ใช่คำสั่ง
+  status:
+    enum: [active, disabled]
+    default: active

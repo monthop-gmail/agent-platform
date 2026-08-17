@@ -1,0 +1,41 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://schemas.agent-platform.internal/provider/v1/agent-provider.schema.yaml
+title: Agent Provider
+description: >-
+  ผู้ให้บริการ agent execution — Claude Code, Gemini CLI, Codex CLI, Copilot CLI,
+  Amazon Q, OpenCode, Hermes, OpenClaw (ADR-0004)
+  native runtime ของ `agent-backend-os` ก็ลงทะเบียนที่นี่เหมือนกัน ไม่มีสิทธิ์พิเศษ (ADR-0005 C2)
+
+allOf:
+  - $ref: https://schemas.agent-platform.internal/provider/v1/provider.schema.yaml
+  - type: object
+    properties:
+      kind:
+        const: agent
+      is_native:
+        type: boolean
+        default: false
+        description: >-
+          true = runtime ที่เราดูแลเอง (platform ถือ loop/state)
+          false = runtime ภายนอกที่ถือ loop ของตัวเอง
+          ค่านี้กำหนด `execution_mode` ที่ใช้ได้ใน execution/v1
+      models:
+        type: array
+        description: model ที่ provider นี้เรียกใช้ได้ — อาจว่างถ้า provider จัดการเอง
+        items: { type: string }
+      session:
+        type: object
+        properties:
+          stateful: { type: boolean, default: true }
+          resumable: { type: boolean, default: false }
+          max_duration_seconds: { type: integer, minimum: 1 }
+      observability_depth:
+        enum: [step, turn]
+        default: turn
+        description: >-
+          external provider ส่วนใหญ่ให้ได้แค่ระดับ turn เพราะมองไม่เห็น step ข้างใน
+          contract ของ event ต้องยอมรับ trace ที่ไม่มี step ย่อย (ADR-0005 C2)
+      cancellation:
+        enum: [graceful, kill_only, unsupported]
+        default: unsupported
+        description: platform ต้องรู้ว่าสั่งหยุดได้แค่ไหนก่อนจะสัญญา SLA กับผู้ใช้

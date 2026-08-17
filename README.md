@@ -15,12 +15,13 @@ repo นี้มีหน้าที่ **คุมภาพรวมและ
 
 | โฟลเดอร์ | เนื้อหา | ผลผูกพัน |
 | --- | --- | --- |
+| [`contracts/`](./contracts) | canonical schema (YAML + JSON Schema) | ✅ ผูกพัน |
 | [`decisions/`](./decisions) | ADR ระดับ ecosystem — ศัพท์และขอบเขตที่ตกลงกันแล้ว | ✅ ผูกพัน |
 | [`architecture/`](./architecture) | คำอธิบาย, mapping, ผลวิเคราะห์ repo อื่น | 📄 อธิบาย |
 | [`ref/`](./ref) | บันทึกดิบตามเวลา ขัดกันเองได้ | ❌ ไม่ผูกพัน |
 | module dirs ด้านล่าง | นิยามขอบเขตของแต่ละ plane | 📄 อธิบาย |
 
-`contracts/` (canonical schema) ยังไม่สร้าง — รอ [vocabulary gate](./decisions#ลำดับที่ควรเคาะ) ผ่านก่อน
+module dirs ด้านล่างจะย้ายไป `planes/` หลัง `contracts/` นิ่ง — ดู [module mapping](./architecture/module-mapping.md)
 
 ## Modules
 
@@ -84,9 +85,11 @@ monthop-gmail/
 
 ยกเว้นข้อเดียว: **ADR-0006 ownership** ยัง `Pending` — `agent-platform` ยังไม่ใช่ canonical owner ของ shared contract จนกว่า Architecture Owner ของ [`devfactory-core`](https://github.com/monthop-gmail/devfactory-core) จะยืนยัน ([issue #6](https://github.com/monthop-gmail/agent-platform/issues/6))
 
-**ขั้นตอนปัจจุบัน:** `contracts/` P0 — contract ที่ไม่อ้าง RFC ของ `devfactory-core` เริ่มได้เลย · contract ที่อ้าง (`approval/`, `event/`) ติดสถานะ `external-authority-pending`
+**[`contracts/` v1 เขียนแล้ว 11 ตัว](./contracts)** — `identity` `agent` `capability` `provider` `model` `tool` `mcp` `execution` `policy` `artifact` `error` · ทั้งหมด validate ผ่าน JSON Schema draft 2020-12 และ cross-ref ระหว่างไฟล์ resolve ครบ
 
-ถัดไป: `profiles/` → ย้าย module ตาม [module mapping](./architecture/module-mapping.md)
+`approval/` และ `event/` **ยังไม่เขียน** — ติดสถานะ `external-authority-pending` เพราะมาจาก RFC ของ `devfactory-core` ที่ authority ยังไม่ย้าย
+
+ถัดไป: `profiles/` → ย้าย module ไป `planes/` ตาม [module mapping](./architecture/module-mapping.md)
 
 การสื่อสารข้ามทีมใช้ GitHub: **issue** สำหรับเคาะ ADR และขอแก้ contract · **PR** สำหรับรีวิว (comment ที่บรรทัด ไม่ใช่เขียนเรียงความ) · **milestone** สำหรับดูว่าติดเฟสไหน
 
