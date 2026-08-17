@@ -16,7 +16,7 @@ vN ยังมีใคร pin อยู่ไหม  → ปิด vN ได�
 
 | Repo | Manifest | Status | Contracts ที่ pin | last_verified | หมายเหตุ |
 | --- | --- | --- | --- | --- | --- |
-| [`devfactory-core`](https://github.com/monthop-gmail/devfactory-core) | ❌ ไม่มี | `unknown` | — | — | เป็น **ต้นทาง** ของ RFC 0002/0003 ที่จะกลายเป็น canonical → ต้องคุย authority ก่อน ([extraction §6](devfactory-core-rfc-extraction.md)) |
+| [`devfactory-core`](https://github.com/monthop-gmail/devfactory-core) | 📝 ร่างแล้ว ยังไม่ push | `unknown` | *(ร่าง)* `identity/v1` `execution/v1` `policy/v1` `error/v1` | — | **consumer นำร่อง** — ยัง conform ไม่ได้เพราะ repo ยังไม่มี code จึงไม่มี payload ให้ validate · ผลวิเคราะห์: [`consumer-devfactory-core.md`](consumer-devfactory-core.md) |
 | [`navi-ims`](https://github.com/monthop-gmail/navi-ims) | ❌ ไม่มี | `unknown` | — | — | default branch `master` · Odoo 19 · เป็น system of record ไม่ใช่ agent consumer โดยตรง |
 | [`ai-web-harness`](https://github.com/monthop-gmail/ai-web-harness) | ❌ ไม่มี | `unknown` | — | — | scaffold stage · อยู่ชั้น orchestration เหนือ gateway |
 | `navi-security-agent` | — | ยังไม่มี repo | — | — | Phase 0 ต้องการ event + policy contract |
@@ -49,6 +49,23 @@ vN ยังมีใคร pin อยู่ไหม  → ปิด vN ได�
 v1 ทุกตัวยังไม่มี consumer pin — เมื่อมี repo แรกขึ้นทะเบียน ให้แตกเป็นบรรทัดต่อ contract
 
 **กฎ:** vN ที่ยังมี consumer pin อยู่ **ห้ามปิด** ไม่ว่าครบกำหนด 90 วันหรือไม่
+
+## ผลการนำร่อง — `devfactory-core`
+
+ทดสอบ contract v1 กับ repo จริงตัวแรกเมื่อ 2026-08-17 — ผลเต็มอยู่ที่ [`consumer-devfactory-core.md`](consumer-devfactory-core.md)
+
+**สรุป: contract ไม่ต้องแก้** ทุกช่องว่างที่เจออยู่ฝั่ง consumer ไม่ใช่ฝั่ง contract
+
+| เจอ | ระดับ |
+| --- | --- |
+| ไม่มี `tenant_id` ที่ไหนเลย ทั้งที่ ADR-0007 บังคับ | 🔴 high — ต้องมี RFC ใหม่ที่ repo นั้น |
+| RFC-0001 `FAILED` terminal แต่ execution retry ได้ — job-level retry ยังไม่มีคำตอบ | 🟠 medium |
+| RFC-0001 ไม่มี `cancelled` / `timed_out` | 🟠 medium |
+| execution ที่รออนุมัติกลางคัน มองไม่เห็นจากระดับ job | 🟠 medium |
+| RFC-0003 บังคับ `job_id` — เข้ากันได้ทางเดียว | 🟡 low |
+| `packages/proxy` = outbound provider access → ชนกับชื่อ `model-gateway` | 🟡 low |
+
+⚠️ **ยังไม่ใช่ conformance จริง** — เป็น *document alignment* เพราะ `devfactory-core` ไม่มี code ให้ validate · ถ้าต้องการ conformance ที่พิสูจน์ด้วย payload จริง consumer ที่มี code อยู่แล้วคือ `navi-ims`
 
 ## วิธีขึ้นทะเบียน
 
