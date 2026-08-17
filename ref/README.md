@@ -31,6 +31,7 @@
 | [`agent-platform-decisions-first-plan.md`](agent-platform-decisions-first-plan.md) | แผน Phase 0–5 ที่กำลังทำตามอยู่ + ADR 8 ตัว + DoD ของ repo นี้ |
 | [`agent-platform-adr-review.md`](agent-platform-adr-review.md) | รีวิวหลังทำ Phase 0–1 (8.8/10) + **5 จุดที่ต้องแก้ก่อน Accept ADR** — เพิ่ม `contracts/capability/`, แยก provider entity/registry, ทบทวน runtime loop, กติกา conformance, นิยาม `modules/` |
 | [`agent-platform-adr-review-2.md`](agent-platform-adr-review-2.md) | รีวิวรอบสอง (9.1/10) — **approve architecture direction** · เหลือ 3 งานก่อนเปิด `contracts/`: README consistency, capability first-class, conformance เป็นข้อกำหนด + เสนอ canonical architecture diagram |
+| [`agent-platform-adr-review-3.md`](agent-platform-adr-review-3.md) | รีวิวรอบสาม (9.5/10) — **architecture review ผ่าน** · สั่งหยุดเพิ่ม ADR แล้วเข้า Decision Gate + **มีตัวเลือกที่แนะนำครบทั้ง 10 ADR** |
 
 ### repo ที่มีอยู่จริงแล้ว
 
