@@ -82,7 +82,9 @@ monthop-gmail/
 
 **Phase 0 — Decisions First** ตาม [decisions-first plan](./ref/agent-platform-decisions-first-plan.md)
 
-ADR ร่างครบแล้ว (Context + Options + Recommendation) ยังเป็น `Proposed` ทั้งหมด — **รอเคาะ** ดู [`decisions/`](./decisions)
+ADR ร่างครบแล้ว (Context + Options + Recommendation) ยังเป็น `Proposed` ทั้งหมด — **รอเคาะที่ [issue label `adr`](https://github.com/monthop-gmail/agent-platform/issues?q=is%3Aissue+label%3Aadr)** ดูเนื้อหาที่ [`decisions/`](./decisions)
+
+การสื่อสารข้ามทีมใช้ GitHub: **issue** สำหรับเคาะ ADR และขอแก้ contract · **PR** สำหรับรีวิว (comment ที่บรรทัด ไม่ใช่เขียนเรียงความ) · **milestone** สำหรับดูว่าติดเฟสไหน
 
 ถัดไปหลัง ADR ผ่าน: `contracts/` P0 → `profiles/` → ย้าย module ตาม [module mapping](./architecture/module-mapping.md)
 

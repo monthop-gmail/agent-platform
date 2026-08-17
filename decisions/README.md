@@ -14,7 +14,10 @@ ADR ในโฟลเดอร์นี้เป็น **authority** ของ�
 
 ## สถานะปัจจุบัน
 
-ทั้ง 10 ตัวเป็น `Proposed` — ช่อง **Decision ยังว่าง รอเคาะ** แต่ละไฟล์มี Context + Options + Recommendation ให้แล้ว
+ทุกตัวเป็น `Proposed` — ช่อง **Decision ยังว่าง รอเคาะ** แต่ละไฟล์มี Context + Options + Recommendation ให้แล้ว
+
+**เคาะที่ไหน:** [issue #1–#10](https://github.com/monthop-gmail/agent-platform/issues?q=is%3Aissue+label%3Aadr) — 1 issue ต่อ 1 ADR มี Options เป็น checklist พร้อมช่อง Decision / Reason / Authority
+เมื่อ issue ถูกเคาะแล้ว ให้เขียน Decision กลับลงไฟล์ ADR เปลี่ยน Status เป็น `Accepted` แล้วปิด issue — **ไฟล์เป็นที่บันทึกว่าตัดสินอะไร issue เป็นที่บันทึกว่าใครตัดสินและเมื่อไหร่**
 
 | ADR | เรื่อง | ปัญหาที่แก้ | Blocking อะไร |
 | --- | --- | --- | --- |
