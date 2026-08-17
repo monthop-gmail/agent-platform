@@ -1,6 +1,6 @@
 # ADR-0005: Agent Runtime Boundary
 
-**Status:** Proposed
+**Status:** Accepted (2026-08-17)
 **Date:** 2026-08-17
 **Depends on:** ADR-0003, ADR-0004
 **Blocking:** `contracts/execution/`, module `agent-runtime/` `agent-harness/` `workflow/` `sandbox/` — **vocabulary gate**
@@ -125,7 +125,16 @@ native runtime          external agent provider
 
 ## Decision
 
-> _(รอเคาะ — ต้องตอบ 2 ส่วน: 4 ชั้น และ platform สร้าง runtime เองหรือไม่)_
+**A + C2**
+
+* **A** — 4 ชั้น `Workflow → Harness → Runtime → Sandbox` และแยกคำ **Harness** (execution policy) ออกจาก **Evals** (test rig)
+* **C2** — Platform Runtime = **native runtime + external agent provider ใต้ execution contract เดียวกัน**
+
+**Reason:** 4 ชั้นตรงกับเส้นแบ่ง orchestration/execution ของ `devfactory-core` RFC-0004 และอธิบาย `ai-web-harness` ที่มีอยู่จริงได้ถูกว่าเป็น harness ไม่ใช่ runtime · เลือก C2 แทน A2 เพราะไม่ใช่ทุก agent มี loop ของตัวเอง — agent ที่เป็นแค่ prompt + tool set ไม่ควรต้องแพ็กตัวเองเป็น agent provider เพื่อให้รันได้ ซึ่งจะทำให้ agent ที่ทีมเขียนเองกลายเป็น citizen ชั้นสอง · C2 ไม่ขัด ADR-0001 เพราะ native runtime อยู่ที่ `agent-backend-os` ไม่ใช่ repo นี้ · ปฏิเสธ B2 เพราะทิ้ง Claude Code / Codex / OpenCode ที่มีอยู่จริง
+
+**Authority:** Monthop Champaruang — Platform Owner / Architecture Authority of `agent-platform`
+
+native runtime ลงทะเบียนเป็น agent provider ตัวหนึ่งตาม ADR-0004 — ไม่มี provider ที่เป็น "ของเรา" แบบมีสิทธิ์พิเศษ
 
 ## Consequences ถ้าเลือก A + C2
 

@@ -1,6 +1,6 @@
 # ADR-0004: Agent Provider vs Model Provider
 
-**Status:** Proposed
+**Status:** Accepted (2026-08-17)
 **Date:** 2026-08-17
 **Blocking:** `contracts/provider/`, `contracts/model/`, `profiles/` — **vocabulary gate**
 
@@ -88,7 +88,14 @@ Anthropic (model provider)        Claude Code (agent provider)
 
 ## Decision
 
-> _(รอเคาะ)_
+**A** — ศัพท์ 3 ชั้น: **Model Provider** (inference) → **Agent Provider** (execution) → **Agent Platform** (abstraction/orchestration)
+พร้อมโครง `contracts/provider/` แบบ base + 2 specialization ตามหัวข้อด้านบน
+
+**Reason:** สองชั้นนี้แยกกันจริง ไม่ใช่แยกด้วย label — `ai-subscription-oauth-gateway` พิสูจน์ว่า OAuth ของ ChatGPT subscription ใช้กับ Codex CLI ได้แต่ไม่ใช่ `OPENAI_API_KEY` คือ credential class คนละอันสำหรับ entity คนละชั้น · คำว่า "Claude" เป็นทั้ง model และ agent runtime ซึ่งมี auth/capability/billing ต่างกัน ถ้าไม่แยกจะกำกวมตลอดไป · ปฏิเสธ B เพราะ shape ต่างกันมากจน field ครึ่งหนึ่งเป็น optional และ validate อะไรไม่ได้ ปฏิเสธ C เพราะ contract กลางต้องเลือกคำใดคำหนึ่งอยู่ดี
+
+**Authority:** Monthop Champaruang — Platform Owner / Architecture Authority of `agent-platform`
+
+ศัพท์ที่ **เลิกใช้** ตั้งแต่นี้: `LLM Adapter` · `Runtime Adapter` · `agent-adapters` · `AgentAdapter` · `agent-model-router` (ดูตารางแทนที่ในหัวข้อ Consequences)
 
 ## Consequences ถ้าเลือก A
 

@@ -80,13 +80,15 @@ monthop-gmail/
 
 ## Status
 
-**Phase 0 — Decisions First** ตาม [decisions-first plan](./ref/agent-platform-decisions-first-plan.md)
+🔒 **VOCABULARY LOCKED — 2026-08-17** · ADR ทั้งหมด `Accepted` แล้ว ดู [`decisions/`](./decisions)
 
-ADR ร่างครบแล้ว (Context + Options + Recommendation) ยังเป็น `Proposed` ทั้งหมด — **รอเคาะที่ [issue label `adr`](https://github.com/monthop-gmail/agent-platform/issues?q=is%3Aissue+label%3Aadr)** ดูเนื้อหาที่ [`decisions/`](./decisions)
+ยกเว้นข้อเดียว: **ADR-0006 ownership** ยัง `Pending` — `agent-platform` ยังไม่ใช่ canonical owner ของ shared contract จนกว่า Architecture Owner ของ [`devfactory-core`](https://github.com/monthop-gmail/devfactory-core) จะยืนยัน ([issue #6](https://github.com/monthop-gmail/agent-platform/issues/6))
+
+**ขั้นตอนปัจจุบัน:** `contracts/` P0 — contract ที่ไม่อ้าง RFC ของ `devfactory-core` เริ่มได้เลย · contract ที่อ้าง (`approval/`, `event/`) ติดสถานะ `external-authority-pending`
+
+ถัดไป: `profiles/` → ย้าย module ตาม [module mapping](./architecture/module-mapping.md)
 
 การสื่อสารข้ามทีมใช้ GitHub: **issue** สำหรับเคาะ ADR และขอแก้ contract · **PR** สำหรับรีวิว (comment ที่บรรทัด ไม่ใช่เขียนเรียงความ) · **milestone** สำหรับดูว่าติดเฟสไหน
-
-ถัดไปหลัง ADR ผ่าน: `contracts/` P0 → `profiles/` → ย้าย module ตาม [module mapping](./architecture/module-mapping.md)
 
 ## Reference
 

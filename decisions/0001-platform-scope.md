@@ -1,6 +1,6 @@
 # ADR-0001: Platform Scope
 
-**Status:** Proposed
+**Status:** Accepted (2026-08-17)
 **Date:** 2026-08-17
 **Blocking:** ADR ทุกตัวที่เหลือ + `contracts/` ทั้งหมด
 
@@ -82,7 +82,11 @@ planes/
 
 ## Decision
 
-> _(รอเคาะ — ต้องตอบ 2 ส่วน: scope และชื่อโฟลเดอร์เอกสารขอบเขต)_
+**A + A2** — `agent-platform` เป็น **Contract & Architecture authority** ไม่มี implementation · โฟลเดอร์เอกสารขอบเขตใช้ชื่อ **`planes/`** ในความหมาย **Plane Boundary Documentation**
+
+**Reason:** ตรงกับ intent เดิมของเจ้าของ repo และมี precedent ในบ้านแล้วที่ `devfactory-core/docs/governance/CORE_BOUNDARY.md` ซึ่งจำกัดตัวเองไว้ที่ RFC / skeleton / interface-contract ที่ไม่ผูก tech · เลือก `planes/` แทน `modules/` เพราะชื่อบอกความหมายตัวเองว่าเป็นขอบเขต ไม่ใช่ที่เก็บ code จึงไม่ต้องอธิบายซ้ำทุกครั้งที่มีคนใหม่เข้ามา และตรงกับศัพท์ plane ที่ `devfactory-core` ใช้อยู่แล้ว · ปฏิเสธ B เพราะทำให้ repo เป็น bottleneck และต้องล็อก stack ทันที ปฏิเสธ C เพราะเส้นแบ่ง "reference implementation ขนาดเล็ก" ไม่ชัดพอที่จะกันไม่ให้โตเป็น B
+
+**Authority:** Monthop Champaruang — Platform Owner / Architecture Authority of `agent-platform`
 
 ## Consequences ถ้าเลือก A
 

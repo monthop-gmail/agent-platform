@@ -2,7 +2,7 @@
 
 **Phase 5 ของ [decisions-first plan](../ref/agent-platform-decisions-first-plan.md)** — map 10 module ที่มีอยู่จริงไปยังโครงเป้าหมาย **ก่อน** จะ rename อะไร
 
-> ⚠️ เอกสารนี้เป็น **ข้อเสนอ** ยังไม่ลงมือ — เกือบทุกแถวรอ ADR ที่ยัง `Proposed` อยู่ ห้าม rename ก่อน ADR ที่ระบุในคอลัมน์ "Blocked on" ถูก Accept
+> ✅ **ADR ที่ blocking ถูก Accept ครบแล้วเมื่อ 2026-08-17** — mapping นี้พร้อมลงมือ แต่ยังไม่ย้ายจนกว่า `contracts/` P0 จะนิ่ง เพื่อย้ายทีเดียวไม่ต้องแก้ link สองรอบ
 
 ## 10 module ที่มีอยู่จริง
 
@@ -25,15 +25,15 @@ agent-platform/
 ├── decisions/      ADR ระดับ ecosystem — ผูกพัน   ✅ มีแล้ว
 ├── architecture/   คำอธิบาย diagram mapping        ✅ มีแล้ว
 ├── profiles/       ชุด config ต่อประเภทงาน
-├── planes/         Plane Boundary Documentation    ← ชื่อรอ ADR-0001
+├── planes/         Plane Boundary Documentation    ✅ ชื่อ lock แล้ว (ADR-0001)
 └── ref/            บันทึกดิบ ไม่ผูกพัน              ✅ มีแล้ว
 ```
 
-โฟลเดอร์เอกสารขอบเขต (`planes/` หรือ `modules/` — รอ [ADR-0001](../decisions/0001-platform-scope.md)) คือ **Plane Boundary Documentation**: ระบุขอบเขต ความรับผิดชอบ และสิ่งที่ห้ามทำของแต่ละ plane พร้อมชี้ว่า implementation อยู่ repo ไหน — **ไม่ใช่ที่รอ code**
+โฟลเดอร์เอกสารขอบเขตชื่อ **`planes/`** ([ADR-0001](../decisions/0001-platform-scope.md) Accepted) คือ **Plane Boundary Documentation**: ระบุขอบเขต ความรับผิดชอบ และสิ่งที่ห้ามทำของแต่ละ plane พร้อมชี้ว่า implementation อยู่ repo ไหน — **ไม่ใช่ที่รอ code**
 
 ## ตาราง mapping
 
-| ปัจจุบัน | Action | เป้าหมาย | เหตุผล | Blocked on |
+| ปัจจุบัน | Action | เป้าหมาย | เหตุผล | ตาม ADR |
 | --- | --- | --- | --- | --- |
 | `backend-os/` | **move** | `planes/backend-os.md` — เอกสารขอบเขตของ repo `agent-backend-os` | เป็น implementation plane ไม่ใช่ contract; ชื่อซ้อนกับ core repo candidate · เป็นบ้านของ **native runtime** ตาม 0005 C2 | [0001](../decisions/0001-platform-scope.md), [0002](../decisions/0002-core-repository-naming.md) |
 | `agent-gateway/` | **split** | `planes/gateway.md` + `contracts/gateway/` | ต้องแยกก่อนว่า gateway ตัวไหน (inbound/outbound/fan-out) | [0003](../decisions/0003-agent-gateway-boundary.md) |
@@ -62,12 +62,12 @@ agent-platform/
 ## ลำดับที่ปลอดภัย
 
 ```text
-1. Accept ADR-0001              → รู้ว่า repo นี้เก็บอะไรได้ + ชื่อโฟลเดอร์เอกสารขอบเขต
-2. Accept ADR-0002/0003         → ชื่อ gateway/repo นิ่ง
-3. Accept ADR-0004/0005/0009    → ศัพท์ provider/runtime/capability นิ่ง   ← vocabulary gate 🔒
-4. Accept ADR-0006/0007/0010    → versioning, tenancy, risk taxonomy
-5. สร้าง contracts/ P0          → ใช้ศัพท์ที่ Accept แล้วเท่านั้น
+1. Accept ADR-0001              ✅ 2026-08-17  → planes/ · contract & architecture only
+2. Accept ADR-0002/0003         ✅ 2026-08-17  → ชื่อ gateway/repo นิ่ง
+3. Accept ADR-0004/0005/0009    ✅ 2026-08-17  → 🔒 vocabulary gate ผ่าน
+4. Accept ADR-0006/0007/0010    ✅ 2026-08-17  → versioning ✅ / ownership ⏳ · tenancy · risk
+5. สร้าง contracts/ P0          ← ขั้นตอนปัจจุบัน
 6. ค่อย git mv 10 module        → ทำครั้งเดียว ไม่ต้องแก้ซ้ำ
 ```
 
-**เหตุผลที่ยังไม่ `git mv` ตอนนี้:** ทั้ง 10 แถวขึ้นอยู่กับ ADR ที่ยังไม่เคาะ (รวมชื่อโฟลเดอร์ปลายทางเองด้วย — `planes/` หรือ `modules/` ยังไม่ตัดสิน) ถ้าย้ายก่อนจะต้องย้ายอีกรอบ และ link ใน `ref/` 13 ไฟล์กับ README จะเสียสองครั้ง
+**เหตุผลที่ยังไม่ `git mv` ตอนนี้:** ปลายทางของหลายแถวคือ `contracts/*` ซึ่งยังไม่ถูกสร้าง ถ้าย้ายก่อนจะต้องย้ายอีกรอบเมื่อ contract จริงลงที่ และ link ใน `ref/` กับ README จะเสียสองครั้ง — ย้ายหลัง `contracts/` P0 นิ่งแล้วทีเดียว

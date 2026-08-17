@@ -1,6 +1,6 @@
 # ADR-0002: Core Repository Naming
 
-**Status:** Proposed
+**Status:** Accepted (2026-08-17)
 **Date:** 2026-08-17
 **Depends on:** ADR-0001
 **Blocking:** ADR-0003, `architecture/module-mapping.md`
@@ -50,7 +50,13 @@ enterprise-knowledge    implementation ของ knowledge plane
 
 ## Decision
 
-> _(รอเคาะ)_
+**A** — `agent-platform` = contract owner · `agent-backend-os` = implementation repo แยก
+
+**Reason:** ไม่ต้อง rename repo ที่สร้างแล้ว (link ที่ส่งทีมไปแล้วไม่เสีย) และแยก domain ของสอง repo ไม่ให้ชนกัน — contract ระดับ ecosystem ไม่ใช่เรื่อง backend จึงไม่ควรอยู่ใต้ชื่อ `backend-os` · แก้การซ้อนกันของ `backend-os/` ที่เป็นทั้ง core repo candidate และ module ในตัวเอง
+
+**Authority:** Monthop Champaruang — Platform Owner / Architecture Authority of `agent-platform`
+
+ลิสต์ "7 core repos" ในไฟล์ naming convention ให้อ่านว่าเป็น **implementation repos** — `agent-platform` อยู่คนละชั้น ไม่นับรวม
 
 ## Consequences ถ้าเลือก A
 

@@ -1,6 +1,6 @@
 # ADR-0008: Reference Stack
 
-**Status:** Proposed
+**Status:** Accepted (2026-08-17)
 **Date:** 2026-08-17
 **Depends on:** ADR-0001
 
@@ -50,7 +50,13 @@
 
 ## Decision
 
-> _(รอเคาะ)_
+**A** — contract เป็น **tech-neutral** (YAML / JSON Schema เท่านั้น) · implementation repo เลือก stack เอง · codegen เป็นหน้าที่ repo ลูก
+
+**Reason:** ecosystem มี Cloudflare, Python, Node, Odoo, Astro อยู่แล้ว การบังคับ stack กลางเป็นภาระโดยไม่ได้ประโยชน์เพิ่ม และต้องย้ายของที่รันอยู่จริง · ตรงกับ `devfactory-core/docs/governance/CORE_BOUNDARY.md` ที่อนุญาต "เพิ่ม interface / contract (ไม่ผูก tech)" และห้าม framework ที่ผูก vendor · Cloudflare ยังใช้ได้เต็มที่ในฐานะ provider ตัวหนึ่งของ `agent-backend-os` ไม่ใช่ของ platform
+
+**Authority:** Monthop Champaruang — Platform Owner / Architecture Authority of `agent-platform`
+
+ห้ามมีใน repo นี้: `package.json` · `pyproject.toml` · `Dockerfile` · `docker-compose.yml` · lockfile · typed SDK ทุกภาษา
 
 ## Consequences ถ้าเลือก A
 

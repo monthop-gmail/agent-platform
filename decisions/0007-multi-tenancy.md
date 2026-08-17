@@ -1,6 +1,6 @@
 # ADR-0007: Multi-Tenancy Model
 
-**Status:** Proposed
+**Status:** Accepted (2026-08-17)
 **Date:** 2026-08-17
 **Blocking:** `contracts/identity/`, `contracts/policy/`, `contracts/event/`
 
@@ -70,7 +70,13 @@ agent_id        agent ที่ลงมือ
 
 ## Decision
 
-> _(รอเคาะ)_
+**A** — `Tenant → Workspace → Resource` · required ids ทุก request คือ `tenant_id` `workspace_id` `actor_id` `agent_id` · **deny cross-tenant by default**
+
+**Reason:** ตรงกับ 4 required ids ที่ `backend-os §17` บังคับอยู่แล้วจึงไม่ต้องแก้ blueprint · 2 ชั้นพอสำหรับ isolation จริง (tenant = boundary แข็ง, workspace = grouping) ส่วน `Organization` เป็น alias ของ tenant และ `Project`/`Department` เป็น label ไม่ใช่ชั้น id · Odoo company map เป็น tenant ได้ตรง ๆ · ปฏิเสธ B เพราะเพิ่มชั้นโดยยังไม่มี requirement จริงมายืนยัน และทำให้ policy evaluation ซับซ้อนขึ้น ปฏิเสธ C เพราะไม่มีที่แบ่งงานภายใน tenant เดียวกัน
+
+**Authority:** Monthop Champaruang — Platform Owner / Architecture Authority of `agent-platform`
+
+`tenant_id` เป็น **required ทุก contract ไม่มีข้อยกเว้น** และ isolation ต้องลงลึกถึง DB / index / storage layer
 
 ## Consequences ถ้าเลือก A
 

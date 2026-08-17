@@ -1,6 +1,6 @@
 # ADR-0009: Capability Model
 
-**Status:** Proposed
+**Status:** Accepted (2026-08-17)
 **Date:** 2026-08-17
 **Depends on:** ADR-0004, ADR-0005
 **Blocking:** `contracts/capability/`, routing ใน gateway ทุกตัว
@@ -82,7 +82,14 @@ capabilities:
 
 ## Decision
 
-> _(รอเคาะ)_
+**A** — `contracts/capability/` เป็น first-class มี 3 schema: **`capability.yaml`** (taxonomy) · **`declaration.yaml`** (ใครมีอะไร) · **`requirement.yaml`** (task ต้องการอะไร)
+พร้อมแยก 3 ระดับ scope (provider / worker-host / tool) และกติกา **unknown capability = ไม่มี**
+
+**Reason:** routing จริงถามว่า "ใครทำสิ่งนี้ได้" ไม่ใช่ "ใช้ provider ไหน" ซึ่งตอบย้อนทางไม่ได้ถ้า capability เป็น field ของ provider · ADR-0005 C2 ทำให้ execution เดินได้ 2 เส้นทาง จึงต้องมี declaration บอกว่าเส้นทางไหนรองรับอะไร — capability จึงจำเป็น ไม่ใช่ของเพิ่มทีหลัง · แยก declaration ออกจาก requirement เพราะที่มาทั้ง 4 แบบใน ref ปนสองอย่างนี้เข้าด้วยกัน ทำให้ `agent: "auto"` ทำงานไม่ได้ · ปฏิเสธ C เพราะ capability บางอย่างไม่ใช่ tool (`long_context`, `vision`, `streaming`) และ tool เปลี่ยนบ่อยกว่า capability
+
+**Authority:** Monthop Champaruang — Platform Owner / Architecture Authority of `agent-platform`
+
+`contracts/provider/*.yaml` **ห้าม** มี field `capabilities` ของตัวเอง ต้องอ้าง `declaration.yaml` เพื่อไม่ให้ประกาศซ้ำสองที่แล้วไม่ตรงกัน
 
 ## Consequences ถ้าเลือก A
 

@@ -1,6 +1,6 @@
 # ADR-0010: Risk & Approval Taxonomy
 
-**Status:** Proposed
+**Status:** Accepted (2026-08-17)
 **Date:** 2026-08-17
 **Depends on:** ADR-0009
 **Blocking:** `contracts/policy/`, `contracts/approval/`, `contracts/capability/`
@@ -90,7 +90,21 @@ approval request → RFC-0002 decision: APPROVE | REJECT | REQUIRE_CHANGES
 
 ## Decision
 
-> _(รอเคาะ)_
+**A** — แยกเป็น 3 field คนละ enum:
+
+```yaml
+action_risk: low | medium | high | critical                          # contracts/capability, contracts/tool
+authority:   auto | notify | approval_required | human_command_only  # contracts/policy
+severity:    (domain กำหนดเอง — ไม่อยู่ใน contract กลาง)
+```
+
+chain ที่ lock: `action_risk` → policy → `authority` → approval → decision (`APPROVE` / `REJECT` / `REQUIRE_CHANGES`)
+
+**Reason:** ทั้งสามมี 4 ระดับพอดีจึงถูกเผลอใช้คำเดียวกัน แต่ค่าไม่ map 1:1 — `read data` ของข้อมูลชั้นความลับสูงเป็น action เสี่ยงต่ำแต่ต้องอนุมัติ · `authority` ใช้คำที่บอกความหมายตัวเองจึงอ่านแล้วไม่ต้องเดา และ policy เขียน mapping ต่อ tenant ได้เอง · `severity` ออกจาก contract กลางเพื่อไม่บังคับ domain อื่นใช้ enum ของงาน security · ปฏิเสธ B เพราะ audit ย้อนหลังจะแยกไม่ออกว่า `HIGH` คือ action เสี่ยงหรือสถานการณ์ร้ายแรง ปฏิเสธ C เพราะ enum เหมือนกันยังชวนให้เทียบค่าข้าม namespace
+
+**Authority:** Monthop Champaruang — Platform Owner / Architecture Authority of `agent-platform`
+
+fallback บังคับเมื่อเจอค่าที่ไม่รู้จัก: `action_risk` → `critical` · `authority` → `human_command_only`
 
 ## Consequences ถ้าเลือก A
 

@@ -1,9 +1,9 @@
 # ADR-0006: Contract Versioning & Ownership
 
-**Status:** Proposed
+**Status:** **แยก 2 ส่วน** — Versioning: `Accepted (2026-08-17)` · Ownership: `Pending external confirmation`
 **Date:** 2026-08-17
 **Depends on:** ADR-0001
-**Blocking:** `contracts/` ทั้งหมด
+**Blocking:** `contracts/` ทั้งหมด (ส่วน versioning) · contract ที่อ้าง `devfactory-core` RFC (ส่วน ownership)
 
 ## Context
 
@@ -181,7 +181,35 @@ vN ที่ยังมี consumer pin อยู่ **ห้ามปิด** 
 
 ## Decision
 
-> _(รอเคาะ — ต้องตอบ 2 ส่วน: รูปแบบ version และความเป็นเจ้าของ)_
+ADR นี้มี **2 การตัดสินใจที่ status ต่างกัน** — อย่ารายงานรวมกัน
+
+### ส่วนที่ 1 — Versioning · `Accepted (2026-08-17)` ✅
+
+**A** — directory per major (`contracts/<name>/vN/`) + additive-only ภายใน major · กติกา conformance, นิยาม breaking change และ deprecation window ตามหัวข้อด้านบนมีผลบังคับทันที
+
+**Reason:** consumer pin version ได้ตรง ๆ และตรวจอัตโนมัติได้ว่าไม่มีการเผลอ breaking · รองรับ 2 version พร้อมกันช่วงย้าย · ปฏิเสธ C เพราะต้องมี service ซึ่งขัด ADR-0001
+
+**Authority:** Monthop Champaruang — Platform Owner / Architecture Authority of `agent-platform`
+
+### ส่วนที่ 2 — Ownership · `Pending external confirmation` ⏳
+
+**A2 ยังไม่ Accepted** — `agent-platform` **ยังไม่ใช่** canonical owner ของ shared contract จนกว่าจะได้รับการยืนยันจาก Architecture Owner ของ `devfactory-core`
+
+**เหตุผลที่ยังไม่เคาะ:** RFC-0001–0004 ของ `devfactory-core` เป็น `Status: Draft` และ `GOVERNANCE.md` ของ repo นั้นระบุว่า **Architecture Owner ของมันมีอำนาจตัดสินสุดท้าย** — การประกาศเองว่า authority ย้ายมาแล้วคือการยึดอำนาจของอีก repo โดยพลการ ซึ่งขัดกับ governance ที่ ADR ชุดนี้ตั้งขึ้นเอง
+
+**รออะไร:** agreement อย่างเป็นทางการจาก Architecture Owner ของ `devfactory-core` ว่า authority ของ shared contract ย้ายมาที่ `agent-platform`
+
+**ระหว่างรอ — ทำอะไรได้/ไม่ได้:**
+
+| ทำได้ | ทำไม่ได้ |
+| --- | --- |
+| เขียน contract ที่ **ไม่** อ้าง RFC-0001–0004 ได้เต็มที่ | ประกาศว่า `agent-platform` เป็น canonical owner |
+| อ้างอิง RFC ในฐานะ **reference** พร้อมติดสถานะ `external-authority-pending` | ย้าย/แก้ RFC ในนามของ platform |
+| ใช้กติกา versioning + conformance ได้ทันที | ปิด ADR-0006 |
+
+contract ที่ได้รับผลกระทบ: `contracts/approval/` (RFC-0002) · `contracts/event/` (RFC-0003) · state machine ที่อ้าง RFC-0001/0004 — ทั้งหมดติดสถานะ **`external-authority-pending`** จนกว่าจะยืนยัน
+
+**การเดินต่อไม่ต้องรอส่วนที่ 2** — ADR อื่นและ contract ที่ไม่พึ่ง RFC เดินได้เลย
 
 ## Consequences ถ้าเลือก A + A2
 

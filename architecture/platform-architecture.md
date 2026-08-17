@@ -1,8 +1,8 @@
 # Platform Architecture
 
-**Status: Proposed** — diagram นี้แสดงโครงที่ ADR ยังไม่ Accept
+**Status: Accepted (2026-08-17)** — canonical architecture ของ platform
 
-> ⚠️ ชั้นที่มีเครื่องหมาย 🔒 ขึ้นอยู่กับ ADR ที่ยังเป็น `Proposed` — **ยังไม่ใช่ข้อตกลง** จะกลายเป็น canonical เมื่อ [vocabulary gate](../decisions#ลำดับที่ควรเคาะ) ผ่านครบ
+ทุกชั้นในนี้อ้างอิง ADR ที่ Accepted แล้ว ([vocabulary gate ผ่านครบ](../decisions/)) · เปลี่ยน diagram นี้ได้ต่อเมื่อมี ADR ใหม่ที่ supersede ADR ที่เกี่ยวข้อง
 
 ## Canonical diagram
 
@@ -19,11 +19,11 @@
         │             │       │        │            │
         └─────────────┴───────┼────────┴────────────┘
                               │
-                   Capability Routing  🔒 ADR-0009
+                   Capability Routing  (ADR-0009)
                               │
               ┌───────────────┴──────────────┐
               ▼                              ▼
-       Model Providers                 Agent Providers   🔒 ADR-0004
+       Model Providers                 Agent Providers   (ADR-0004)
               │                              │
       OpenAI / Claude                 Claude Code
       Gemini / Qwen                   Gemini CLI
@@ -48,7 +48,7 @@ contract เป็นชั้นบนสุด **ไม่ใช่เพร�
 
 `Identity` · `Gateway` · `Runtime` · `Workflow` · `Policy` วางแนวนอนเพราะไม่มีใครอยู่ใต้ใคร — แต่ละตัวถูกเรียกได้จากทุกตัว ต่างจาก diagram รุ่นแรกที่วาง Gateway → Runtime → Backend เป็นลำดับ ซึ่งซ่อนความจริงว่า Policy ถูกเรียกทั้งตอน gateway และตอน runtime
 
-### Capability Routing เป็นชั้นแยก ไม่ใช่ field 🔒
+### Capability Routing เป็นชั้นแยก ไม่ใช่ field
 
 จุดที่ต่างจาก diagram เดิมที่สุด — การเลือกว่าใครทำงานนี้ **ไม่ได้ถามว่า "ใช้ provider ไหน"** แต่ถามว่า "ใครทำสิ่งนี้ได้"
 
@@ -63,7 +63,7 @@ github + code_execution      + tenant/policy        native runtime
 
 ถ้า capability เป็นแค่ field ของ provider จะตอบคำถามย้อนทางนี้ไม่ได้ ([ADR-0009](../decisions/0009-capability-model.md))
 
-### Model Providers ≠ Agent Providers 🔒
+### Model Providers ≠ Agent Providers
 
 สองกล่องนี้อยู่ระดับเดียวกันแต่ **shape ต่างกัน** — model provider ให้ inference, agent provider ให้ execution (มี loop/tool/workspace ของตัวเอง) `Claude` ปรากฏสองฝั่งเพราะเป็นสองสิ่ง ([ADR-0004](../decisions/0004-agent-vs-model-provider.md))
 
@@ -100,8 +100,6 @@ README ใช้เวอร์ชันย่อ (Gateway / Runtime / Knowledge
 * README = ภาพให้คนนอกเข้าใจใน 10 วินาที
 * ไฟล์นี้ = ภาพสำหรับคนที่จะเขียน contract หรือ implement plane
 
-เมื่อ ADR-0004/0005/0009 Accepted แล้ว ให้ลบ 🔒 ออกและเปลี่ยน Status เป็น `Accepted` — และพิจารณาแทน diagram ใน README ด้วยลิงก์มาที่นี่
-
 ## ที่มา
 
-diagram ต้นฉบับจาก [`ref/agent-platform-adr-review-2.md`](../ref/agent-platform-adr-review-2.md) · เพิ่มการกำกับ 🔒 และหมายเหตุว่าชั้นไหนขึ้นอยู่กับ ADR ตัวไหน
+diagram ต้นฉบับจาก [`ref/agent-platform-adr-review-2.md`](../ref/agent-platform-adr-review-2.md) · เพิ่มหมายเหตุว่าชั้นไหนอ้างอิง ADR ตัวไหน และปรับเป็น `Accepted` เมื่อ ADR-0004/0005/0009 ถูกเคาะเมื่อ 2026-08-17

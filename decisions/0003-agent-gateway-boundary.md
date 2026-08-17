@@ -1,6 +1,6 @@
 # ADR-0003: Agent Gateway Boundary
 
-**Status:** Proposed
+**Status:** Accepted (2026-08-17)
 **Date:** 2026-08-17
 **Depends on:** ADR-0002
 **Blocking:** `contracts/` ทั้งหมด — **นี่คือ vocabulary gate**
@@ -66,7 +66,21 @@ agent-gateway/
 
 ## Decision
 
-> _(รอเคาะ — ต้องตอบทั้ง 2 ส่วน: ชื่อ และเส้นแบ่ง)_
+**A** — แยกชื่อตามทิศทาง traffic:
+
+| ระบบ | ชื่อที่ lock |
+| --- | --- |
+| inbound (agent ภายนอก → enterprise backend) | **`agent-gateway`** |
+| outbound (เราถือ subscription → provider) | **`model-gateway`** |
+| fan-out (task → broker → worker หลัง NAT) | **`agent-fleet`** |
+
+และ **ยืนยันตารางเส้นแบ่ง Gateway / Runtime / Adapter** ในหัวข้อด้านบนตามที่เขียนไว้ รวมรายการ "ห้ามทำ" ของแต่ละชั้น
+
+**Reason:** ทั้งสามเป็นระบบที่ต้องมีจริงและไม่ทับหน้าที่กัน ปัญหาอยู่ที่ชื่อเท่านั้น · ปฏิเสธ B (ร่มเดียว) เพราะทั้งสาม deploy และ scale คนละแบบ และการรวม outbound (ที่ถือ credential) เข้ากับ inbound (public API) ทำให้ blast radius ของ secret ใหญ่ขึ้นโดยไม่จำเป็น · ปฏิเสธ C เพราะต้องแก้มากที่สุดโดยได้ประโยชน์น้อยกว่า A
+
+**Authority:** Monthop Champaruang — Platform Owner / Architecture Authority of `agent-platform`
+
+ห้ามใช้คำว่า "gateway" เดี่ยว ๆ ใน contract หรือเอกสารใหม่ — ต้องระบุว่าตัวไหน
 
 ## Consequences ถ้าเลือก A
 

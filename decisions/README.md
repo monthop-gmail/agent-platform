@@ -12,45 +12,60 @@ ADR ในโฟลเดอร์นี้เป็น **authority** ของ�
 * ADR ต้องมี **Options ที่พิจารณา** ไม่ใช่แค่คำตอบ เพื่อให้คนมาใหม่รู้ว่าทำไมไม่เลือกทางอื่น
 * repo ลูกเก็บ spec ภายในที่ `rfcs/` ของตัวเอง (เช่น `devfactory-core/rfcs/`) และ **ห้ามแก้ contract กลางเอง**
 
-## สถานะปัจจุบัน
+## สถานะปัจจุบัน — 🔒 VOCABULARY LOCKED (2026-08-17)
 
-ทุกตัวเป็น `Proposed` — ช่อง **Decision ยังว่าง รอเคาะ** แต่ละไฟล์มี Context + Options + Recommendation ให้แล้ว
+**Authority ของทั้งชุด:** Monthop Champaruang — Platform Owner / Architecture Authority of `agent-platform`
 
-**เคาะที่ไหน:** [issue #1–#10](https://github.com/monthop-gmail/agent-platform/issues?q=is%3Aissue+label%3Aadr) — 1 issue ต่อ 1 ADR มี Options เป็น checklist พร้อมช่อง Decision / Reason / Authority
-เมื่อ issue ถูกเคาะแล้ว ให้เขียน Decision กลับลงไฟล์ ADR เปลี่ยน Status เป็น `Accepted` แล้วปิด issue — **ไฟล์เป็นที่บันทึกว่าตัดสินอะไร issue เป็นที่บันทึกว่าใครตัดสินและเมื่อไหร่**
-
-| ADR | เรื่อง | ปัญหาที่แก้ | Blocking อะไร |
+| ADR | เรื่อง | Decision | Status |
 | --- | --- | --- | --- |
-| [0001](0001-platform-scope.md) | Platform scope | repo นี้ implement หรือไม่ / mono vs multi-repo | ทุกอย่าง |
-| [0002](0002-core-repository-naming.md) | Core repository naming | ชื่อ core repo มี 4 เวอร์ชันในเอกสาร | 0003, module mapping |
-| [0003](0003-agent-gateway-boundary.md) | Agent gateway boundary | `agent-gateway` มี 3 ความหมายคนละทิศ | contracts, module mapping |
-| [0004](0004-agent-vs-model-provider.md) | Agent vs model provider | LLM / Agent / Coding Agent ปนกัน | `contracts/provider/` |
-| [0005](0005-agent-runtime-boundary.md) | Agent runtime boundary | runtime / harness / workflow / sandbox ทับกัน | `contracts/execution/` |
-| [0006](0006-contract-versioning.md) | Contract versioning | ใครเป็นเจ้าของ contract, แก้ยังไง | contracts ทั้งหมด |
-| [0007](0007-multi-tenancy.md) | Multi-tenancy | tenant model 3 แบบใน 3 เอกสาร | `contracts/identity/` |
-| [0008](0008-reference-stack.md) | Reference stack | Cloudflare vs Python vs Node | น้อยสุด (contract ไม่ผูก tech) |
-| [0009](0009-capability-model.md) | Capability model | capability กระจาย 4 รูปแบบ ไม่มีเจ้าของ | `contracts/capability/`, routing ทุกตัว |
-| [0010](0010-risk-approval-taxonomy.md) | Risk & approval taxonomy | `LOW/MEDIUM/HIGH/CRITICAL` มี 3 ความหมาย | `contracts/policy/`, `contracts/approval/` |
+| [0001](0001-platform-scope.md) | Platform scope | **A + A2** — contract & architecture only · `planes/` | ✅ Accepted |
+| [0002](0002-core-repository-naming.md) | Core repository naming | **A** — `agent-platform` = contract owner · `agent-backend-os` = implementation | ✅ Accepted |
+| [0003](0003-agent-gateway-boundary.md) | Agent gateway boundary | **A** — `agent-gateway` / `model-gateway` / `agent-fleet` | ✅ Accepted |
+| [0004](0004-agent-vs-model-provider.md) | Agent vs model provider | **A** — Model Provider / Agent Provider / Agent Platform | ✅ Accepted |
+| [0005](0005-agent-runtime-boundary.md) | Agent runtime boundary | **A + C2** — Workflow→Harness→Runtime→Sandbox · native + external ใต้ contract เดียว | ✅ Accepted |
+| [0006](0006-contract-versioning.md) | Contract versioning | **A** versioning · **A2** ownership | ✅ versioning / ⏳ **ownership pending** |
+| [0007](0007-multi-tenancy.md) | Multi-tenancy | **A** — Tenant → Workspace → Resource | ✅ Accepted |
+| [0008](0008-reference-stack.md) | Reference stack | **A** — tech-neutral (YAML/JSON Schema) | ✅ Accepted |
+| [0009](0009-capability-model.md) | Capability model | **A** — capability / declaration / requirement | ✅ Accepted |
+| [0010](0010-risk-approval-taxonomy.md) | Risk & approval taxonomy | **A** — `action_risk` / `authority` / `severity` | ✅ Accepted |
 
-## ลำดับที่ควรเคาะ
+การเคาะบันทึกไว้ที่ [issue #1–#10](https://github.com/monthop-gmail/agent-platform/issues?q=is%3Aissue+label%3Aadr) — **ไฟล์บันทึกว่าตัดสินอะไร issue บันทึกว่าใครตัดสินและเมื่อไหร่**
+
+### ⏳ สิ่งเดียวที่ยังค้าง — ADR-0006 ownership
+
+`agent-platform` **ยังไม่ใช่** canonical owner ของ shared contract จนกว่า Architecture Owner ของ [`devfactory-core`](https://github.com/monthop-gmail/devfactory-core) จะยืนยัน — RFC-0001–0004 ที่นั่นยัง `Draft` และ `GOVERNANCE.md` ระบุว่า owner ของ repo นั้นมีอำนาจสุดท้าย
+
+ระหว่างรอ: contract ที่อ้าง RFC เหล่านั้น (`contracts/approval/` `contracts/event/` และ state machine) ติดสถานะ **`external-authority-pending`** ส่วน contract อื่นเดินได้ตามปกติ ดู [issue #6](https://github.com/monthop-gmail/agent-platform/issues/6)
+
+## ศัพท์ที่ lock แล้ว
+
+ห้ามใช้คำเหล่านี้ในเอกสารหรือ contract ใหม่:
+
+| ห้ามใช้ | ใช้แทน | ที่มา |
+| --- | --- | --- |
+| `modules/` (ในความหมายที่เก็บ code) | `planes/` — Plane Boundary Documentation | 0001 |
+| `enterprise-agent-backend` · `enterprise-agent-knowledge-platform` | `agent-backend-os` · `enterprise-knowledge` | 0002 |
+| `gateway` เดี่ยว ๆ · `ai-agent-gateway` · `multi-agent-gateway` | `agent-gateway` / `model-gateway` / `agent-fleet` | 0003 |
+| `LLM Adapter` · `Runtime Adapter` · `agent-adapters` · `AgentAdapter` · `agent-model-router` | Model Provider · Agent Provider | 0004 |
+| `harness` ในความหมาย test rig | `evals` | 0005 |
+| `Project` / `Department` เป็นชั้น id | label ของ workspace | 0007 |
+| `risk_level` เดี่ยว ๆ | `action_risk` / `authority` / `severity` | 0010 |
+
+## ลำดับที่เคาะไปแล้ว
 
 ```text
-0001 (scope)
+0001 (scope) ✅
   ↓
-0002 (ชื่อ) ── 0004 (ศัพท์ provider)
+0002 (ชื่อ) ✅ ── 0004 (ศัพท์ provider) ✅
   ↓                ↓
-0003 (gateway) ── 0005 (runtime) ── 0009 (capability)   ← vocabulary/boundary gate 🔒
+0003 (gateway) ✅ ── 0005 (runtime) ✅ ── 0009 (capability) ✅   🔒 vocabulary gate — ผ่านแล้ว
   ↓
-0006 (versioning + conformance) ── 0007 (tenancy) ── 0010 (risk/authority)
+0006 (versioning ✅ / ownership ⏳) ── 0007 (tenancy) ✅ ── 0010 (risk/authority) ✅
   ↓
-0008 (stack)
+0008 (stack) ✅
   ↓
-contracts/ P0
+contracts/ P0  ← เริ่มได้แล้ว
 ```
-
-**0003 + 0004 + 0005 + 0009 คือ vocabulary/boundary gate** ตาม [decisions-first plan](../ref/agent-platform-decisions-first-plan.md) Phase 2 และ [ADR review](../ref/agent-platform-adr-review.md) — ห้ามเขียน `contracts/` ก่อนสี่ตัวนี้ Accepted ไม่งั้น schema จะฝังศัพท์ที่ยังไม่ตกลง
-
-0009 อยู่ใน gate เพราะ [ADR-0005 option C2](0005-agent-runtime-boundary.md) ทำให้ execution เดินได้ 2 เส้นทาง — ต้องมี capability declaration บอกว่าเส้นทางไหนรองรับอะไร ไม่ใช่ของเพิ่มเติมทีหลัง
 
 ## ที่มา
 
