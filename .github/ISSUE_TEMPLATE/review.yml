@@ -1,0 +1,52 @@
+name: Architecture Review
+description: ส่งผลรีวิว architecture / ADR / contract
+title: "review: <ขอบเขตที่รีวิว>"
+labels: ["architecture"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **ถ้ารีวิวเป็นการแก้ไฟล์ ให้ comment ใน PR ดีกว่า** — inline comment ผูกกับบรรทัดที่พูดถึงเลย
+        ใช้ issue นี้เมื่อเป็นการรีวิวภาพรวมที่ไม่ผูกกับ diff ใด diff เดียว
+
+  - type: input
+    id: commit
+    attributes:
+      label: รีวิวที่ commit ไหน
+      description: สำคัญมาก — ระบุ commit SHA หรือวันที่ ที่ใช้ตรวจ เพื่อไม่ให้รีวิว repo เวอร์ชันเก่าโดยไม่รู้ตัว
+      placeholder: b2156fa หรือ 2026-08-17
+    validations:
+      required: true
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: ขอบเขตที่รีวิว
+      placeholder: decisions/ ทั้งหมด + architecture/module-mapping.md
+    validations:
+      required: true
+
+  - type: textarea
+    id: passed
+    attributes:
+      label: ผ่านแล้ว
+      description: อะไรที่ทำถูกและไม่ต้องแก้ (ระบุด้วยว่าอย่าแก้อะไร)
+
+  - type: textarea
+    id: blocking
+    attributes:
+      label: ต้องแก้ก่อนไปต่อ
+      description: เขียนเป็นข้อ ๆ พร้อมระบุไฟล์และบรรทัดถ้าเป็นไปได้
+    validations:
+      required: true
+
+  - type: textarea
+    id: nonblocking
+    attributes:
+      label: อยากให้ปรับ (ไม่ blocking)
+
+  - type: input
+    id: gate
+    attributes:
+      label: อนุญาตให้ไปต่อขั้นไหน
+      placeholder: approve architecture direction — ยังไม่เปิด contracts/

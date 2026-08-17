@@ -1,0 +1,63 @@
+name: ADR Decision
+description: บันทึกการเคาะ Decision ของ ADR ที่เป็น Proposed
+title: "ADR-NNNN: <หัวข้อ> — เคาะ Decision"
+labels: ["adr", "decision-needed"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ใช้ issue นี้เพื่อ **เคาะ Decision** ของ ADR ที่ยังเป็น `Proposed`
+
+        Decision ที่ตกลงใน issue นี้จะถูกเขียนกลับลงไฟล์ ADR พร้อมเปลี่ยน Status เป็น `Accepted`
+        — issue เป็นที่บันทึก *ใครตัดสินและเมื่อไหร่* ไฟล์ ADR เป็นที่บันทึก *ตัดสินว่าอะไร*
+
+  - type: input
+    id: adr
+    attributes:
+      label: ADR
+      description: ไฟล์ ADR ที่จะเคาะ
+      placeholder: decisions/0001-platform-scope.md
+    validations:
+      required: true
+
+  - type: textarea
+    id: options
+    attributes:
+      label: Options ที่พิจารณา
+      description: คัดลอกหัวข้อ Options จาก ADR มาเป็น checklist แล้วติ๊กตัวที่เลือก
+      value: |
+        - [ ] A.
+        - [ ] B.
+        - [ ] C.
+    validations:
+      required: true
+
+  - type: textarea
+    id: decision
+    attributes:
+      label: Decision
+      description: เลือกอะไร — เขียนเป็นประโยคที่เอาไปใส่ช่อง Decision ของ ADR ได้ตรง ๆ
+    validations:
+      required: true
+
+  - type: textarea
+    id: reason
+    attributes:
+      label: Reason
+      description: ทำไมเลือกทางนี้ และทำไมไม่เลือกทางอื่น
+    validations:
+      required: true
+
+  - type: input
+    id: authority
+    attributes:
+      label: Authority
+      description: ใครเป็นผู้ตัดสิน (ตาม RFC-0002 การตัดสินต้องมีเจ้าของ)
+    validations:
+      required: true
+
+  - type: textarea
+    id: blocked
+    attributes:
+      label: ปลดล็อกอะไร
+      description: ADR หรืองานไหนที่รอ decision นี้อยู่

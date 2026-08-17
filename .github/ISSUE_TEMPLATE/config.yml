@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: อ่าน ADR ก่อนเปิด issue
+    url: https://github.com/monthop-gmail/agent-platform/tree/main/decisions
+    about: ข้อตกลงเรื่องศัพท์และขอบเขตอยู่ที่ decisions/ — ถ้าเรื่องที่จะถามมี ADR อยู่แล้ว ให้ comment ใน issue ของ ADR นั้น
+  - name: ref/ คือบันทึกดิบ ไม่ใช่ข้อตกลง
+    url: https://github.com/monthop-gmail/agent-platform/tree/main/ref
+    about: เอกสารใน ref/ ขัดกันเองได้ตามเวลา ถ้าขัดกับ ADR ที่ Accepted แล้ว ให้ยึด ADR

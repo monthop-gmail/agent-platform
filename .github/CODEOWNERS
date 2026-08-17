@@ -1,0 +1,18 @@
+# Code owners — ทำให้ authority ใน ADR-0006 มีผลจริง ไม่ใช่แค่เขียนในเอกสาร
+#
+# หมายเหตุ: CODEOWNERS จะบังคับให้ต้อง review ก่อน merge ได้จริง
+# ต่อเมื่อเปิด branch protection + "Require review from Code Owners" บน main
+# ตอนนี้ยังไม่เปิด — ไฟล์นี้จึงทำหน้าที่ auto-request reviewer เท่านั้น
+
+# ค่าเริ่มต้น
+*                       @monthop-gmail
+
+# ผูกพัน — เปลี่ยนได้ผ่าน ADR เท่านั้น
+/decisions/             @monthop-gmail
+/contracts/             @monthop-gmail
+
+# ทะเบียน consumer — กระทบการตัดสินใจปิด contract version
+/architecture/consumers.md   @monthop-gmail
+
+# บันทึกดิบ ไม่ผูกพัน — แก้ได้อิสระกว่า แต่ห้ามแก้เนื้อหา raw ย้อนหลัง
+/ref/                   @monthop-gmail

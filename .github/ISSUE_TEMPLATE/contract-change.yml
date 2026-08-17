@@ -1,0 +1,70 @@
+name: Contract Change
+description: ขอเพิ่ม แก้ หรือ deprecate canonical contract
+title: "contract: <ชื่อ contract> — <สิ่งที่ขอ>"
+labels: ["contract"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ตาม [ADR-0006](../blob/main/decisions/0006-contract-versioning.md) `agent-platform` เป็นเจ้าของ contract
+        **repo ลูกที่อยากเปลี่ยน contract ต้องเปิด issue ที่นี่ ห้ามแก้ในบ้านตัวเอง**
+
+  - type: input
+    id: contract
+    attributes:
+      label: Contract
+      placeholder: contracts/event/v1
+    validations:
+      required: true
+
+  - type: dropdown
+    id: kind
+    attributes:
+      label: ประเภทการเปลี่ยน
+      options:
+        - เพิ่ม contract ใหม่
+        - เพิ่ม optional field (ไม่ breaking)
+        - เพิ่มค่าใน enum (ไม่ breaking)
+        - ผ่อน validation (ไม่ breaking)
+        - breaking change (ต้องขึ้น major ใหม่)
+        - deprecate version
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: สิ่งที่ขอเปลี่ยน
+      description: ระบุ field/ค่า/พฤติกรรมที่ต้องการ พร้อมตัวอย่าง YAML ถ้ามี
+    validations:
+      required: true
+
+  - type: textarea
+    id: why
+    attributes:
+      label: ทำไมต้องเปลี่ยนที่ contract กลาง
+      description: ทำไมแก้ในฝั่ง consumer เองไม่ได้
+    validations:
+      required: true
+
+  - type: textarea
+    id: impact
+    attributes:
+      label: ผลกระทบต่อ consumer
+      description: |
+        repo ไหนที่ pin version นี้อยู่ — ดู architecture/consumers.md
+        ถ้าเป็น breaking change ต้องระบุแผนย้ายและวันที่คาดว่าจะปิด version เดิม
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: ตรวจก่อนส่ง
+      options:
+        - label: อ่าน ADR-0006 เรื่องนิยาม breaking change แล้ว
+          required: true
+        - label: เช็ค architecture/consumers.md ว่าใคร pin version นี้อยู่
+          required: true
+        - label: ถ้าเป็น breaking change — เข้าใจว่าต้องขึ้น major ใหม่ ไม่ใช่แก้ในที่เดิม
+          required: true
