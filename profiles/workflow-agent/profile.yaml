@@ -1,0 +1,57 @@
+# $schema: ../../contracts/profile/v1/profile.schema.yaml
+profile_id: workflow-agent
+display_name: Workflow Agent
+description: >-
+  ตัวประสานงานหลายขั้นหลาย agent — decompose, มอบหมาย, รวมผล, จัดการ retry
+  หลักการจาก RFC-0004: orchestration **ห้ามแก้ artifact เอง**
+  ตัวนี้จึงแทบไม่มี tool ที่เขียนอะไร — อำนาจของมันคือการมอบหมาย ไม่ใช่การลงมือ
+
+capability_requirement:
+  required:
+    - long_context
+  constraints:
+    max_cost_usd: 1.0
+
+tools:
+  allow:
+    - workflow.step.start
+    - workflow.step.status
+    - execution.status.read
+    - knowledge.search
+  deny:
+    - fs.file.write
+    - git.commit.create
+    - shell.execute
+    - odoo.sale.create
+
+execution:
+  preferred_mode: native          # ต้องการ state/resume ที่ platform คุมเอง
+  min_observability_depth: step
+  max_duration_seconds: 86400     # workflow อยู่ข้ามวันได้
+  max_attempts: 3
+
+policy:
+  authority_map:
+    low: auto
+    medium: auto                  # การมอบหมายเองไม่ใช่ action ที่มีผลกับระบบจริง
+    high: approval_required
+    critical: human_command_required
+  deny_capabilities:
+    - shell
+    - code_execution
+    - filesystem
+    - autonomous_execution
+
+budget:
+  max_cost_usd_per_execution: 1.0
+  max_cost_usd_per_day: 100.0
+
+delegation:
+  enabled: true
+  allowed_profiles:
+    - coding-agent
+    - knowledge-agent
+    - enterprise-agent
+  max_depth: 3                    # ลึกกว่านี้คุมต้นทุนและ trace ไม่ไหว
+
+artifact_retention_days: 90

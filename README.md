@@ -16,6 +16,7 @@ repo นี้มีหน้าที่ **คุมภาพรวมและ
 | โฟลเดอร์ | เนื้อหา | ผลผูกพัน |
 | --- | --- | --- |
 | [`contracts/`](./contracts) | canonical schema (YAML + JSON Schema) | ✅ ผูกพัน |
+| [`profiles/`](./profiles) | ชุด config ต่อประเภทงาน — instance ของ `contracts/profile/v1` | ✅ ผูกพัน |
 | [`decisions/`](./decisions) | ADR ระดับ ecosystem — ศัพท์และขอบเขตที่ตกลงกันแล้ว | ✅ ผูกพัน |
 | [`architecture/`](./architecture) | คำอธิบาย, mapping, ผลวิเคราะห์ repo อื่น | 📄 อธิบาย |
 | [`ref/`](./ref) | บันทึกดิบตามเวลา ขัดกันเองได้ | ❌ ไม่ผูกพัน |
@@ -89,14 +90,17 @@ monthop-gmail/
 
 `approval/` และ `event/` **ยังไม่เขียน** — ติดสถานะ `external-authority-pending` เพราะมาจาก RFC ของ `devfactory-core` ที่ authority ยังไม่ย้าย
 
-ถัดไป: `profiles/` → ย้าย module ไป `planes/` ตาม [module mapping](./architecture/module-mapping.md)
+**[`profiles/` 6 ตัว](./profiles)** — `coding` `security` `knowledge` `enterprise` `workflow` `autonomous` · validate ผ่าน `contracts/profile/v1` ทั้งหมด
+
+ถัดไป: ย้าย module ไป `planes/` ตาม [module mapping](./architecture/module-mapping.md)
 
 การสื่อสารข้ามทีมใช้ GitHub: **issue** สำหรับเคาะ ADR และขอแก้ contract · **PR** สำหรับรีวิว (comment ที่บรรทัด ไม่ใช่เขียนเรียงความ) · **milestone** สำหรับดูว่าติดเฟสไหน
 
 ## Reference
 
 - [`decisions/`](./decisions) — ADR ทั้งหมดและลำดับที่ควรเคาะ
-- [`architecture/platform-architecture.md`](./architecture/platform-architecture.md) — canonical diagram (`Proposed`) พร้อมกำกับว่าชั้นไหนรอ ADR ตัวไหน
+- [`contracts/`](./contracts) · [`profiles/`](./profiles) — canonical schema และ config ต่อประเภทงาน
+- [`architecture/platform-architecture.md`](./architecture/platform-architecture.md) — canonical diagram (`Accepted`)
 - [`architecture/consumers.md`](./architecture/consumers.md) — ทะเบียน consumer และสถานะ conformance
 - [`architecture/module-mapping.md`](./architecture/module-mapping.md) — module ปัจจุบัน → โครงเป้าหมาย (ยังไม่ย้าย)
 - [`architecture/devfactory-core-rfc-extraction.md`](./architecture/devfactory-core-rfc-extraction.md) — ดึง RFC ของ `devfactory-core` มาเป็น canonical contract อะไรได้แค่ไหน

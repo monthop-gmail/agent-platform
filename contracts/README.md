@@ -19,10 +19,13 @@ canonical schema ที่ทุก repo ใน ecosystem ต้องใช้�
 | [`policy/v1`](policy/v1/) | `policy-decision.schema.yaml` | ✅ v1 | [0010](../decisions/0010-risk-approval-taxonomy.md) |
 | [`artifact/v1`](artifact/v1/) | `artifact.schema.yaml` | ✅ v1 | — |
 | [`error/v1`](error/v1/) | `error.schema.yaml` | ✅ v1 | — |
+| [`profile/v1`](profile/v1/) | `profile.schema.yaml` | ✅ v1 | — (เพิ่มนอกลิสต์ P0 เดิม) |
 | [`approval/`](approval/) | — | ⏳ **external-authority-pending** | [0006](../decisions/0006-contract-versioning.md) |
 | [`event/`](event/) | — | ⏳ **external-authority-pending** | [0006](../decisions/0006-contract-versioning.md) |
 
-สองตัวสุดท้ายรอ agreement จาก Architecture Owner ของ `devfactory-core` — ไม่ใช่เพราะยังไม่พร้อม แต่เพราะยังไม่มีสิทธิ์ ดู [issue #6](https://github.com/monthop-gmail/agent-platform/issues/6)
+`profile/v1` เป็น contract ที่เพิ่มเข้ามานอกลิสต์ P0 เดิมเพื่อรองรับ [`profiles/`](../profiles) — เพิ่ม contract ใหม่ไม่ใช่ breaking change แต่บันทึกไว้ให้ชัดว่าเป็นการขยายขอบเขต
+
+`approval/` และ `event/` รอ agreement จาก Architecture Owner ของ `devfactory-core` — ไม่ใช่เพราะยังไม่พร้อม แต่เพราะยังไม่มีสิทธิ์ ดู [issue #6](https://github.com/monthop-gmail/agent-platform/issues/6)
 
 ## กติกา
 

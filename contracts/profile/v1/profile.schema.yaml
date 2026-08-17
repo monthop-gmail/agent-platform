@@ -1,0 +1,118 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://schemas.agent-platform.internal/profile/v1/profile.schema.yaml
+title: Agent Profile
+description: >-
+  ชุด configuration ที่ประกอบ contract ตัวอื่นเข้าด้วยกันสำหรับงานประเภทหนึ่ง
+  **contract เดียวกัน แต่ profile ต่างกัน** — profile ไม่ได้เพิ่มความสามารถใหม่
+  แต่กำหนดว่า agent ประเภทนี้ใช้อะไรได้และต้องขออนุมัติเมื่อไหร่
+
+  profile เป็น "เพดาน" ไม่ใช่ "การอนุญาต" — สิทธิ์จริงคือส่วนที่ profile, agent
+  และ policy ของ tenant ตกลงตรงกันทั้งสามฝ่าย ค่าที่กว้างที่สุดชนะไม่ได้
+
+type: object
+required: [profile_id, display_name, policy]
+properties:
+  profile_id:
+    $ref: https://schemas.agent-platform.internal/identity/v1/identity.schema.yaml#/$defs/Id
+  display_name:
+    type: string
+  description:
+    type: string
+  extends:
+    $ref: https://schemas.agent-platform.internal/identity/v1/identity.schema.yaml#/$defs/Id
+    description: >-
+      สืบทอดจาก profile อื่น — การสืบทอด **ทำให้แคบลงได้อย่างเดียว**
+      profile ลูกที่พยายามเปิดสิ่งที่พ่อปิดไว้ถือว่าผิด contract
+
+  capability_requirement:
+    $ref: https://schemas.agent-platform.internal/capability/v1/requirement.schema.yaml
+    description: capability ที่งานประเภทนี้ต้องการ — ใช้ route หา provider ที่ทำได้
+
+  tools:
+    type: object
+    properties:
+      allow:
+        type: array
+        description: >-
+          allowlist ของ tool — ว่าง = ไม่อนุญาต tool ใดเลย ไม่ใช่ "อนุญาตทั้งหมด"
+        items:
+          $ref: https://schemas.agent-platform.internal/tool/v1/tool.schema.yaml#/$defs/ToolId
+      deny:
+        type: array
+        description: ชนะ allow เสมอ — ใช้ตัดเฉพาะรายการออกจาก allow ที่กว้าง
+        items:
+          $ref: https://schemas.agent-platform.internal/tool/v1/tool.schema.yaml#/$defs/ToolId
+
+  execution:
+    type: object
+    properties:
+      preferred_mode:
+        enum: [native, provider, any]
+        default: any
+        description: >-
+          คำใบ้ให้ router ไม่ใช่คำสั่ง — ถ้าไม่มีทางเลือกที่ตรง router เลือกทางที่
+          satisfy capability ได้ก่อน (ADR-0005 C2)
+      min_observability_depth:
+        enum: [step, turn]
+        default: turn
+        description: >-
+          ตั้ง `step` เมื่องานนี้ต้อง audit ละเอียด — จะตัด external provider
+          ที่ให้ได้แค่ turn ออกจากตัวเลือกโดยอัตโนมัติ
+      max_duration_seconds:
+        type: integer
+        minimum: 1
+      max_attempts:
+        type: integer
+        minimum: 1
+        default: 1
+
+  policy:
+    type: object
+    required: [authority_map]
+    properties:
+      authority_map:
+        type: object
+        description: >-
+          `action_risk` → `authority` (ADR-0010) — **ต้องเป็น config แบบนี้ ห้าม hard-code**
+          tenant หนึ่งอาจให้ high = approval_required อีก tenant ให้ high = human_command_required
+          ค่าที่ไม่ระบุ ให้ fallback เป็น `human_command_required`
+        additionalProperties: false
+        properties:
+          low: { $ref: '#/$defs/Authority' }
+          medium: { $ref: '#/$defs/Authority' }
+          high: { $ref: '#/$defs/Authority' }
+          critical: { $ref: '#/$defs/Authority' }
+      deny_capabilities:
+        type: array
+        description: capability ที่ห้ามใช้ในงานประเภทนี้ แม้ provider จะทำได้
+        items:
+          $ref: https://schemas.agent-platform.internal/capability/v1/capability.schema.yaml#/$defs/CapabilityId
+      require_human_for:
+        type: array
+        description: tool ที่ต้องให้คนสั่งเสมอ ไม่ว่า action_risk จะเป็นเท่าไร
+        items:
+          $ref: https://schemas.agent-platform.internal/tool/v1/tool.schema.yaml#/$defs/ToolId
+
+  budget:
+    type: object
+    properties:
+      max_cost_usd_per_execution: { type: number, minimum: 0 }
+      max_cost_usd_per_day: { type: number, minimum: 0 }
+
+  delegation:
+    type: object
+    properties:
+      enabled: { type: boolean, default: false }
+      allowed_profiles:
+        type: array
+        items:
+          $ref: https://schemas.agent-platform.internal/identity/v1/identity.schema.yaml#/$defs/Id
+      max_depth: { type: integer, minimum: 1, default: 1 }
+
+  artifact_retention_days:
+    type: integer
+    minimum: 1
+
+$defs:
+  Authority:
+    $ref: https://schemas.agent-platform.internal/policy/v1/policy-decision.schema.yaml#/$defs/Authority

@@ -1,0 +1,54 @@
+# $schema: ../../contracts/profile/v1/profile.schema.yaml
+profile_id: knowledge-agent
+display_name: Knowledge Agent
+description: >-
+  ค้นและสรุปความรู้ในองค์กรพร้อม citation — ใช้กับ enterprise-knowledge
+  หลักการ: อ่านอย่างเดียว ไม่เขียนอะไรกลับเข้าระบบต้นทาง
+  ความเสี่ยงหลักไม่ใช่การทำลายข้อมูล แต่คือการ **เห็นข้อมูลที่ไม่ควรเห็น**
+
+capability_requirement:
+  required:
+    - long_context
+  preferred:
+    - vision                   # อ่านเอกสารสแกน
+  constraints:
+    max_cost_usd: 0.5
+
+tools:
+  allow:
+    - knowledge.search
+    - document.read
+    - document.cite
+  deny:
+    - document.write
+    - knowledge.index.rebuild
+    - fs.file.write
+    - shell.execute
+
+execution:
+  preferred_mode: any
+  min_observability_depth: turn
+  max_duration_seconds: 120
+  max_attempts: 2
+
+policy:
+  authority_map:
+    low: auto
+    medium: auto
+    high: approval_required
+    critical: human_command_required
+  deny_capabilities:
+    - shell
+    - code_execution
+    - filesystem
+    - network_egress
+    - autonomous_execution
+
+budget:
+  max_cost_usd_per_execution: 0.5
+  max_cost_usd_per_day: 200.0
+
+delegation:
+  enabled: false
+
+artifact_retention_days: 30

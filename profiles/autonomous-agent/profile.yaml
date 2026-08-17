@@ -1,0 +1,67 @@
+# $schema: ../../contracts/profile/v1/profile.schema.yaml
+profile_id: autonomous-agent
+display_name: Autonomous Agent
+description: >-
+  ⚠️ profile เดียวที่เปิด `autonomous_execution` — agent เริ่มงานเองได้จาก trigger
+  ไม่ต้องมีคนกดทุกครั้ง
+
+  **เป็น opt-in ต่อ tenant เท่านั้น** ไม่ใช่ค่าเริ่มต้นของใคร และ tenant ที่เปิดต้อง
+  ยอมรับว่ามี execution เกิดขึ้นโดยไม่มีคนสั่งในขณะนั้น
+
+  แลกกับความอิสระในการ "เริ่ม" ด้วยการจำกัดสิ่งที่ "ทำได้" อย่างหนัก —
+  งานที่มีผลกระทบยังต้องผ่านคนเหมือนเดิม
+
+# ไม่ใช้ `extends: knowledge-agent` แม้ tool set จะใกล้เคียงกันมาก
+# เพราะ knowledge-agent ปิด `autonomous_execution` ไว้ ส่วน profile นี้ต้องเปิด
+# — การสืบทอดทำให้แคบลงได้อย่างเดียว จะเปิดสิ่งที่พ่อปิดไม่ได้
+# ถ้าอยากใช้ร่วมกันจริงต้องแยก base profile ที่ไม่ตัดสินเรื่องนี้ออกมาก่อน
+
+capability_requirement:
+  required:
+    - autonomous_execution
+    - long_context
+  constraints:
+    max_cost_usd: 1.0
+
+tools:
+  allow:
+    - knowledge.search
+    - document.read
+    - incident.read
+    - report.generate
+    - notification.send
+  deny:
+    - shell.execute
+    - fs.file.write
+    - github.pr.merge
+    - deploy.production.run
+    - finance.payment.create
+    - access.door.unlock
+
+execution:
+  preferred_mode: native           # ต้องคุม lifecycle และ budget ได้เต็มที่
+  min_observability_depth: step    # งานที่ไม่มีคนกดต้อง audit ได้ทุกขั้น
+  max_duration_seconds: 900
+  max_attempts: 1
+
+policy:
+  authority_map:
+    low: notify                    # ไม่มี `auto` เลย — ทุกอย่างต้องมีคนรู้อย่างน้อยหนึ่งคน
+    medium: approval_required
+    high: human_command_required
+    critical: human_command_required
+  deny_capabilities:
+    - shell
+    - code_execution
+    - filesystem
+    - network_egress
+    - docker
+
+budget:
+  max_cost_usd_per_execution: 1.0
+  max_cost_usd_per_day: 20.0       # เพดานต่ำสุดในทุก profile เพราะไม่มีคนคอยเบรก
+
+delegation:
+  enabled: false                   # งานที่เริ่มเองแล้วยังมอบต่อได้ = คุมขอบเขตไม่ได้
+
+artifact_retention_days: 180

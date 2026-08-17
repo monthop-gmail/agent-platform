@@ -1,0 +1,64 @@
+# $schema: ../../contracts/profile/v1/profile.schema.yaml
+profile_id: security-agent
+display_name: Security Agent
+description: >-
+  งานเฝ้าระวังและวิเคราะห์สถานการณ์ความปลอดภัย — ใช้กับ navi-security-agent
+  หลักการที่เข้มที่สุดในทุก profile: **AI ≠ Authority**
+  agent สังเกต วิเคราะห์ และ *เสนอ* ได้ แต่ไม่สั่งการทางกายภาพเอง
+
+capability_requirement:
+  required:
+    - long_context
+  preferred:
+    - vision                   # วิเคราะห์ภาพจากกล้อง
+  constraints:
+    max_latency_ms: 5000       # งานเฝ้าระวังต้องตอบเร็ว
+
+tools:
+  allow:
+    - camera.status.read
+    - camera.alert.create
+    - incident.read
+    - incident.create
+    - sighting.read
+    - geofence.violation.read
+    - patrol.location.read
+    - watchlist.read
+    - knowledge.search
+  deny:
+    - access.door.unlock       # physical action — ไม่อยู่ในมือ agent เด็ดขาด
+    - patrol.dispatch.execute
+    - lockdown.zone.execute
+    - user.delete
+    - finance.payment.create
+
+execution:
+  preferred_mode: any
+  min_observability_depth: step   # ทุก decision ต้อง audit ได้ละเอียด ตัด provider ที่ให้แค่ turn ออก
+  max_duration_seconds: 300
+  max_attempts: 1                 # ไม่ retry อัตโนมัติ — เหตุการณ์เปลี่ยนไปแล้ว retry อาจผิดบริบท
+
+policy:
+  authority_map:
+    low: notify                   # แม้แค่อ่านก็ต้องแจ้ง เพราะเป็นข้อมูลบุคคล
+    medium: approval_required
+    high: human_command_required
+    critical: human_command_required
+  deny_capabilities:
+    - autonomous_execution
+    - shell
+    - code_execution
+    - network_egress
+  require_human_for:
+    - incident.escalate
+    - patrol.dispatch.execute
+    - lockdown.zone.execute
+
+budget:
+  max_cost_usd_per_execution: 0.5
+  max_cost_usd_per_day: 50.0
+
+delegation:
+  enabled: false                  # สายการบังคับบัญชาต้องชัด ห้ามมอบงานต่อ
+
+artifact_retention_days: 365      # หลักฐานเหตุการณ์ต้องเก็บนาน

@@ -1,0 +1,62 @@
+# $schema: ../../contracts/profile/v1/profile.schema.yaml
+profile_id: enterprise-agent
+display_name: Enterprise Agent
+description: >-
+  งานธุรกิจที่แตะ system of record — Odoo, ERP, CRM, ฐานข้อมูล
+  หลักการ: การอ่านทำได้อิสระ แต่ทุกการเขียนแตะข้อมูลจริงขององค์กร
+  จึงตั้ง medium = approval_required ต่างจาก coding-agent ที่เขียนแค่ใน sandbox
+
+capability_requirement:
+  required:
+    - long_context
+  preferred:
+    - mcp                      # ต่อ Odoo / DB ผ่าน MCP server
+  constraints:
+    max_cost_usd: 2.0
+
+tools:
+  allow:
+    - odoo.sale.read
+    - odoo.purchase.read
+    - odoo.partner.read
+    - odoo.sale.create
+    - odoo.purchase.create
+    - db.query.read
+    - knowledge.search
+    - report.generate
+  deny:
+    - odoo.record.delete
+    - finance.payment.create
+    - db.query.write
+    - secret.read
+
+execution:
+  preferred_mode: any
+  min_observability_depth: step   # ธุรกรรมธุรกิจต้องย้อนดูได้ทีละขั้น
+  max_duration_seconds: 600
+  max_attempts: 1                 # tool เขียนส่วนใหญ่ไม่ idempotent — ห้าม retry เอง
+
+policy:
+  authority_map:
+    low: auto
+    medium: approval_required     # การเขียนเข้า system of record ต้องมีคนเห็นชอบ
+    high: human_command_required
+    critical: human_command_required
+  deny_capabilities:
+    - shell
+    - code_execution
+    - autonomous_execution
+  require_human_for:
+    - finance.payment.create
+    - odoo.record.delete
+
+budget:
+  max_cost_usd_per_execution: 2.0
+  max_cost_usd_per_day: 150.0
+
+delegation:
+  enabled: true
+  allowed_profiles: [knowledge-agent]
+  max_depth: 2
+
+artifact_retention_days: 365      # เอกสารธุรกิจมักมีข้อกำหนดการเก็บ
