@@ -16,7 +16,7 @@ vN ยังมีใคร pin อยู่ไหม  → ปิด vN ได�
 
 | Repo | Manifest | Status | Contracts ที่ pin | last_verified | หมายเหตุ |
 | --- | --- | --- | --- | --- | --- |
-| [`devfactory-core`](https://github.com/monthop-gmail/devfactory-core) | ✅ [`platform-contract.yaml`](https://github.com/monthop-gmail/devfactory-core/blob/main/platform-contract.yaml) | `unknown` | `identity/v1` `execution/v1` `policy/v1` `error/v1` | — | **consumer นำร่อง** — ยัง conform ไม่ได้เพราะ repo ยังไม่มี code จึงไม่มี payload ให้ validate · ช่องว่างทั้ง 6 มี RFC ปิดแล้ว ([#10](https://github.com/monthop-gmail/devfactory-core/pull/10)) · authority ตาม [RFC-0005](https://github.com/monthop-gmail/devfactory-core/blob/main/rfcs/0005-platform-contract-authority.md) · ผลวิเคราะห์: [`consumer-devfactory-core.md`](consumer-devfactory-core.md) |
+| [`devfactory-core`](https://github.com/monthop-gmail/devfactory-core) | ✅ [`platform-contract.yaml`](https://github.com/monthop-gmail/devfactory-core/blob/main/platform-contract.yaml) | `unknown` | `identity/v1` `execution/v1` `policy/v1` `error/v1` `approval/v1` `event/v1` | — | **consumer นำร่อง** — ยัง conform ไม่ได้เพราะ repo ยังไม่มี code จึงไม่มี payload ให้ validate · ช่องว่างทั้ง 6 มี RFC ปิดแล้ว ([#10](https://github.com/monthop-gmail/devfactory-core/pull/10)) · authority ตาม [RFC-0005](https://github.com/monthop-gmail/devfactory-core/blob/main/rfcs/0005-platform-contract-authority.md) · ผลวิเคราะห์: [`consumer-devfactory-core.md`](consumer-devfactory-core.md) |
 | [`navi-ims`](https://github.com/monthop-gmail/navi-ims) | ❌ ไม่มี | `unknown` | — | — | default branch `master` · Odoo 19 · เป็น system of record ไม่ใช่ agent consumer โดยตรง |
 | [`ai-web-harness`](https://github.com/monthop-gmail/ai-web-harness) | ❌ ไม่มี | `unknown` | — | — | scaffold stage · อยู่ชั้น orchestration เหนือ gateway |
 | `navi-security-agent` | — | ยังไม่มี repo | — | — | Phase 0 ต้องการ event + policy contract |
@@ -47,11 +47,15 @@ vN ยังมีใคร pin อยู่ไหม  → ปิด vN ได�
 | `execution` | `devfactory-core` ⚠️ declared | — | ไม่มี v2 |
 | `policy` | `devfactory-core` ⚠️ declared | — | ไม่มี v2 |
 | `error` | `devfactory-core` ⚠️ declared | — | ไม่มี v2 |
+| `approval` 🔗 | `devfactory-core` ⚠️ declared | — | ไม่มี v2 |
+| `event` 🔗 | `devfactory-core` ⚠️ declared | — | ไม่มี v2 |
 | `agent` `capability` `provider` `model` | *(ยังไม่มีใคร)* | — | ไม่มี v2 |
 | `tool` `mcp` `artifact` `profile` | *(ยังไม่มีใคร)* | — | ไม่มี v2 |
 
 ⚠️ **declared** = ประกาศ pin ใน `platform-contract.yaml` แล้ว แต่ยังไม่ผ่าน conformance (`status: unknown`)
 declared ยังไม่ทำให้เป็น consumer ตาม ADR-0006 — **แต่มีผลกับการตัดสินใจปิด version** เพราะมี repo ที่พึ่งพา v1 นั้นอยู่จริงแล้ว
+
+🔗 **derived** = semantics เป็นของ `devfactory-core` ([ADR-0006 C2](../decisions/0006-contract-versioning.md)) · pin ปัจจุบัน `semantics_version: "1.1"` ตรงกับต้นทาง
 
 **กฎ:** vN ที่ยังมี consumer pin อยู่ **ห้ามปิด** ไม่ว่าครบกำหนด 90 วันหรือไม่
 
