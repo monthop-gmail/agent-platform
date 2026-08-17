@@ -13,6 +13,10 @@
 
 # 1. RFC-0009 (ต้นฉบับจาก `devfactory-core`)
 
+> คัดลอกตามต้นฉบับ ไม่แก้ — **relative link ข้างในชี้ไปยังไฟล์ใน `devfactory-core` ไม่ใช่ repo นี้**
+> เติม `https://github.com/monthop-gmail/devfactory-core/blob/main/rfcs/` ข้างหน้าเพื่อเปิด
+> (`0005-platform-contract-authority.md` · `../references/team-notes/2026-08-18-adr-0006-ownership-transfer.md`)
+
 # RFC-0009: Vocabulary Extension Is Additive
 
 ## Status
