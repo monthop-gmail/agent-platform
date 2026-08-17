@@ -22,8 +22,8 @@ vN ยังมีใคร pin อยู่ไหม  → ปิด vN ได�
 | `navi-security-agent` | — | ยังไม่มี repo | — | — | Phase 0 ต้องการ event + policy contract |
 | `enterprise-knowledge` | — | ยังไม่มี repo | — | — | ต้องการ tool + policy (ACL-aware retrieval) |
 | `agent-backend-os` | — | ยังไม่มี repo | — | — | บ้านของ native runtime ตาม [ADR-0005 C2](../decisions/0005-agent-runtime-boundary.md) |
-| `agent-fleet` *(ชื่อรอ [ADR-0003](../decisions/0003-agent-gateway-boundary.md))* | — | ยังไม่มี repo | — | — | ต้องการ execution + capability |
-| `model-gateway` *(ชื่อรอ [ADR-0003](../decisions/0003-agent-gateway-boundary.md))* | — | ยังไม่มี repo | — | — | ต้องการ provider + capability |
+| `agent-fleet` | — | ยังไม่มี repo | — | — | ต้องการ execution + capability |
+| `model-gateway` | — | ยังไม่มี repo | — | — | ต้องการ provider + capability |
 | `farm-agent` | — | ยังไม่มี repo | — | — | ต้องการ agent + tool |
 
 ## วิธีอ่านคอลัมน์ Status
@@ -43,7 +43,10 @@ vN ยังมีใคร pin อยู่ไหม  → ปิด vN ได�
 
 | Contract | v1 pinned by | v2 pinned by | ปิด v1 ได้? |
 | --- | --- | --- | --- |
-| *(ยังไม่มี contract)* | — | — | — |
+| `identity` `agent` `capability` `provider` `model` | *(ยังไม่มีใคร)* | — | ไม่มี v2 |
+| `tool` `mcp` `execution` `policy` `artifact` `error` `profile` | *(ยังไม่มีใคร)* | — | ไม่มี v2 |
+
+v1 ทุกตัวยังไม่มี consumer pin — เมื่อมี repo แรกขึ้นทะเบียน ให้แตกเป็นบรรทัดต่อ contract
 
 **กฎ:** vN ที่ยังมี consumer pin อยู่ **ห้ามปิด** ไม่ว่าครบกำหนด 90 วันหรือไม่
 
