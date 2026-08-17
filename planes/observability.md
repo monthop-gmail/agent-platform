@@ -5,7 +5,7 @@
 | | |
 | --- | --- |
 | Implementation | ยังไม่มี repo · `devfactory-core/packages/observability` เป็นของฝั่ง job |
-| Contracts | `contracts/event/` ⏳ **pending** · `execution/v1` · `error/v1` |
+| Contracts | [`event/v1`](../contracts/event/v1/) 🔗 derived · `execution/v1` · `error/v1` |
 | ADR | [0006](../decisions/0006-contract-versioning.md) · [0007](../decisions/0007-multi-tenancy.md) · [0010](../decisions/0010-risk-approval-taxonomy.md) |
 
 ## รับผิดชอบ
@@ -31,10 +31,10 @@ Agent → Reason/Plan metadata → Tool Call → Policy Decision → Execution �
 * บล็อก execution เพราะ observability พัง — trace หายดีกว่างานหยุด แต่ต้องนับว่าหายไปเท่าไร
 * เก็บ credential, PII หรือเนื้อหา prompt ผู้ใช้ในข้อความ error ([`error/v1`](../contracts/error/v1/))
 
-## สถานะ ⏳
+## สถานะ
 
-**`contracts/event/` ยังไม่เขียน** — มาจาก `devfactory-core` RFC-0003 ที่ authority ยังไม่ย้าย ([issue #6](https://github.com/monthop-gmail/agent-platform/issues/6))
+[`contracts/event/v1`](../contracts/event/v1/) เขียนแล้ว (2026-08-18) — `job_id` optional · `subject_type`/`subject_id` required · `correlation_id` · `tenant_id` required · `policy_result` บันทึกทั้ง `action_risk` และ `authority`
 
-สิ่งที่ต้องแก้จาก RFC-0003 ก่อนใช้ระดับ platform อยู่ใน [`contracts/event/README.md`](../contracts/event/README.md) — `job_id` required → optional, field 5 → 13 ตัว, correlation id, cost attribution
+semantics (event vocabulary 7 ตัว + guarantees) เป็นของ `devfactory-core` แก้ที่นี่ไม่ได้ ต้องมี RFC ที่ต้นทางก่อน ([ADR-0006 C2](../decisions/0006-contract-versioning.md))
 
-ระหว่างนี้ producer เก็บ event รูปแบบตัวเองได้ แต่ **อย่าเผยแพร่เป็นสัญญาข้ามระบบ**
+ยังไม่มี implementation — dashboard, metrics backend และ replay engine ยังไม่มี repo

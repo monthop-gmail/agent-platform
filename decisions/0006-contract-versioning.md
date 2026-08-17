@@ -1,9 +1,9 @@
 # ADR-0006: Contract Versioning & Ownership
 
-**Status:** **แยก 2 ส่วน** — Versioning: `Accepted (2026-08-17)` · Ownership: `Pending external confirmation`
-**Date:** 2026-08-17
+**Status:** **Accepted** — Versioning: `Accepted (2026-08-17)` · Ownership: `Accepted (2026-08-18)`
+**Date:** 2026-08-17 · ownership resolved 2026-08-18
 **Depends on:** ADR-0001
-**Blocking:** `contracts/` ทั้งหมด (ส่วน versioning) · contract ที่อ้าง `devfactory-core` RFC (ส่วน ownership)
+**Blocking:** —
 
 ## Context
 
@@ -72,6 +72,21 @@ devfactory-core · navi-security-agent · enterprise-knowledge · agent-fleet ·
 
 * ✅ ทีมเดินเร็ว ไม่ต้องรอ approve
 * ❌ กลับไปสู่ปัญหาเดิม (schema เดียวกันคนละ field) ซึ่งเป็นเหตุผลที่สร้าง repo นี้
+
+### C2. แยกตาม semantics / wire schema ⭐ (เพิ่มเมื่อ 2026-08-18)
+
+เสนอโดย Architecture Owner ของ `devfactory-core` ใน [RFC-0005](https://github.com/monthop-gmail/devfactory-core/blob/main/rfcs/0005-platform-contract-authority.md) เมื่อเราถามเป็นคำถามสองทาง (A2 หรือ B2)
+
+| ใคร | ถืออะไร |
+| --- | --- |
+| repo ต้นทาง | **semantics** — vocabulary (`APPROVE`/`REJECT`/`REQUIRE_CHANGES` · event types 7 ตัว) และ guarantees |
+| `agent-platform` | **canonical wire schema** — field name, type, JSON Schema, `$ref`, versioning, conformance suite, consumer registry |
+
+* ✅ **A2 กับ B2 ผิดแบบเดียวกัน** — มองว่า *ความหมาย* กับ *รูปร่างบน wire* เป็นก้อนเดียวที่แยกไม่ได้
+* ✅ ปัญหาที่ ADR นี้ตั้งใจแก้ ("schema เดียวกันคนละ field") เป็น **schema failure** — รวมศูนย์ schema ก็แก้ได้แล้ว ไม่จำเป็นต้องรวมศูนย์ semantics ด้วย
+* ✅ `no execution without APPROVE` เป็น direction lock ของ repo ต้นทาง ไม่ใช่รายละเอียดการ serialize — ถ้ายกทั้งก้อน ความหมายของ `APPROVE` จะแก้ได้ผ่าน ADR ของ repo อื่น
+* ✅ platform เพิ่ม field ที่ repo ต้นทาง **ไม่มีความเห็นด้วย** (`tenant_id` `correlation_id` …) ได้เองโดยไม่ต้องต่อคิว review cycle ของเขา
+* ⚠️ ต้องมีกลไกกัน drift ที่ตรวจได้ด้วยเครื่อง ไม่ใช่ความไว้ใจ → `derived_from` ด้านล่าง
 
 ## กติกา conformance (บังคับ)
 
@@ -181,7 +196,7 @@ vN ที่ยังมี consumer pin อยู่ **ห้ามปิด** 
 
 ## Decision
 
-ADR นี้มี **2 การตัดสินใจที่ status ต่างกัน** — อย่ารายงานรวมกัน
+ADR นี้มี **2 การตัดสินใจ** ที่เคาะคนละวัน — ส่วนที่ 2 ค้างอยู่ 1 วันเพราะต้องรอ repo ต้นทางตอบ
 
 ### ส่วนที่ 1 — Versioning · `Accepted (2026-08-17)` ✅
 
@@ -191,32 +206,70 @@ ADR นี้มี **2 การตัดสินใจที่ status ต่
 
 **Authority:** Monthop Champaruang — Platform Owner / Architecture Authority of `agent-platform`
 
-### ส่วนที่ 2 — Ownership · `Pending external confirmation` ⏳
+### ส่วนที่ 2 — Ownership · `Accepted (2026-08-18)` ✅
 
-**A2 ยังไม่ Accepted** — `agent-platform` **ยังไม่ใช่** canonical owner ของ shared contract จนกว่าจะได้รับการยืนยันจาก Architecture Owner ของ `devfactory-core`
+**C2 — แยกตาม semantics / wire schema** · Accepted 2026-08-18
 
-**เหตุผลที่ยังไม่เคาะ:** RFC-0001–0004 ของ `devfactory-core` เป็น `Status: Draft` และ `GOVERNANCE.md` ของ repo นั้นระบุว่า **Architecture Owner ของมันมีอำนาจตัดสินสุดท้าย** — การประกาศเองว่า authority ย้ายมาแล้วคือการยึดอำนาจของอีก repo โดยพลการ ซึ่งขัดกับ governance ที่ ADR ชุดนี้ตั้งขึ้นเอง
-
-**รออะไร:** agreement อย่างเป็นทางการจาก Architecture Owner ของ `devfactory-core` ว่า authority ของ shared contract ย้ายมาที่ `agent-platform`
-
-**ระหว่างรอ — ทำอะไรได้/ไม่ได้:**
-
-| ทำได้ | ทำไม่ได้ |
+| ใคร | ถืออะไร |
 | --- | --- |
-| เขียน contract ที่ **ไม่** อ้าง RFC-0001–0004 ได้เต็มที่ | ประกาศว่า `agent-platform` เป็น canonical owner |
-| อ้างอิง RFC ในฐานะ **reference** พร้อมติดสถานะ `external-authority-pending` | ย้าย/แก้ RFC ในนามของ platform |
-| ใช้กติกา versioning + conformance ได้ทันที | ปิด ADR-0006 |
+| repo ต้นทางของ RFC | **semantics** — vocabulary และ guarantees |
+| `agent-platform` | **canonical wire schema** — field name/type · JSON Schema · `$ref` · versioning · conformance suite · consumer registry |
 
-contract ที่ได้รับผลกระทบ: `contracts/approval/` (RFC-0002) · `contracts/event/` (RFC-0003) · state machine ที่อ้าง RFC-0001/0004 — ทั้งหมดติดสถานะ **`external-authority-pending`** จนกว่าจะยืนยัน
+**Reason:** เราถามเป็นคำถามสองทาง (A2 หรือ B2) และ Architecture Owner ของ `devfactory-core` ตอบว่าทั้งสองทางผิดแบบเดียวกัน — ปัญหา "schema เดียวกันคนละ field" ที่ ADR นี้ตั้งใจแก้เป็น *schema failure* การรวมศูนย์ schema แก้ได้แล้วโดยไม่ต้องรวมศูนย์ semantics ด้วย · ส่วน `no execution without APPROVE` เป็น direction lock ของ repo ต้นทาง ไม่ใช่รายละเอียดการ serialize
 
-**การเดินต่อไม่ต้องรอส่วนที่ 2** — ADR อื่นและ contract ที่ไม่พึ่ง RFC เดินได้เลย
+**Authority:** Monthop Champaruang — Platform Owner / Architecture Authority of `agent-platform` · ฝั่ง semantics ตัดสินโดย Architecture Owner ของ `devfactory-core` ผ่าน [RFC-0005](https://github.com/monthop-gmail/devfactory-core/blob/main/rfcs/0005-platform-contract-authority.md)
 
-## Consequences ถ้าเลือก A + A2
+### กฎ 5 ข้อที่ทำให้เส้นแบ่งอยู่ได้
+
+1. **field ระดับ platform เพิ่มได้เอง** — `tenant_id` `workspace_id` `execution_id` `agent_id` `correlation_id` `policy_id` `expires_at` `action_risk` `escalation_target` cost attribution · ผ่าน ADR ฝั่งนี้อย่างเดียว ไม่ต้องมี RFC ที่ต้นทาง
+2. **semantic change ต้องมี RFC ที่ต้นทางก่อน** — 5 ประเภท: เพิ่ม/ลบ/เปลี่ยนชื่อ decision หรือ event type · ลดหรือถอน guarantee · เปลี่ยน field ที่มีความหมายจาก required ↔ optional · เปลี่ยนความหมายของ decision/event/state ที่มีอยู่ · เปิดทางให้ execution เดินได้โดยไม่มี `APPROVE`
+3. **ทุก derived contract ต้องมี `derived_from`** — ดูหัวข้อถัดไป
+4. **ไม่มี schema ขนานที่ต้นทาง** — repo ต้นทาง consume schema ที่ publish แล้วตรง ๆ · RFC ของเขาเป็น intent spec ไม่ใช่ wire format
+5. **escalation ชัด** — semantics ตัดสินสุดท้ายที่ Architecture Owner ของ repo ต้นทาง · schema shape กับ versioning ตัดสินสุดท้ายที่ `agent-platform` · ไม่มีใครตัดสินครึ่งของอีกฝ่ายได้เอง
+
+### `derived_from` — pin `semantics_version` ไม่ใช่ commit SHA
+
+RFC-0005 Rule 3 ฉบับแรกให้ pin commit SHA ของไฟล์ RFC · **แก้แล้วโดยต้นทางเอง** เพราะ RFC เป็น prose:
+
+* แก้คำผิด → SHA เปลี่ยน แต่ไม่มีอะไร drift → false alarm
+* แก้ enum ที่ frozen → SHA เปลี่ยนเท่ากันพอดี → แยกจากกรณีแรกไม่ออก
+
+จึง pin `semantics_version` ของ [`contract-semantics.yaml`](https://github.com/monthop-gmail/devfactory-core/blob/main/contract-semantics.yaml) แทน ซึ่งขยับเฉพาะเมื่อ `frozen` ขยับ
+
+```yaml
+derived_from:
+  repo: monthop-gmail/devfactory-core
+  manifest: contract-semantics.yaml
+  semantics_version: "1.0"
+  rfcs: [rfcs/0002-governance-decision-contract.md]
+  license: MIT
+```
+
+contract ที่ `derived_from` ชี้ไปยัง `semantics_version` ที่ไม่ตรงกับต้นทางแล้ว = **out of conformance** ไม่ว่า `CHANGELOG.md` จะเขียนว่าอะไร
+
+### ตอบคำถามที่ต้นทางถามกลับ
+
+**ถาม: check `derived_from` อัตโนมัติใน CI หรือตรวจตอน contract change ก็พอ?**
+
+**ตอบ: ตรวจตอน contract change ก่อน · ยังไม่ทำ CI** — เหตุผลคือ ADR-0008 ห้ามมี implementation ใน repo นี้ และ workflow ที่ fetch manifest ของ repo อื่นมา hash เป็น code ที่ต้องดูแล ไม่ใช่ contract · ตอนนี้มี derived contract แค่ 2 ตัวและ `semantics_version` ยังเป็น `1.0` ทั้งคู่ ต้นทุนการตรวจด้วยคนยังต่ำกว่าต้นทุนการมี code ก้อนแรกใน repo
+
+ทบทวนใหม่เมื่อเข้าเงื่อนไขข้อใดข้อหนึ่ง: derived contract เกิน 5 ตัว · มี repo ต้นทางมากกว่าหนึ่งแห่ง · หรือเคยพลาดจน `semantics_version` ค้างจริงหนึ่งครั้ง
+
+ต้นทางเตรียม `hash_scope: frozen` ไว้ให้แล้วถ้าวันหนึ่งจะทำ
+
+**ถาม: `subject_type: job` + `subject_id` ทำให้ `job_id` ซ้ำซ้อนไหม?**
+
+**ตอบ: ไม่ซ้ำ เก็บทั้งคู่** — เป็นคนละคำถาม · `job_id` คือ *สายเหตุ* (งานแม่) ส่วน `subject_id` คือ *หัวเรื่อง* · event `EXECUTION_STARTED` มี subject เป็น execution แต่ `job_id` เป็น job ที่มันสังกัด ถ้ารวมเป็นค่าเดียวจะตอบคำถามใดคำถามหนึ่งไม่ได้
+
+เพิ่มกฎระดับ schema: ถ้า `subject_type: job` และมี `job_id` ทั้งสองค่าต้องตรงกัน
+
+## Consequences
 
 * `contracts/*/vN/CHANGELOG.md` เป็นสิ่งบังคับ
 * ทุก contract มี field `contract_version` ใน payload เพื่อให้ audit ย้อนได้ว่าใช้เวอร์ชันไหน
 * repo ลูก **ต้อง** มี `platform-contract.yaml` + conformance test ใน CI ตามกติกาด้านบน — repo ที่ไม่มีไม่ถือเป็น consumer
-* ต้องนัดคุยกับ Architecture Owner ของ `devfactory-core` ก่อนเขียน `contracts/approval/` และ `contracts/event/`
+* `contracts/approval/` และ `contracts/event/` เขียนได้แล้ว — ต้องมีบล็อก `derived_from` ทุกตัว
+* contract ที่ derive มาต้องกำกับ 🔒 ที่ส่วนซึ่งเป็น semantics เพื่อไม่ให้ใครแก้โดยไม่รู้ว่าต้องผ่าน RFC ที่ต้นทาง
 * platform ต้องเก็บ [`architecture/consumers.md`](../architecture/consumers.md) ให้เป็นปัจจุบัน — ตัดสินใจปิด vN ไม่ได้ถ้าไม่รู้ว่าใคร pin อยู่
 * `waived` ต้องมีวันหมดอายุ — ยกเว้นถาวรไม่มี ถ้าจะยกเว้นนานกว่า 1 major ต้องเขียน ADR
 

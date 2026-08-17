@@ -1,0 +1,103 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://schemas.agent-platform.internal/approval/v1/approval.schema.yaml
+title: Approval
+description: >-
+  คำตัดสินของผู้มีอำนาจว่าจะให้งานเดินต่อหรือไม่
+
+  **semantics เป็นของ `devfactory-core`** — decision vocabulary และ guarantees ในไฟล์นี้
+  แก้ที่นี่ไม่ได้ ต้องมี RFC ที่ repo นั้นก่อน (RFC-0005 Rule 2)
+  ส่วนชื่อ field, type, โครงสร้างและ versioning เป็นของ `agent-platform` (Rule 1)
+
+  **approval ≠ policy** — [`policy/v1`](../../policy/v1/) ตอบว่า "ต้องขออนุมัติไหม"
+  ไฟล์นี้คือคำตัดสินของผู้มีอำนาจหลังจากนั้น
+
+derived_from:
+  repo: monthop-gmail/devfactory-core
+  manifest: contract-semantics.yaml
+  semantics_version: "1.0"
+  rfcs:
+    - rfcs/0002-governance-decision-contract.md
+  license: MIT
+  # ตรวจ drift โดยเทียบ semantics_version ไม่ใช่ SHA ของไฟล์ RFC
+  # RFC เป็น prose — แก้คำผิดทำให้ SHA เปลี่ยนโดยไม่มีอะไร drift จริง
+
+$defs:
+  Decision:
+    description: >-
+      🔒 frozen — vocabulary เป็นของ devfactory-core
+      เพิ่ม ลบ หรือเปลี่ยนชื่อค่าใดค่าหนึ่ง = semantic change ต้องมี RFC ที่ repo นั้นก่อน
+    enum:
+      - APPROVE
+      - REJECT
+      - REQUIRE_CHANGES
+
+type: object
+required: [approval_id, tenant_id, subject, decision, reason, authority, decided_at]
+properties:
+  approval_id:
+    $ref: https://schemas.agent-platform.internal/identity/v1/identity.schema.yaml#/$defs/Id
+
+  tenant_id:
+    $ref: https://schemas.agent-platform.internal/identity/v1/identity.schema.yaml#/$defs/TenantId
+    description: >-
+      🔒 invariant — decision ต้องอยู่ tenant เดียวกับสิ่งที่มันอนุมัติ
+      ต่าง tenant = invalid ให้ **reject ไม่ใช่ coerce**
+  workspace_id:
+    $ref: https://schemas.agent-platform.internal/identity/v1/identity.schema.yaml#/$defs/WorkspaceId
+
+  subject:
+    type: object
+    description: อนุมัติให้อะไร
+    required: [type, id]
+    properties:
+      type:
+        enum: [job, execution, tool_call, artifact, deployment]
+      id:
+        $ref: https://schemas.agent-platform.internal/identity/v1/identity.schema.yaml#/$defs/Id
+  execution_id:
+    $ref: https://schemas.agent-platform.internal/identity/v1/identity.schema.yaml#/$defs/ExecutionId
+  agent_id:
+    $ref: https://schemas.agent-platform.internal/identity/v1/identity.schema.yaml#/$defs/AgentId
+
+  decision:
+    $ref: '#/$defs/Decision'
+  reason:
+    type: string
+    minLength: 1
+    description: >-
+      🔒 required meaning — เหตุผลที่ตัดสินอย่างนั้น
+      ห้ามใส่ credential, PII หรือ private reasoning ของ model
+  authority:
+    $ref: https://schemas.agent-platform.internal/identity/v1/identity.schema.yaml#/$defs/Principal
+    description: >-
+      🔒 required meaning — ผู้มีอำนาจที่รับผิดชอบคำตัดสินนี้
+      **invariant:** agent ออก `APPROVE` ให้งานของตัวเองไม่ได้ ("no agent has total authority")
+      — `authority.id` ต้องไม่ใช่ `agent_id` ของงานที่กำลังอนุมัติ
+  decided_at:
+    type: string
+    format: date-time
+    description: 🔒 required meaning — เวลาที่ตัดสิน
+
+  policy_id:
+    type: string
+    description: policy decision ที่ทำให้ต้องขออนุมัติ — ดู `policy/v1`
+  action_risk:
+    $ref: https://schemas.agent-platform.internal/capability/v1/capability.schema.yaml#/$defs/ActionRisk
+  expires_at:
+    type: string
+    format: date-time
+    description: >-
+      approval ที่หมดอายุแล้วใช้เดินงานไม่ได้ ต้องขอใหม่
+      งานที่ค้างรออนุมัติจนเลยกำหนดควรเข้าสถานะ timeout ไม่ใช่รอตลอดไป
+  escalation_target:
+    $ref: https://schemas.agent-platform.internal/identity/v1/identity.schema.yaml#/$defs/Principal
+
+guarantees:
+  description: >-
+    🔒 frozen — เป็นของ devfactory-core (RFC-0002)
+    ลดหรือถอนข้อใดข้อหนึ่ง = semantic change ต้องมี RFC ที่ repo นั้นก่อน
+  rules:
+    - "decision เป็น immutable — แก้ไม่ได้หลังบันทึก · การเปลี่ยนใจคือ approval ใบใหม่ที่อ้างใบเดิม"
+    - "ทุก APPROVE ต้อง auditable — ต้องมี event GOVERNANCE_DECISION คู่กันเสมอ"
+    - "execution ที่ไม่มี APPROVE เป็นสิ่งที่ห้าม"
+    - "REQUIRE_CHANGES ไม่ใช่ REJECT — งานยังมีชีวิตและกลับมายื่นใหม่ได้"

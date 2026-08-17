@@ -5,7 +5,7 @@
 | | |
 | --- | --- |
 | Implementation | ยังไม่มี repo · `devfactory-core/packages/governance` เป็นของฝั่ง job |
-| Contracts | [`policy/v1`](../contracts/policy/v1/) · [`profile/v1`](../contracts/profile/v1/) · `approval/` ⏳ |
+| Contracts | [`policy/v1`](../contracts/policy/v1/) · [`profile/v1`](../contracts/profile/v1/) · [`approval/v1`](../contracts/approval/v1/) |
 | ADR | [0010](../decisions/0010-risk-approval-taxonomy.md) · [0006](../decisions/0006-contract-versioning.md) |
 
 ## รับผิดชอบ
@@ -45,4 +45,4 @@ constraint: none | rate_limited | budget_exceeded | quota_exhausted
 
 ## สถานะ
 
-`policy/v1` เขียนแล้วและใช้ได้ทันที · `approval/` ติด `external-authority-pending` รอ [issue #6](https://github.com/monthop-gmail/agent-platform/issues/6)
+`policy/v1` และ [`approval/v1`](../contracts/approval/v1/) เขียนแล้วทั้งคู่ · semantics ของ approval (decision vocabulary + guarantees) เป็นของ `devfactory-core` แก้ที่นี่ไม่ได้ ([ADR-0006](../decisions/0006-contract-versioning.md))

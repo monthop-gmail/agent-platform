@@ -1,0 +1,147 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://schemas.agent-platform.internal/event/v1/event.schema.yaml
+title: Audit Event
+description: >-
+  บันทึกสิ่งที่เกิดขึ้นในระบบแบบ append-only
+
+  **semantics เป็นของ `devfactory-core`** — event vocabulary และ guarantees ในไฟล์นี้
+  แก้ที่นี่ไม่ได้ ต้องมี RFC ที่ repo นั้นก่อน (RFC-0005 Rule 2)
+  ส่วนชื่อ field, type, โครงสร้างและ versioning เป็นของ `agent-platform` (Rule 1)
+
+derived_from:
+  repo: monthop-gmail/devfactory-core
+  manifest: contract-semantics.yaml
+  semantics_version: "1.0"
+  rfcs:
+    - rfcs/0003-audit-event-log-schema.md
+    - rfcs/0008-external-event-intake.md
+  license: MIT
+  # ตรวจ drift โดยเทียบ semantics_version ไม่ใช่ SHA ของไฟล์ RFC
+
+$defs:
+  EventType:
+    description: >-
+      🔒 frozen — vocabulary เป็นของ devfactory-core
+      event type ใหม่ที่ไม่อยู่ในลิสต์นี้ = semantic change ต้องมี RFC ที่ repo นั้นก่อน
+    enum:
+      - JOB_CREATED
+      - STATE_TRANSITION
+      - GOVERNANCE_DECISION
+      - TASK_ASSIGNED
+      - EXECUTION_STARTED
+      - EXECUTION_FAILED
+      - JOB_COMPLETED
+
+  SubjectType:
+    description: >-
+      สิ่งที่ event นี้พูดถึง — enum และชื่อ field เป็นของ agent-platform
+      ส่วนกฎที่ว่า "ทุก event ต้องตอบได้ว่าเกี่ยวกับอะไร" เป็นของ devfactory-core
+    enum: [job, execution, step, agent, tool_call, artifact, approval, external]
+
+type: object
+required: [event_id, event_type, tenant_id, subject_type, subject_id, occurred_at, source]
+properties:
+  event_id:
+    $ref: https://schemas.agent-platform.internal/identity/v1/identity.schema.yaml#/$defs/Id
+  event_type:
+    $ref: '#/$defs/EventType'
+
+  tenant_id:
+    $ref: https://schemas.agent-platform.internal/identity/v1/identity.schema.yaml#/$defs/TenantId
+    description: >-
+      🔒 invariant — event ที่ resolve tenant ไม่ได้ ให้ **reject ที่ intake ห้ามเดา tenant ให้**
+  workspace_id:
+    $ref: https://schemas.agent-platform.internal/identity/v1/identity.schema.yaml#/$defs/WorkspaceId
+    description: optional เฉพาะ event ระดับ tenant ตาม ADR-0007
+
+  subject_type:
+    $ref: '#/$defs/SubjectType'
+  subject_id:
+    $ref: https://schemas.agent-platform.internal/identity/v1/identity.schema.yaml#/$defs/Id
+
+  job_id:
+    $ref: https://schemas.agent-platform.internal/identity/v1/identity.schema.yaml#/$defs/Id
+    description: >-
+      **optional ใน schema — ไม่ optional ในพฤติกรรม**
+      event ที่ `devfactory-core` ส่งออกโดยไม่มี `job_id` เป็น defect
+      การไม่มีค่าใช้ได้เฉพาะ event ที่ไม่ได้เกิดจาก job จริง ๆ (sighting, geofence, observer)
+
+      🔒 invariant — **ห้ามสร้าง `job_id` ปลอมหรือ default ให้ event ที่ไม่มี job · ไม่มีคือไม่มี**
+
+      `job_id` กับ `subject_id` ไม่ซ้ำกัน — `job_id` คือสายเหตุ (งานแม่)
+      ส่วน `subject_id` คือหัวเรื่อง · `EXECUTION_STARTED` มี subject เป็น execution
+      แต่ `job_id` เป็น job ที่มันสังกัด
+  execution_id:
+    $ref: https://schemas.agent-platform.internal/identity/v1/identity.schema.yaml#/$defs/ExecutionId
+  agent_id:
+    $ref: https://schemas.agent-platform.internal/identity/v1/identity.schema.yaml#/$defs/AgentId
+  actor:
+    $ref: https://schemas.agent-platform.internal/identity/v1/identity.schema.yaml#/$defs/Principal
+  correlation_id:
+    $ref: https://schemas.agent-platform.internal/identity/v1/identity.schema.yaml#/$defs/Id
+    description: ผูก event ที่เป็นงานเดียวกันข้าม service — `job_id` ทำแทนไม่ได้
+
+  occurred_at:
+    type: string
+    format: date-time
+  source:
+    type: object
+    description: >-
+      🔒 invariant — external event ต้องคง source ไว้ให้รู้ตลอดไปว่ามาจากข้างนอก
+    required: [kind]
+    properties:
+      kind:
+        enum: [internal, external]
+      system:
+        type: string
+        description: "ระบบต้นทางเมื่อ `kind: external` เช่น `navi-ims`"
+
+  transition:
+    type: object
+    description: ใช้กับ `STATE_TRANSITION` — ทุกการเปลี่ยน state ต้องมี event ตัวนี้
+    properties:
+      from: { type: string }
+      to: { type: string }
+      reason: { type: string }
+  policy_result:
+    type: object
+    description: >-
+      บันทึก **ทั้ง `action_risk` และ `authority` ที่ใช้ตัดสิน** ไม่ใช่แค่ผลลัพธ์
+      เพื่อให้ audit ย้อนหลังรู้ว่าตัดสินจากอะไร (ADR-0010)
+    properties:
+      effect:
+        $ref: https://schemas.agent-platform.internal/policy/v1/policy-decision.schema.yaml#/$defs/Effect
+      authority:
+        $ref: https://schemas.agent-platform.internal/policy/v1/policy-decision.schema.yaml#/$defs/Authority
+      action_risk:
+        $ref: https://schemas.agent-platform.internal/capability/v1/capability.schema.yaml#/$defs/ActionRisk
+      policy_id: { type: string }
+  usage:
+    $ref: https://schemas.agent-platform.internal/model/v1/inference.schema.yaml#/$defs/Usage
+  error:
+    $ref: https://schemas.agent-platform.internal/error/v1/error.schema.yaml
+  metadata:
+    type: object
+    description: >-
+      🔒 invariant — **ห้ามเก็บ private reasoning หรือ chain-of-thought เป็น audit record**
+      เก็บ structured metadata แทน
+
+guarantees:
+  description: >-
+    🔒 frozen — เป็นของ devfactory-core (RFC-0003 · RFC-0008)
+    ลดหรือถอนข้อใดข้อหนึ่ง = semantic change ต้องมี RFC ที่ repo นั้นก่อน
+  rules:
+    - "event เป็น append-only — แก้หรือลบไม่ได้"
+    - "no silent state change — ทุกการเปลี่ยน state ต้องมี event"
+    - "ทุก event ต้องตอบได้ว่าเกี่ยวกับอะไร — subject จำเป็นเสมอ ส่วน job_id optional"
+    - "ห้ามสร้าง job_id ปลอมหรือ default ให้ event ที่ไม่มี job"
+    - "event ที่ resolve tenant ไม่ได้ ให้ reject ที่ intake ห้ามเดา tenant ให้"
+    - "external event ต้องคง source ไว้ให้รู้ตลอดไปว่ามาจากข้างนอก"
+    - "ห้ามเก็บ private reasoning / chain-of-thought เป็น audit record"
+    - "trace ที่ไม่มี step ย่อยถือว่าถูกต้อง — execution ที่ไม่มี step event ไม่ได้แปลว่าไม่ได้ทำอะไร"
+
+platform_rules:
+  description: กฎระดับ schema ที่ `agent-platform` เพิ่มเอง — ไม่ใช่ semantics
+  rules:
+    - "ถ้า `subject_type: job` และมี `job_id` ทั้งสองค่าต้องตรงกัน"
+    - "consumer ที่เจอ `event_type` ที่ไม่รู้จักต้องเก็บ event ไว้แล้วข้ามการตีความ ห้าม drop และห้าม fail"

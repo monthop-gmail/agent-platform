@@ -41,7 +41,8 @@ properties:
     description: >-
       งานระดับบนที่ execution นี้สังกัด — optional เพราะไม่ใช่ทุก execution เกิดจาก job
       (chat turn, retrieval, observer event ไม่มี job)
-      ⚠️ ความหมายของ job state ยัง `external-authority-pending` จนกว่า ADR-0006 ownership จะได้ข้อสรุป
+      ความหมายของ job state เป็นของ `devfactory-core` (RFC-0001 amended by RFC-0007) — 13 states
+      terminal คือ COMPLETED · FAILED · CANCELLED · TIMED_OUT · `agent-platform` อ้างอิงได้แต่ redefine ไม่ได้
   execution_mode:
     $ref: '#/$defs/ExecutionMode'
   provider_id:

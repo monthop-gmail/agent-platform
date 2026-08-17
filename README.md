@@ -83,11 +83,11 @@ monthop-gmail/
 
 🔒 **VOCABULARY LOCKED — 2026-08-17** · ADR ทั้งหมด `Accepted` แล้ว ดู [`decisions/`](./decisions)
 
-ยกเว้นข้อเดียว: **ADR-0006 ownership** ยัง `Pending` — `agent-platform` ยังไม่ใช่ canonical owner ของ shared contract จนกว่า Architecture Owner ของ [`devfactory-core`](https://github.com/monthop-gmail/devfactory-core) จะยืนยัน ([issue #6](https://github.com/monthop-gmail/agent-platform/issues/6))
+**ADR-0006 ownership ปิดแล้ว (2026-08-18)** — Architecture Owner ของ [`devfactory-core`](https://github.com/monthop-gmail/devfactory-core) ตอบด้วยทางที่สาม: **แยก semantics (repo ต้นทาง) ออกจาก wire schema (ที่นี่)** ดู [ADR-0006](./decisions/0006-contract-versioning.md)
 
 **[`contracts/` v1 เขียนแล้ว](./contracts)** — `identity` `agent` `capability` `provider` `model` `tool` `mcp` `execution` `policy` `artifact` `error` `profile` · ทั้งหมด validate ผ่าน JSON Schema draft 2020-12 และ cross-ref ระหว่างไฟล์ resolve ครบ
 
-`approval/` และ `event/` **ยังไม่เขียน** — ติดสถานะ `external-authority-pending` เพราะมาจาก RFC ของ `devfactory-core` ที่ authority ยังไม่ย้าย
+`approval/v1` และ `event/v1` เขียนแล้ว — มีบล็อก `derived_from` ที่ pin `semantics_version` ของ [`devfactory-core/contract-semantics.yaml`](https://github.com/monthop-gmail/devfactory-core/blob/main/contract-semantics.yaml) และกำกับ 🔒 ที่ส่วนซึ่งเป็น semantics ของ repo ต้นทาง
 
 **[`profiles/`](./profiles)** — `coding` `security` `knowledge` `enterprise` `workflow` `autonomous` · validate ผ่าน `contracts/profile/v1` ทั้งหมด
 

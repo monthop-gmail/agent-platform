@@ -23,7 +23,7 @@ ADR ในโฟลเดอร์นี้เป็น **authority** ของ�
 | [0003](0003-agent-gateway-boundary.md) | Agent gateway boundary | **A** — `agent-gateway` / `model-gateway` / `agent-fleet` | ✅ Accepted |
 | [0004](0004-agent-vs-model-provider.md) | Agent vs model provider | **A** — Model Provider / Agent Provider / Agent Platform | ✅ Accepted |
 | [0005](0005-agent-runtime-boundary.md) | Agent runtime boundary | **A + C2** — Workflow→Harness→Runtime→Sandbox · native + external ใต้ contract เดียว | ✅ Accepted |
-| [0006](0006-contract-versioning.md) | Contract versioning | **A** versioning · **A2** ownership | ✅ versioning / ⏳ **ownership pending** |
+| [0006](0006-contract-versioning.md) | Contract versioning | **A** versioning · **C2** ownership (แยก semantics / wire schema) | ✅ Accepted |
 | [0007](0007-multi-tenancy.md) | Multi-tenancy | **A** — Tenant → Workspace → Resource | ✅ Accepted |
 | [0008](0008-reference-stack.md) | Reference stack | **A** — tech-neutral (YAML/JSON Schema) | ✅ Accepted |
 | [0009](0009-capability-model.md) | Capability model | **A** — capability / declaration / requirement | ✅ Accepted |
@@ -31,11 +31,11 @@ ADR ในโฟลเดอร์นี้เป็น **authority** ของ�
 
 การเคาะบันทึกไว้ที่ [issue #1–#10](https://github.com/monthop-gmail/agent-platform/issues?q=is%3Aissue+label%3Aadr) — **ไฟล์บันทึกว่าตัดสินอะไร issue บันทึกว่าใครตัดสินและเมื่อไหร่**
 
-### ⏳ สิ่งเดียวที่ยังค้าง — ADR-0006 ownership
+### ✅ ADR-0006 ownership ปิดแล้ว — 2026-08-18
 
-`agent-platform` **ยังไม่ใช่** canonical owner ของ shared contract จนกว่า Architecture Owner ของ [`devfactory-core`](https://github.com/monthop-gmail/devfactory-core) จะยืนยัน — RFC-0001–0004 ที่นั่นยัง `Draft` และ `GOVERNANCE.md` ระบุว่า owner ของ repo นั้นมีอำนาจสุดท้าย
+Architecture Owner ของ [`devfactory-core`](https://github.com/monthop-gmail/devfactory-core) ตอบด้วยทางที่สามที่เราไม่ได้เสนอ: **แยก semantics ออกจาก wire schema** — vocabulary และ guarantees เป็นของ repo ต้นทาง · field name, type, โครงสร้างและ versioning เป็นของที่นี่
 
-ระหว่างรอ: contract ที่อ้าง RFC เหล่านั้น (`contracts/approval/` `contracts/event/` และ state machine) ติดสถานะ **`external-authority-pending`** ส่วน contract อื่นเดินได้ตามปกติ ดู [issue #6](https://github.com/monthop-gmail/agent-platform/issues/6)
+`contracts/approval/v1` และ `contracts/event/v1` เขียนแล้ว พร้อมบล็อก `derived_from` ที่ pin `semantics_version` — **ไม่มี ADR ใดค้างอยู่อีก**
 
 ## ศัพท์ที่ lock แล้ว
 

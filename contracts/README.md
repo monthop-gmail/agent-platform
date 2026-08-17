@@ -20,12 +20,22 @@ canonical schema ที่ทุก repo ใน ecosystem ต้องใช้�
 | [`artifact/v1`](artifact/v1/) | `artifact.schema.yaml` | ✅ v1 | — |
 | [`error/v1`](error/v1/) | `error.schema.yaml` | ✅ v1 | — |
 | [`profile/v1`](profile/v1/) | `profile.schema.yaml` | ✅ v1 | — (เพิ่มนอกลิสต์ P0 เดิม) |
-| [`approval/`](approval/) | — | ⏳ **external-authority-pending** | [0006](../decisions/0006-contract-versioning.md) |
-| [`event/`](event/) | — | ⏳ **external-authority-pending** | [0006](../decisions/0006-contract-versioning.md) |
+| [`approval/v1`](approval/v1/) | `approval.schema.yaml` | ✅ v1 · 🔗 derived | [0006](../decisions/0006-contract-versioning.md) |
+| [`event/v1`](event/v1/) | `event.schema.yaml` | ✅ v1 · 🔗 derived | [0006](../decisions/0006-contract-versioning.md) |
 
 `profile/v1` เป็น contract ที่เพิ่มเข้ามานอกลิสต์ P0 เดิมเพื่อรองรับ [`profiles/`](../profiles) — เพิ่ม contract ใหม่ไม่ใช่ breaking change แต่บันทึกไว้ให้ชัดว่าเป็นการขยายขอบเขต
 
-`approval/` และ `event/` รอ agreement จาก Architecture Owner ของ `devfactory-core` — ไม่ใช่เพราะยังไม่พร้อม แต่เพราะยังไม่มีสิทธิ์ ดู [issue #6](https://github.com/monthop-gmail/agent-platform/issues/6)
+### 🔗 Derived contracts
+
+`approval/v1` และ `event/v1` **derive semantics มาจาก `devfactory-core`** ตาม [ADR-0006 C2](../decisions/0006-contract-versioning.md) — เราเป็นเจ้าของ *รูปร่างบน wire* เขาเป็นเจ้าของ *ความหมาย*
+
+| ห้ามแก้ที่นี่ (ต้องมี RFC ที่ต้นทางก่อน) | แก้ที่นี่ได้เลย |
+| --- | --- |
+| decision vocabulary · event vocabulary · guarantees · invariants — ส่วนที่กำกับ 🔒 | field name · type · โครงสร้าง · `$ref` · version · field ระดับ platform |
+
+ทั้งสองไฟล์มีบล็อก `derived_from` ที่ pin `semantics_version` ของ [`contract-semantics.yaml`](https://github.com/monthop-gmail/devfactory-core/blob/main/contract-semantics.yaml) — **pin `semantics_version` ไม่ใช่ commit SHA** เพราะ RFC เป็น prose การแก้คำผิดจะปลุก alarm โดยไม่มีอะไร drift จริง
+
+`semantics_version` ที่ไม่ตรงกับต้นทาง = out of conformance ไม่ว่า `CHANGELOG.md` จะเขียนว่าอะไร · ตอนนี้ตรวจด้วยคนตอนแก้ contract ยังไม่ทำ CI ([เหตุผลใน ADR-0006](../decisions/0006-contract-versioning.md))
 
 ## กติกา
 
