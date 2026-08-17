@@ -6,7 +6,7 @@
 
 ## ⚠️ repo นี้ไม่ implement
 
-repo นี้มีหน้าที่ **คุมภาพรวมและปรับปรุงโครง module** เท่านั้น — เก็บ architecture, module boundary, contract และ decision record
+repo นี้มีหน้าที่ **คุมภาพรวมและเป็นเจ้าของ contract** เท่านั้น — เก็บ architecture, plane boundary, contract และ decision record
 
 **code จริงอยู่ใน product/application repo** ที่ consume platform นี้ (ดู [Ecosystem](#ecosystem))
 ถ้าจะเพิ่ม service, build tooling หรือ implementation ใด ๆ ให้ไปที่ repo ปลายทาง ไม่ใช่ที่นี่
@@ -19,27 +19,26 @@ repo นี้มีหน้าที่ **คุมภาพรวมและ
 | [`profiles/`](./profiles) | ชุด config ต่อประเภทงาน — instance ของ `contracts/profile/v1` | ✅ ผูกพัน |
 | [`decisions/`](./decisions) | ADR ระดับ ecosystem — ศัพท์และขอบเขตที่ตกลงกันแล้ว | ✅ ผูกพัน |
 | [`architecture/`](./architecture) | คำอธิบาย, mapping, ผลวิเคราะห์ repo อื่น | 📄 อธิบาย |
+| [`planes/`](./planes) | นิยามขอบเขตของแต่ละ plane | 📄 อธิบาย |
 | [`ref/`](./ref) | บันทึกดิบตามเวลา ขัดกันเองได้ | ❌ ไม่ผูกพัน |
-| module dirs ด้านล่าง | นิยามขอบเขตของแต่ละ plane | 📄 อธิบาย |
 
-module dirs ด้านล่างจะย้ายไป `planes/` หลัง `contracts/` นิ่ง — ดู [module mapping](./architecture/module-mapping.md)
+## Planes
 
-## Modules
+[`planes/`](./planes) เก็บ **นิยามขอบเขต** ของแต่ละ plane — ไม่ใช่ code
 
-แต่ละ directory เก็บ **นิยามขอบเขต** ของ module นั้น ไม่ใช่ code
-
-| Module | หน้าที่ |
+| Plane | หน้าที่ |
 | --- | --- |
-| [`backend-os`](./backend-os) | ชั้น OS ของ backend — core services, data plane, integration กับ enterprise system |
-| [`agent-gateway`](./agent-gateway) | ทางเข้าเดียวของทุก agent traffic — auth, routing, rate limit, quota |
-| [`agent-runtime`](./agent-runtime) | ที่ agent รันจริง — loop, state, memory, lifecycle |
-| [`agent-harness`](./agent-harness) | harness สำหรับ test / eval / benchmark agent |
-| [`tool-registry`](./tool-registry) | catalog ของ tool ที่ agent เรียกได้ พร้อม schema และ versioning |
-| [`policy-engine`](./policy-engine) | governance — permission, guardrail, approval, audit rule |
-| [`knowledge`](./knowledge) | ingestion, index และ retrieval ของ enterprise knowledge |
-| [`workflow`](./workflow) | orchestration ของงานหลายขั้น / หลาย agent |
-| [`sandbox`](./sandbox) | execution environment ที่ isolate สำหรับ code และ tool ที่ไม่น่าเชื่อถือ |
-| [`observability`](./observability) | trace, metric, log, cost และ replay ของทุก agent run |
+| [`gateway`](./planes/gateway.md) | ทางเข้า inbound — auth, policy check, quota, audit |
+| [`runtime`](./planes/runtime.md) | agent loop, state, lifecycle — native + external provider |
+| [`harness`](./planes/harness.md) | execution policy — บังคับลำดับขั้นภายในหนึ่งงาน |
+| [`evals`](./planes/evals.md) | สนามทดสอบ — scenario, evaluator, regression |
+| [`tools`](./planes/tools.md) | catalog ของ tool + MCP registration |
+| [`policy`](./planes/policy.md) | ทำได้ไหม และต้องให้ใครอนุมัติ |
+| [`knowledge`](./planes/knowledge.md) | ingest, retrieval, citation, ACL |
+| [`workflow`](./planes/workflow.md) | orchestration ข้ามขั้น ข้าม agent |
+| [`sandbox`](./planes/sandbox.md) | ที่ที่ command และ code รันจริง |
+| [`observability`](./planes/observability.md) | trace, audit, cost, replay |
+| [`backend-os`](./planes/backend-os.md) | data plane, connector, บ้านของ native runtime |
 
 ## Architecture
 
@@ -92,7 +91,7 @@ monthop-gmail/
 
 **[`profiles/` 6 ตัว](./profiles)** — `coding` `security` `knowledge` `enterprise` `workflow` `autonomous` · validate ผ่าน `contracts/profile/v1` ทั้งหมด
 
-ถัดไป: ย้าย module ไป `planes/` ตาม [module mapping](./architecture/module-mapping.md)
+**[`planes/` 11 ตัว](./planes)** — ย้ายจาก module dirs เดิมตาม [module mapping](./architecture/module-mapping.md) เรียบร้อย (`agent-harness` แยกเป็น `harness` + `evals`)
 
 การสื่อสารข้ามทีมใช้ GitHub: **issue** สำหรับเคาะ ADR และขอแก้ contract · **PR** สำหรับรีวิว (comment ที่บรรทัด ไม่ใช่เขียนเรียงความ) · **milestone** สำหรับดูว่าติดเฟสไหน
 
@@ -102,7 +101,7 @@ monthop-gmail/
 - [`contracts/`](./contracts) · [`profiles/`](./profiles) — canonical schema และ config ต่อประเภทงาน
 - [`architecture/platform-architecture.md`](./architecture/platform-architecture.md) — canonical diagram (`Accepted`)
 - [`architecture/consumers.md`](./architecture/consumers.md) — ทะเบียน consumer และสถานะ conformance
-- [`architecture/module-mapping.md`](./architecture/module-mapping.md) — module ปัจจุบัน → โครงเป้าหมาย (ยังไม่ย้าย)
+- [`architecture/module-mapping.md`](./architecture/module-mapping.md) — บันทึกการย้าย module เดิม → `planes/` และ `contracts/`
 - [`architecture/devfactory-core-rfc-extraction.md`](./architecture/devfactory-core-rfc-extraction.md) — ดึง RFC ของ `devfactory-core` มาเป็น canonical contract อะไรได้แค่ไหน
 - [`ref/`](./ref) — บันทึกดิบ พร้อมสารบัญและตารางข้อขัดแย้งที่รู้แล้ว
 - [`ref/existing-repos.md`](./ref/existing-repos.md) — inventory ของ repo ที่มีอยู่จริง

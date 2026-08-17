@@ -2,9 +2,10 @@
 
 **Phase 5 ของ [decisions-first plan](../ref/agent-platform-decisions-first-plan.md)** — map 10 module ที่มีอยู่จริงไปยังโครงเป้าหมาย **ก่อน** จะ rename อะไร
 
-> ✅ **ADR ที่ blocking ถูก Accept ครบแล้วเมื่อ 2026-08-17** — mapping นี้พร้อมลงมือ แต่ยังไม่ย้ายจนกว่า `contracts/` P0 จะนิ่ง เพื่อย้ายทีเดียวไม่ต้องแก้ link สองรอบ
+> ✅ **ย้ายเสร็จแล้วเมื่อ 2026-08-17** — เอกสารนี้กลายเป็น **บันทึกการย้าย** ไม่ใช่แผนอีกต่อไป
+> module dirs 10 ตัวที่ root ไม่มีแล้ว · ปลายทางอยู่ที่ [`planes/`](../planes) และ [`contracts/`](../contracts)
 
-## 10 module ที่มีอยู่จริง
+## 10 module เดิม (ก่อนย้าย)
 
 อ่านจาก tree จริงของ repo (ไม่ใช่จาก diagram ใน README — [`ref/agent-platform-contract-review.md`](../ref/agent-platform-contract-review.md) อ่านจาก diagram จึงเห็นแค่ 7 ตัวและชื่อไม่ตรง)
 
@@ -13,7 +14,7 @@ backend-os/  agent-gateway/  agent-runtime/  agent-harness/  tool-registry/
 policy-engine/  knowledge/  workflow/  sandbox/  observability/
 ```
 
-ทั้ง 10 ตัวมีแค่ `README.md` ที่ระบุ scope — ยังไม่มี code
+ทั้ง 10 ตัวมีแค่ `README.md` ที่ระบุ scope — ย้ายด้วย `git mv` เพื่อรักษา history ของแต่ละไฟล์
 
 ## โครงเป้าหมาย
 
@@ -66,8 +67,35 @@ agent-platform/
 2. Accept ADR-0002/0003         ✅ 2026-08-17  → ชื่อ gateway/repo นิ่ง
 3. Accept ADR-0004/0005/0009    ✅ 2026-08-17  → 🔒 vocabulary gate ผ่าน
 4. Accept ADR-0006/0007/0010    ✅ 2026-08-17  → versioning ✅ / ownership ⏳ · tenancy · risk
-5. สร้าง contracts/ P0          ← ขั้นตอนปัจจุบัน
-6. ค่อย git mv 10 module        → ทำครั้งเดียว ไม่ต้องแก้ซ้ำ
+5. สร้าง contracts/ P0          ✅ 2026-08-17  → 12 contract · 16 schema
+6. git mv 10 module → planes/  ✅ 2026-08-17  → ทำครั้งเดียว ไม่ต้องแก้ซ้ำ
 ```
 
-**เหตุผลที่ยังไม่ `git mv` ตอนนี้:** ปลายทางของหลายแถวคือ `contracts/*` ซึ่งยังไม่ถูกสร้าง ถ้าย้ายก่อนจะต้องย้ายอีกรอบเมื่อ contract จริงลงที่ และ link ใน `ref/` กับ README จะเสียสองครั้ง — ย้ายหลัง `contracts/` P0 นิ่งแล้วทีเดียว
+**เหตุผลที่รอถึงขั้นที่ 5 ก่อนย้าย:** ปลายทางของหลายแถวคือ `contracts/*` — ถ้าย้ายก่อนจะต้องย้ายอีกรอบเมื่อ contract จริงลงที่ และ link ใน `ref/` กับ README จะเสียสองครั้ง
+
+## ผลการย้าย — 2026-08-17
+
+ย้ายด้วย `git mv` ทั้ง 10 ไฟล์เพื่อรักษา history แล้วเขียนเนื้อหาใหม่ตามขอบเขตที่ ADR กำหนด
+
+| เดิม | ตอนนี้ |
+| --- | --- |
+| `backend-os/README.md` | [`planes/backend-os.md`](../planes/backend-os.md) |
+| `agent-gateway/README.md` | [`planes/gateway.md`](../planes/gateway.md) |
+| `agent-runtime/README.md` | [`planes/runtime.md`](../planes/runtime.md) |
+| `agent-harness/README.md` | [`planes/harness.md`](../planes/harness.md) + [`planes/evals.md`](../planes/evals.md) *(split)* |
+| `tool-registry/README.md` | [`planes/tools.md`](../planes/tools.md) |
+| `policy-engine/README.md` | [`planes/policy.md`](../planes/policy.md) |
+| `knowledge/README.md` | [`planes/knowledge.md`](../planes/knowledge.md) |
+| `workflow/README.md` | [`planes/workflow.md`](../planes/workflow.md) |
+| `sandbox/README.md` | [`planes/sandbox.md`](../planes/sandbox.md) |
+| `observability/README.md` | [`planes/observability.md`](../planes/observability.md) |
+
+### ที่ต่างจากแผน
+
+ตารางแผนด้านบนระบุปลายทางของ `tool-registry/` และ `policy-engine/` ไว้แค่ `contracts/*` โดยไม่มี plane doc — **ตอนลงมือได้สร้าง plane doc ให้ทั้งคู่** (`planes/tools.md` · `planes/policy.md`)
+
+เหตุผล: ทั้งสองมี implementation ที่ต้องมีคนทำจริง (registry service, policy engine) การมีแต่ contract โดยไม่มีเอกสารขอบเขตจะทำให้ไม่มีที่บันทึกว่า "ใครทำ และห้ามทำอะไร" ซึ่งเป็นหน้าที่ของ Plane Boundary Documentation
+
+### ที่ยังไม่ได้ทำ
+
+`contracts/gateway/` ที่ตารางแผนระบุไว้ **ยังไม่ได้เขียน** — ไม่อยู่ในลิสต์ P0 ที่ตกลงกันไว้ การเพิ่มต้องผ่าน [issue contract-change](https://github.com/monthop-gmail/agent-platform/issues/new/choose) บันทึกไว้ใน [`planes/gateway.md`](../planes/gateway.md) แล้ว
