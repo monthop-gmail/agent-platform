@@ -33,6 +33,7 @@
 | [`agent-platform-adr-review-2.md`](agent-platform-adr-review-2.md) | รีวิวรอบสอง (9.1/10) — **approve architecture direction** · เหลือ 3 งานก่อนเปิด `contracts/`: README consistency, capability first-class, conformance เป็นข้อกำหนด + เสนอ canonical architecture diagram |
 | [`agent-platform-adr-review-3.md`](agent-platform-adr-review-3.md) | รีวิวรอบสาม (9.5/10) — **architecture review ผ่าน** · สั่งหยุดเพิ่ม ADR แล้วเข้า Decision Gate + **มีตัวเลือกที่แนะนำครบทั้ง 10 ADR** |
 | [`agent-platform-pr11-review.md`](agent-platform-pr11-review.md) | รีวิว PR #11 (9.7/10) — **ผ่าน architecture review** · approve การไม่เขียน `approval/` + `event/` ว่าเป็น *governance-preserving omission* · สั่งหยุดออกแบบ แล้วไปทดสอบ contract กับ repo ลูกจริง |
+| [`rfc-0009-vocabulary-extension.md`](rfc-0009-vocabulary-extension.md) | **RFC-0009 + PR #13** (2026-08-18) — แก้ Rule 2: เพิ่ม event type เป็น additive · เพิ่ม decision type ยัง semantic · `semantics_version` 1.0 → 1.1 (การใช้งานจริงครั้งแรกของกลไก drift) |
 | [`agent-platform-adr-decisions.md`](agent-platform-adr-decisions.md) | **ชุด Decision ที่เคาะจาก Platform Owner** ครบ 10 ADR + Authority · แยกสถานะ ADR-0006 เป็น versioning `ACCEPTED` / ownership `PENDING` (ติด devfactory-core) และแผนเดินต่อโดยไม่รอ #6 |
 
 ### repo ที่มีอยู่จริงแล้ว
