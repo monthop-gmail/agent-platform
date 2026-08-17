@@ -14,7 +14,7 @@ description: >-
 derived_from:
   repo: monthop-gmail/devfactory-core
   manifest: contract-semantics.yaml
-  semantics_version: "1.0"
+  semantics_version: "1.1"
   rfcs:
     - rfcs/0002-governance-decision-contract.md
   license: MIT
@@ -24,8 +24,14 @@ derived_from:
 $defs:
   Decision:
     description: >-
-      🔒 frozen — vocabulary เป็นของ devfactory-core
+      🔒 frozen · **ชุดปิด** — vocabulary เป็นของ devfactory-core
       เพิ่ม ลบ หรือเปลี่ยนชื่อค่าใดค่าหนึ่ง = semantic change ต้องมี RFC ที่ repo นั้นก่อน
+
+      **การเพิ่มค่ายังเป็น semantic change ที่นี่ ต่างจาก `event/v1` `$defs.EventType`
+      ซึ่ง RFC-0009 เปิดให้เพิ่มได้** — ความต่างเป็นเจตนา ไม่ใช่ความไม่สม่ำเสมอ:
+      outcome ของการอนุมัติแบบใหม่ เช่น `AUTO_APPROVE` หรือ `APPROVE_WITH_CONDITIONS`
+      ที่ไม่มีใครตรวจ condition **เปิดทางให้ execution เดินโดยไม่มี APPROVE ของคนได้
+      ด้วยการเพิ่มค่า ไม่ใช่การลบค่า** ซึ่งเป็นข้อ 6 ของ Rule 2 เอง
     enum:
       - APPROVE
       - REJECT

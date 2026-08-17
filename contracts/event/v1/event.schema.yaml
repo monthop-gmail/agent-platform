@@ -11,18 +11,29 @@ description: >-
 derived_from:
   repo: monthop-gmail/devfactory-core
   manifest: contract-semantics.yaml
-  semantics_version: "1.0"
+  semantics_version: "1.1"
   rfcs:
     - rfcs/0003-audit-event-log-schema.md
     - rfcs/0008-external-event-intake.md
+    - rfcs/0009-vocabulary-extension.md
   license: MIT
   # ตรวจ drift โดยเทียบ semantics_version ไม่ใช่ SHA ของไฟล์ RFC
 
 $defs:
   EventType:
     description: >-
-      🔒 frozen — vocabulary เป็นของ devfactory-core
-      event type ใหม่ที่ไม่อยู่ในลิสต์นี้ = semantic change ต้องมี RFC ที่ repo นั้นก่อน
+      🔓 **ชุดเปิด** — 7 ค่านี้คือ *ขั้นต่ำที่ต้องมี* ไม่ใช่ชุดทั้งหมด
+      (devfactory-core RFC-0009 · `semantics_version: "1.1"`)
+
+      **เพิ่ม event type ใหม่ = additive** — `agent-platform` ทำได้เองผ่าน ADR ที่นี่
+      ไม่ต้องมี RFC ที่ต้นทาง เพราะ event type ใหม่คือสิ่งที่สังเกตเพิ่ม
+      ลดทอน guarantee ข้อใดไม่ได้
+
+      🔒 **ลบ · เปลี่ยนชื่อ · เปลี่ยนความหมาย ของ 7 ค่านี้ = semantic change**
+      ต้องมี RFC ที่ devfactory-core ก่อน
+
+      ต่างจาก `approval/v1` `$defs.Decision` ซึ่งยังเป็นชุดปิด — ที่นั่นการเพิ่มค่า
+      เปิดทางให้ execution เดินโดยไม่มี APPROVE ของคนได้ ที่นี่เพิ่มไม่ได้ทำแบบนั้น
     enum:
       - JOB_CREATED
       - STATE_TRANSITION

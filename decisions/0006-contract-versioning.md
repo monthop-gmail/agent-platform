@@ -222,7 +222,9 @@ ADR นี้มี **2 การตัดสินใจ** ที่เคา�
 ### กฎ 5 ข้อที่ทำให้เส้นแบ่งอยู่ได้
 
 1. **field ระดับ platform เพิ่มได้เอง** — `tenant_id` `workspace_id` `execution_id` `agent_id` `correlation_id` `policy_id` `expires_at` `action_risk` `escalation_target` cost attribution · ผ่าน ADR ฝั่งนี้อย่างเดียว ไม่ต้องมี RFC ที่ต้นทาง
-2. **semantic change ต้องมี RFC ที่ต้นทางก่อน** — 5 ประเภท: เพิ่ม/ลบ/เปลี่ยนชื่อ decision หรือ event type · ลดหรือถอน guarantee · เปลี่ยน field ที่มีความหมายจาก required ↔ optional · เปลี่ยนความหมายของ decision/event/state ที่มีอยู่ · เปิดทางให้ execution เดินได้โดยไม่มี `APPROVE`
+2. **semantic change ต้องมี RFC ที่ต้นทางก่อน** — **แก้เมื่อ 2026-08-18 ตาม [RFC-0009](https://github.com/monthop-gmail/devfactory-core/blob/main/rfcs/0009-vocabulary-extension.md) · ดูหัวข้อ "Rule 2 — เพิ่ม event type เป็น additive" ด้านล่าง**
+   6 ประเภท: ลบ/เปลี่ยนชื่อ/เปลี่ยนความหมาย decision หรือ event type ที่มีอยู่ · **เพิ่ม decision type** · ลดหรือถอน guarantee · เปลี่ยน field ที่มีความหมายจาก required ↔ optional · เปลี่ยนความหมายของ decision/event/state ที่มีอยู่ · เปิดทางให้ execution เดินได้โดยไม่มี `APPROVE`
+   → **เพิ่ม event type ไม่อยู่ในลิสต์** เป็น additive ภายใต้ Rule 1
 3. **ทุก derived contract ต้องมี `derived_from`** — ดูหัวข้อถัดไป
 4. **ไม่มี schema ขนานที่ต้นทาง** — repo ต้นทาง consume schema ที่ publish แล้วตรง ๆ · RFC ของเขาเป็น intent spec ไม่ใช่ wire format
 5. **escalation ชัด** — semantics ตัดสินสุดท้ายที่ Architecture Owner ของ repo ต้นทาง · schema shape กับ versioning ตัดสินสุดท้ายที่ `agent-platform` · ไม่มีใครตัดสินครึ่งของอีกฝ่ายได้เอง
@@ -240,12 +242,44 @@ RFC-0005 Rule 3 ฉบับแรกให้ pin commit SHA ของไฟล
 derived_from:
   repo: monthop-gmail/devfactory-core
   manifest: contract-semantics.yaml
-  semantics_version: "1.0"
+  semantics_version: "1.1"
   rfcs: [rfcs/0002-governance-decision-contract.md]
   license: MIT
 ```
 
 contract ที่ `derived_from` ชี้ไปยัง `semantics_version` ที่ไม่ตรงกับต้นทางแล้ว = **out of conformance** ไม่ว่า `CHANGELOG.md` จะเขียนว่าอะไร
+
+### Rule 2 — เพิ่ม event type เป็น additive · แก้ 2026-08-18
+
+Rule 2 ฉบับแรกรวมคำว่า **เพิ่ม** ไว้กับ ลบ/เปลี่ยนชื่อ ทำให้ event type ใหม่ที่ repo อื่นต้องการต้องผ่าน RFC ที่ `devfactory-core` ก่อน
+
+ปัญหาที่ทีมยกขึ้นมา และเรารับ:
+
+```text
+navi-security-agent อยากได้ event type สำหรับ sighting
+enterprise-knowledge อยากได้ event type สำหรับ ACL-aware retrieval
+              ↓
+   ต้องผ่าน RFC cycle + majority maintainer vote ของ devfactory-core
+              ↓
+   vocabulary ที่ Dev Factory ไม่ได้ใช้ ถูก gate โดย Dev Factory
+```
+
+`devfactory-core` เห็นด้วยและออก [RFC-0009](https://github.com/monthop-gmail/devfactory-core/blob/main/rfcs/0009-vocabulary-extension.md) แก้ Rule 2 ให้
+
+**หลักฐานว่ากฎเดิมขัดกับ schema ที่เราเขียนเอง** — `event/v1` `platform_rules` ระบุว่า *"consumer ที่เจอ `event_type` ที่ไม่รู้จักต้องเก็บ event ไว้แล้วข้ามการตีความ ห้าม drop และห้าม fail"* · contract ที่สอนวิธีรับมือ event type ที่ไม่รู้จัก คือ contract ที่คาดว่า enum จะโต
+
+| | เพิ่มค่าใหม่ | ลบ · เปลี่ยนชื่อ · เปลี่ยนความหมาย |
+| --- | --- | --- |
+| `event/v1` `EventType` | ✅ **additive** — ADR ที่นี่พอ | 🔒 semantic — RFC ที่ต้นทาง |
+| `approval/v1` `Decision` | 🔒 **semantic** — RFC ที่ต้นทาง | 🔒 semantic — RFC ที่ต้นทาง |
+
+**ความไม่สมมาตรเป็นเจตนา** — event type ใหม่คือสิ่งที่สังเกตเพิ่ม ลดทอน guarantee ไม่ได้ · แต่ decision outcome ใหม่อย่าง `AUTO_APPROVE` หรือ `APPROVE_WITH_CONDITIONS` ที่ไม่มีใครตรวจ condition เปิดทางให้ execution เดินโดยไม่มี `APPROVE` ของคนได้ **ด้วยการเพิ่มค่า ไม่ใช่ลบค่า** ซึ่งเป็นข้อสุดท้ายของ Rule 2 เอง
+
+7 event type เดิมกลายเป็น **ขั้นต่ำที่ต้องมี** ไม่ใช่ชุดปิด · guarantee ทั้ง 8 ข้อไม่ขยับ
+
+`semantics_version` ที่ต้นทางขยับ `1.0` → `1.1` · `derived_from` ของทั้ง `approval/v1` และ `event/v1` อัปเดตตามใน PR เดียวกันนี้ — เป็นการใช้กลไก drift จริงครั้งแรกและมันทำงานตามที่ออกแบบ
+
+**เพิ่มอนุประโยคเรื่อง breaking:** การลดหรือถอน guarantee ถือเป็น breaking change เสมอ **แม้ wire format จะยัง compatible** — schema อยู่ได้โดยที่ความหมายข้างใต้เปลี่ยนไปแล้ว เคสนั้นต้องไม่หลุดผ่านไปในฐานะ additive
 
 ### ตอบคำถามที่ต้นทางถามกลับ
 
