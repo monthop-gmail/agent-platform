@@ -29,6 +29,7 @@
 | --- | --- |
 | [`agent-platform-contract-review.md`](agent-platform-contract-review.md) | รีวิวโครง repo นี้ (7.5/10) + ตาราง P0/P1/P2 + เสนอ `contracts/` |
 | [`agent-platform-decisions-first-plan.md`](agent-platform-decisions-first-plan.md) | แผน Phase 0–5 ที่กำลังทำตามอยู่ + ADR 8 ตัว + DoD ของ repo นี้ |
+| [`agent-platform-adr-review.md`](agent-platform-adr-review.md) | รีวิวหลังทำ Phase 0–1 (8.8/10) + **5 จุดที่ต้องแก้ก่อน Accept ADR** — เพิ่ม `contracts/capability/`, แยก provider entity/registry, ทบทวน runtime loop, กติกา conformance, นิยาม `modules/` |
 
 ### repo ที่มีอยู่จริงแล้ว
 
