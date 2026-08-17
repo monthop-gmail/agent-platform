@@ -119,14 +119,58 @@ patrol_geolocation/controllers/geolocation_api.py
 
 ---
 
+## `ai-web-harness`
+
+<https://github.com/monthop-gmail/ai-web-harness>
+
+> PoC: Harness that enforces a web-build workflow (requirement → design → implement → test → review → fix) while leaving room for model creativity. Themes: swiss / brutalist / editorial / japanese / playful.
+
+* public · default branch `main` · Astro · MIT · push ล่าสุด 2026-08-14
+
+```text
+ai-web-harness/
+├── CLAUDE.md
+├── docs/architecture.md
+├── harness/
+│   ├── checks/          (ยังว่าง)
+│   └── workflow/        (ยังว่าง)
+├── skills/
+│   ├── frontend/ · visual-qa/ · web-design/   (ยังว่าง)
+├── themes/
+│   └── swiss/ brutalist/ editorial/ japanese/ playful/   (ยังว่าง)
+├── tests/
+│   ├── functional/ · visual/   (ยังว่าง)
+├── app/
+│   └── pages/index.astro
+├── ref/
+│   ├── 2026-08-14-ai-web-harness-plan-raw.md
+│   └── 2026-08-14-claude-code-prompt-milestones-raw.md
+├── docker-compose.yml · Dockerfile · nginx.conf
+└── astro.config.mjs
+```
+
+**สถานะจริง:** ยังเป็น scaffold — โครง directory ครบแต่ส่วนใหญ่เป็น `.gitkeep` ของที่มีเนื้อจริงคือ `CLAUDE.md`, `docs/architecture.md`, `README.md`, `app/pages/index.astro` และ raw docs ใน `ref/`
+
+### สิ่งที่ใช้ได้เลย
+
+* **แพตเทิร์น `ref/` แบบมี date prefix** — `YYYY-MM-DD-<topic>-raw.md` ควรเอามาใช้กับ `ref/` ของ repo นี้ด้วย จะได้เรียงตามเวลาและรู้ว่าอันไหน raw
+* `harness/workflow` + `harness/checks` = โครงของ execution policy ที่ blueprint อื่นเรียกว่า harness
+* `skills/` = แพตเทิร์นเดียวกับ Claude Code skills
+
+**ข้อควรระวัง:** repo นี้เป็น harness **เฉพาะงาน web build** ไม่ใช่ `agent-harness` กลางตามไฟล์ naming convention — blueprint ฝั่ง OAuth gateway §17 ก็ระบุชัดว่า `ai-web-harness` ทำ orchestration/workflow ส่วน gateway ทำ auth/routing คนละชั้นกัน
+
+---
+
 ## สรุปสถานะ ref หลังเพิ่มไฟล์นี้
 
 | Core repo | ref |
 | --- | --- |
 | `agent-backend-os` | ✅ blueprint |
 | `agent-gateway` | ⚠️ ยังไม่มีของตัวเอง (inbound/outbound ชื่อชนกัน) |
-| `agent-harness` | ❌ ยังไม่มี |
+| `agent-harness` | ⚠️ ยังไม่มีตัวกลาง — มี `ai-web-harness` (web เท่านั้น) + adapter framework ใน blueprint distributed gateway |
 | `enterprise-knowledge` | ✅ blueprint |
 | `devfactory-core` | ✅ ของจริง (ไฟล์นี้) |
 | `navi-ims` | ✅ ของจริง (ไฟล์นี้) |
 | `navi-security-agent` | ✅ blueprint |
+
+repo ที่มีอยู่จริงแล้ว 3 ตัว: `devfactory-core` · `navi-ims` · `ai-web-harness`
