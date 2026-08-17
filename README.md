@@ -11,6 +11,17 @@ repo นี้มีหน้าที่ **คุมภาพรวมและ
 **code จริงอยู่ใน product/application repo** ที่ consume platform นี้ (ดู [Ecosystem](#ecosystem))
 ถ้าจะเพิ่ม service, build tooling หรือ implementation ใด ๆ ให้ไปที่ repo ปลายทาง ไม่ใช่ที่นี่
 
+## โฟลเดอร์ไหนเก็บอะไร
+
+| โฟลเดอร์ | เนื้อหา | ผลผูกพัน |
+| --- | --- | --- |
+| [`decisions/`](./decisions) | ADR ระดับ ecosystem — ศัพท์และขอบเขตที่ตกลงกันแล้ว | ✅ ผูกพัน |
+| [`architecture/`](./architecture) | คำอธิบาย, mapping, ผลวิเคราะห์ repo อื่น | 📄 อธิบาย |
+| [`ref/`](./ref) | บันทึกดิบตามเวลา ขัดกันเองได้ | ❌ ไม่ผูกพัน |
+| module dirs ด้านล่าง | นิยามขอบเขตของแต่ละ plane | 📄 อธิบาย |
+
+`contracts/` (canonical schema) ยังไม่สร้าง — รอ [vocabulary gate](./decisions#ลำดับที่ควรเคาะ) ผ่านก่อน
+
 ## Modules
 
 แต่ละ directory เก็บ **นิยามขอบเขต** ของ module นั้น ไม่ใช่ code
@@ -67,11 +78,19 @@ monthop-gmail/
 
 ## Status
 
-โครง module รอบแรกวางแล้ว — ยังอยู่ในขั้นตอนปรับปรุงขอบเขตและ boundary ระหว่าง module
+**Phase 0 — Decisions First** ตาม [decisions-first plan](./ref/agent-platform-decisions-first-plan.md)
+
+ADR ทั้ง 8 ตัวร่างแล้ว (Context + Options + Recommendation) ยังเป็น `Proposed` ทั้งหมด — **รอเคาะ** ดู [`decisions/`](./decisions)
+
+ถัดไปหลัง ADR ผ่าน: `contracts/` P0 → `profiles/` → ย้าย 10 module ตาม [module mapping](./architecture/module-mapping.md)
 
 ## Reference
 
-- [`ref/repo-naming-agent-platform.md`](./ref/repo-naming-agent-platform.md) — เหตุผลและตัวเลือกอื่นที่พิจารณาก่อนเลือกชื่อ `agent-platform`
+- [`decisions/`](./decisions) — ADR 8 ตัวและลำดับที่ควรเคาะ
+- [`architecture/module-mapping.md`](./architecture/module-mapping.md) — 10 module ปัจจุบัน → โครงเป้าหมาย (ยังไม่ย้าย)
+- [`architecture/devfactory-core-rfc-extraction.md`](./architecture/devfactory-core-rfc-extraction.md) — ดึง RFC ของ `devfactory-core` มาเป็น canonical contract อะไรได้แค่ไหน
+- [`ref/`](./ref) — บันทึกดิบ 12 ไฟล์ พร้อมสารบัญและตารางข้อขัดแย้งที่รู้แล้ว
+- [`ref/existing-repos.md`](./ref/existing-repos.md) — inventory ของ repo ที่มีอยู่จริง 3 ตัว
 
 ## License
 

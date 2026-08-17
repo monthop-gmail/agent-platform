@@ -1,0 +1,56 @@
+# ref/ — บันทึกดิบ
+
+เอกสารในโฟลเดอร์นี้เป็น **raw notes ตามเวลา** เก็บไว้ตามต้นฉบับ ไม่แก้ไข
+
+> ⚠️ **ไม่ผูกพัน** — ไฟล์ในนี้ขัดกันเองหลายจุด (ชื่อ core repo 4 เวอร์ชัน, `agent-gateway` 3 ความหมาย, stack 4 ชุด) ข้อตกลงจริงอยู่ที่ [`../decisions/`](../decisions/) ถ้าขัดกัน → ADR ที่ Accepted ชนะ
+
+## สารบัญ
+
+### ตัดสินใจเรื่องชื่อและขอบเขต
+
+| ไฟล์ | เนื้อหา |
+| --- | --- |
+| [`repo-naming-agent-platform.md`](repo-naming-agent-platform.md) | เหตุผลที่เลือกชื่อ `agent-platform` + ตัวเลือกอื่น 6 ชื่อ |
+| [`naming-convention-ecosystem.md`](naming-convention-ecosystem.md) | naming convention ทั้ง ecosystem + ลิสต์ "7 core repos" |
+
+### Blueprint ระดับระบบ
+
+| ไฟล์ | ระบบ | stack ที่เสนอ |
+| --- | --- | --- |
+| [`enterprise-agent-backend-os-blueprint.md`](enterprise-agent-backend-os-blueprint.md) | Backend OS สำหรับ agent (M0–M7) | Cloudflare Workers / DO / D1 / R2 |
+| [`enterprise-agent-knowledge-platform-blueprint.md`](enterprise-agent-knowledge-platform-blueprint.md) | Knowledge platform + RAG (M1–M7) | Python / FastAPI / Postgres / Qdrant / Neo4j |
+| [`navi-security-agent-blueprint.md`](navi-security-agent-blueprint.md) | AI Security Agent คู่กับ `navi-ims` (Phase 0–5, M0–M12) | FastAPI/Node · Redis · Postgres |
+| [`ai-subscription-oauth-gateway-blueprint.md`](ai-subscription-oauth-gateway-blueprint.md) | Subscription/OAuth gateway **ขาออก** (M1–M6) | — |
+| [`distributed-multi-agent-gateway-blueprint.md`](distributed-multi-agent-gateway-blueprint.md) | Task dispatcher + worker fleet หลัง NAT (Phase 1–5) | Node/TS หรือ FastAPI · MQTT/NATS · SQLite |
+
+### รีวิวและแผนของ repo นี้
+
+| ไฟล์ | เนื้อหา |
+| --- | --- |
+| [`agent-platform-contract-review.md`](agent-platform-contract-review.md) | รีวิวโครง repo นี้ (7.5/10) + ตาราง P0/P1/P2 + เสนอ `contracts/` |
+| [`agent-platform-decisions-first-plan.md`](agent-platform-decisions-first-plan.md) | แผน Phase 0–5 ที่กำลังทำตามอยู่ + ADR 8 ตัว + DoD ของ repo นี้ |
+
+### repo ที่มีอยู่จริงแล้ว
+
+| ไฟล์ | เนื้อหา |
+| --- | --- |
+| [`existing-repos.md`](existing-repos.md) | inventory ของ `devfactory-core` · `navi-ims` · `ai-web-harness` (สำรวจจาก remote จริง — ไม่ใช่ raw) |
+
+## ข้อขัดแย้งที่รู้แล้ว
+
+จุดเหล่านี้มี ADR รออยู่แล้ว ไม่ต้องพยายามอ่านให้ตรงกัน:
+
+| ขัดกันเรื่อง | อยู่ใน ADR |
+| --- | --- |
+| ชื่อ core repo 4 เวอร์ชัน | [0002](../decisions/0002-core-repository-naming.md) |
+| `agent-gateway` = inbound / outbound / fan-out | [0003](../decisions/0003-agent-gateway-boundary.md) |
+| LLM Adapter vs Runtime Adapter vs AgentAdapter | [0004](../decisions/0004-agent-vs-model-provider.md) |
+| platform สร้าง runtime เองไหม (backend-os §6 vs knowledge §5) | [0005](../decisions/0005-agent-runtime-boundary.md) |
+| tenant model 2/3/5 ชั้น | [0007](../decisions/0007-multi-tenancy.md) |
+| Cloudflare vs Python vs Node | [0008](../decisions/0008-reference-stack.md) |
+| risk level `LOW/MEDIUM/HIGH/CRITICAL` คนละความหมาย (backend-os §9 vs navi Phase 4) | ยังไม่มี ADR |
+
+## หมายเหตุ
+
+* `ai-web-harness/ref/` ใช้ naming แบบ `YYYY-MM-DD-<topic>-raw.md` ซึ่งดีกว่าที่นี่ (รู้ลำดับเวลา + รู้ว่าอันไหน raw) — ยังไม่ได้ rename ตาม เพราะจะทำให้ link ที่ส่งทีมไปแล้วเสีย
+* รูป 6 รูปใน `navi-security-agent-blueprint.md` เป็น external link ไป `images.openai.com` ซึ่งอาจหมดอายุ
