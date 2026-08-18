@@ -1,6 +1,6 @@
 # ADR-0012: Consent Contract
 
-**Status:** Proposed
+**Status:** Accepted (2026-08-19)
 **Date:** 2026-08-19
 **Depends on:** [ADR-0001](0001-platform-scope.md) · [ADR-0006](0006-contract-versioning.md) · [ADR-0007](0007-multi-tenancy.md) · [ADR-0010](0010-risk-approval-taxonomy.md)
 **Blocking:** [issue #15](https://github.com/monthop-gmail/agent-platform/issues/15) · `contracts/consent/` (ยังไม่มี)
@@ -109,13 +109,19 @@ grant ที่หมดอายุหรือถูกเพิกถอน�
 
 ## Decision
 
-> _(รอเคาะ — ต้องตอบ 3 ส่วน)_
->
-> 1. **รับหรือไม่** — A / B / C / D
-> 2. **ถ้ารับ ใครเป็นเจ้าของ semantics** — D1 (platform) หรือ D2 (`care`)
-> 3. **เกณฑ์รับ contract ใหม่ 4 ข้อ** — ยืนยันหรือแก้
+**A + D1** — รับเข้าเป็น `contracts/consent/v1` โดย **`agent-platform` เป็นเจ้าของทั้ง semantics และ wire schema** · เกณฑ์รับ contract ใหม่ 4 ข้อ **ยืนยันตามที่เสนอ**
 
-## Consequences ถ้าเลือก A + D1
+**Reason:** ไม่มี contract ไหนตอบคำถาม *"กับข้อมูลของคนไหน"* ได้ และเป็นคำถามที่ทุก repo ที่ถือข้อมูลบุคคลต้องตอบ — ถ้าต่างคนต่างนิยาม audit ข้าม repo จะเทียบกันไม่ได้ ซึ่งเป็นความล้มเหลวแบบเดียวกับที่ ADR-0006 มีอยู่เพื่อกัน · ปฏิเสธ C เพราะ `policy/v1` `Decision` เป็นผลประเมินครั้งหนึ่งที่อายุสั้น ส่วน consent เป็นข้อเท็จจริงที่คงอยู่และถูกเพิกถอนเป็นเหตุการณ์ของตัวเอง · ปฏิเสธ D เพราะ implementation ที่ยกขึ้นได้มีอยู่แล้วและ domain-free จริง การรออีกฝ่ายมาถึงทำให้ต้อง migrate ของที่รันอยู่โดยไม่ได้ข้อมูลใหม่ที่เปลี่ยนคำตอบ
+
+**เจ้าของ semantics = platform (D1):** consent ไม่ใช่ความรู้เฉพาะโดเมน — `Scope` และ `Purpose` เป็นค่าของโดเมนอยู่แล้ว ส่วนที่เหลือคือ *ใคร ให้ใคร เมื่อไร ถอนเมื่อไร* ซึ่งเป็นรูปแบบเดียวกันทุกโดเมน · ถ้าให้ `care` ถือแบบ `devfactory-core` จะทำให้ `enterprise-knowledge` ต้องขอ RFC ที่ `care` สำหรับ field ที่ `care` ไม่มีความเห็นด้วย ซึ่งเป็นปัญหาที่ RFC-0005 ปฏิเสธ A2/B2 มาแล้ว
+
+**Authority:** Monthop Champaruang — Platform Owner / Architecture Authority of `agent-platform`
+
+### เกณฑ์ 4 ข้อมีผลกับคำขอ contract ใหม่ทุกครั้งจากนี้
+
+ต้องครบทุกข้อ ไม่ใช่ส่วนใหญ่ · บันทึกไว้ใน [`contracts/README.md`](../contracts/README.md) เพื่อให้ผู้ขอวัดตัวเองได้ก่อนเปิด issue
+
+## Consequences
 
 * `contracts/consent/v1/consent.schema.yaml` + `CHANGELOG.md` · **ไม่มี** `derived_from` เพราะ semantics เป็นของที่นี่
 * ปิดช่องว่าง 4 จุดข้างบนก่อน publish · เพิ่ม `revoked_by` เป็น required เมื่อมี `revoked_at`

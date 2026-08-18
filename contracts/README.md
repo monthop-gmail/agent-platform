@@ -22,8 +22,20 @@ canonical schema ที่ทุก repo ใน ecosystem ต้องใช้�
 | [`profile/v1`](profile/v1/) | `profile.schema.yaml` | ✅ v1 | — (เพิ่มนอกลิสต์ P0 เดิม) |
 | [`approval/v1`](approval/v1/) | `approval.schema.yaml` | ✅ v1 · 🔗 derived | [0006](../decisions/0006-contract-versioning.md) |
 | [`event/v1`](event/v1/) | `event.schema.yaml` | ✅ v1 · 🔗 derived | [0006](../decisions/0006-contract-versioning.md) |
+| [`consent/v1`](consent/v1/) | `consent.schema.yaml` | ✅ v1 | [0012](../decisions/0012-consent-contract.md) — เพิ่มนอกลิสต์ P0 |
 
-`profile/v1` เป็น contract ที่เพิ่มเข้ามานอกลิสต์ P0 เดิมเพื่อรองรับ [`profiles/`](../profiles) — เพิ่ม contract ใหม่ไม่ใช่ breaking change แต่บันทึกไว้ให้ชัดว่าเป็นการขยายขอบเขต
+### เกณฑ์รับ contract ใหม่ — ต้องครบทุกข้อ
+
+`profile/v1` และ `consent/v1` เพิ่มเข้ามานอกลิสต์ P0 เดิม · เพิ่ม contract ใหม่ไม่ใช่ breaking change แต่ถ้ารับทุกคำขอที่มีเหตุผลดี ลิสต์ P0 จะไม่มีความหมาย · [ADR-0012](../decisions/0012-consent-contract.md) จึงวางเกณฑ์ไว้ **วัดตัวเองได้ก่อนเปิด issue**:
+
+| # | เกณฑ์ |
+| --- | --- |
+| 1 | มี contract ที่มีอยู่แล้วตอบคำถามนี้ได้หรือไม่ — **ถ้ามี ให้ขยายตัวนั้น** |
+| 2 | จะมี consumer อย่างน้อย 2 ราย หรือมี 1 รายที่ใช้จริงแล้วและรายที่สองระบุตัวได้ |
+| 3 | มี implementation จริงให้อ้าง ไม่ใช่ออกแบบจากจินตนาการ |
+| 4 | platform เข้าใจ semantics พอที่จะเป็นผู้ตัดสินสุดท้าย หรือมีเจ้าของ semantics ที่ชัด |
+
+คำขอที่ไม่ครบ 4 ข้อไม่ได้ถูกปฏิเสธถาวร — แต่ต้องรอให้ครบก่อน ไม่ใช่ผ่านด้วยความน่าเชื่อของผู้ขอ
 
 ### 🔗 Derived contracts
 

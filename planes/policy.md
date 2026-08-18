@@ -5,7 +5,7 @@
 | | |
 | --- | --- |
 | Implementation | ยังไม่มี repo · `devfactory-core/packages/governance` เป็นของฝั่ง job |
-| Contracts | [`policy/v1`](../contracts/policy/v1/) · [`profile/v1`](../contracts/profile/v1/) · [`approval/v1`](../contracts/approval/v1/) |
+| Contracts | [`policy/v1`](../contracts/policy/v1/) · [`profile/v1`](../contracts/profile/v1/) · [`approval/v1`](../contracts/approval/v1/) · [`consent/v1`](../contracts/consent/v1/) |
 | ADR | [0010](../decisions/0010-risk-approval-taxonomy.md) · [0006](../decisions/0006-contract-versioning.md) |
 
 ## รับผิดชอบ
@@ -21,6 +21,20 @@ effect: allow | deny
 authority: auto | notify | approval_required | human_command_required
 constraint: none | rate_limited | budget_exceeded | quota_exhausted
 ```
+
+## Policy ≠ Consent ≠ Approval
+
+สาม contract ในตระกูลเดียวกันที่ตอบคำถามคนละข้อ — การเข้าถึงข้อมูลบุคคลต้องผ่านทั้งสามที่เกี่ยวข้อง ผ่านอันเดียวไม่พอ
+
+| | ตอบคำถาม | contract |
+| --- | --- | --- |
+| **Policy** | identity นี้ทำ action นี้ได้ไหม | `policy/v1` |
+| **Consent** | **กับข้อมูลของคนไหน** | `consent/v1` |
+| **Approval** | ใครอนุมัติให้ทำครั้งนี้ | `approval/v1` ⏳ |
+
+ตัวอย่างที่ทำให้เห็นว่าแยกกันจริง: ลูกสาวมีสิทธิ์ `medication.read` (policy ผ่าน) แต่อ่านได้เฉพาะยาของแม่ตัวเอง ไม่ใช่ของผู้ป่วยทุกคนใน tenant (consent จำกัด)
+
+🔒 **ความสัมพันธ์ไม่ให้สิทธิ์อะไรโดยอัตโนมัติ** — ญาติ ผู้ดูแล หรือทีมเดียวกัน ไม่ได้ทำให้เข้าถึงได้ ต้องมี grant ที่ชัดเจน
 
 ## Policy ≠ Approval
 

@@ -14,8 +14,6 @@ ADR ในโฟลเดอร์นี้เป็น **authority** ของ�
 
 ## สถานะปัจจุบัน — 🔒 VOCABULARY LOCKED (2026-08-17)
 
-> ⏳ **มี 1 ตัวรอเคาะ** — [ADR-0012 Consent Contract](0012-consent-contract.md) จาก [issue #15](https://github.com/monthop-gmail/agent-platform/issues/15) · vocabulary ที่ lock ไว้ไม่กระทบ
-
 **Authority ของทั้งชุด:** Monthop Champaruang — Platform Owner / Architecture Authority of `agent-platform`
 
 | ADR | เรื่อง | Decision | Status |
@@ -31,7 +29,7 @@ ADR ในโฟลเดอร์นี้เป็น **authority** ของ�
 | [0009](0009-capability-model.md) | Capability model | **A** — capability / declaration / requirement | ✅ Accepted |
 | [0010](0010-risk-approval-taxonomy.md) | Risk & approval taxonomy | **A** — `action_risk` / `authority` / `severity` | ✅ Accepted |
 | [0011](0011-conformance-automation.md) | Conformance automation | **C** — `conformance/` เป็นข้อยกเว้นเดียวของ ADR-0008 · supersede คำตอบ "ตรวจด้วยคน" ใน 0006 | ✅ Accepted |
-| [0012](0012-consent-contract.md) | Consent contract | รับ `contracts/consent/v1` ไหม · ใครเป็นเจ้าของ semantics · เกณฑ์รับ contract ใหม่ | ⏳ **Proposed — รอเคาะ** |
+| [0012](0012-consent-contract.md) | Consent contract | **A + D1** — รับเป็น `consent/v1` · platform ถือ semantics · เกณฑ์รับ contract ใหม่ 4 ข้อ | ✅ Accepted |
 
 การเคาะบันทึกไว้ที่ [issue #1–#10](https://github.com/monthop-gmail/agent-platform/issues?q=is%3Aissue+label%3Aadr) — **ไฟล์บันทึกว่าตัดสินอะไร issue บันทึกว่าใครตัดสินและเมื่อไหร่**
 
@@ -70,7 +68,7 @@ Architecture Owner ของ [`devfactory-core`](https://github.com/monthop-gmai
   ↓
 contracts/ P0 ✅ ── profiles/ ✅ ── planes/ ✅
   ↓
-0011 (conformance automation) ✅ ── 0012 (consent) ⏳ รอเคาะ
+0011 (conformance automation) ✅ ── 0012 (consent) ✅
 ```
 
 ## ที่มา
