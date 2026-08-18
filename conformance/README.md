@@ -10,9 +10,11 @@
 # ดึง manifest จาก repo ต้นทางผ่าน raw.githubusercontent
 python3 conformance/drift_check.py
 
-# ใช้ clone ในเครื่องแทน (offline / ทดสอบก่อนต้นทาง merge)
-python3 conformance/drift_check.py --local /path/to/devfactory-core
+# ใช้ clone ในเครื่องแทน — ชี้โฟลเดอร์แม่ที่มีหลาย clone ได้
+python3 conformance/drift_check.py --local /opt/docker-test
 ```
+
+`--local` หา `<dir>/<repo-name>/<path>` ก่อน แล้วค่อย `<dir>/<path>` · repo ที่ไม่มี clone ในเครื่องจะดึงจาก network ต่อ **ไม่ใช่เดาจากไฟล์ของ repo อื่น** — เวอร์ชันแรกอ่านไฟล์เดียวให้ทุก repo ซึ่งมองไม่เห็นตอนมี consumer รายเดียว
 
 ต้องมี `pyyaml` `jsonschema` `referencing` · **ไม่มี `requirements.txt` โดยตั้งใจ** — pin ไว้ใน [workflow](../.github/workflows/drift-check.yml) แทน เพราะ ADR-0008 ห้าม dependency manifest ใน repo นี้
 
@@ -25,6 +27,7 @@ python3 conformance/drift_check.py --local /path/to/devfactory-core
 | 1 | `derived_from.semantics_version` เทียบต้นทาง | ต้นทางขยับ semantics แล้วเราไม่ตาม |
 | 2 | `frozen` vocabulary — ขาดค่าที่บังคับ · เกินเมื่อ `closed: true` | ลบ event type ที่ต้องมี · **เพิ่ม decision type เข้าชุดปิด** |
 | 3 | จำนวน guarantees | ถอน guarantee เงียบ ๆ |
+| 3b | **field ผูกกับ enum ปิด/เปิด ตรงกับ `closed` ของต้นทางไหม** | schema ประกาศว่าชุดเปิดแต่ field ยัง `$ref` ไป enum ปิด — [#17](https://github.com/monthop-gmail/agent-platform/issues/17) |
 | 4 | `consumers.md` เทียบ `platform-contract.yaml` จริง | registry ตามหลัง manifest |
 | 5 | ตาราง version usage | ตารางอ่านว่าปิด version ได้ทั้งที่มีคน pin |
 | 6 | schema draft 2020-12 · `$ref` · `CHANGELOG.md` | contract พังหรือชี้ไปไม่มีอะไร |
@@ -49,6 +52,10 @@ check ที่ไม่เคยเห็นสถานะ FAIL คือ chec
 | เพิ่ม `AUTO_APPROVE` เข้า decision enum | `frozen: ต้นทาง closed=true แต่มีค่าเกิน` |
 | ลบ pin ออกจากแถวใน `consumers.md` | `registry: แถวนี้ขาด pin` |
 | ลบ guarantee ออกจาก schema | `frozen: guarantees มี 1 ข้อ ต้นทางบังคับ 3` |
+| ให้ `event_type` ผูกกับ enum ปิดอีกครั้ง | `binding: ต้นทาง closed=false แต่ field ผูกกับ enum ปิด` |
+| ถอด `decision` ออกจาก enum ปิด | `binding: closed=true แต่ไม่มี field ไหนผูกกับ enum นี้` (WARN) |
+
+เคสที่ **binding** เพิ่มเข้ามาเพราะ check ที่มีอยู่จับไม่ได้: `EventType` มี 7 ค่าครบตามที่ต้นทางบังคับทุกตัว จึงผ่าน check ที่เทียบ *ค่าที่มี* — แต่ field ยังผูกกับ enum ปิด ทำให้ค่านอกลิสต์ validate ไม่ผ่าน **check ที่เทียบค่าอย่างเดียวมองไม่เห็นความปิดของ enum**
 
 เคสที่สามคือ `AUTO_APPROVE` ที่ [RFC-0009](https://github.com/monthop-gmail/devfactory-core/blob/main/rfcs/0009-vocabulary-extension.md) ยกมาเป็นเหตุผลว่าทำไม decision vocabulary ต้องเป็นชุดปิด — เป็นเส้นทางที่เปิดได้ด้วยการ *เพิ่ม* ค่าอย่างเดียว โดยไม่ต้องลบหรือเปลี่ยนชื่ออะไรเลย
 
@@ -60,5 +67,6 @@ check ที่ไม่เคยเห็นสถานะ FAIL คือ chec
 | --- | --- |
 | `derived` — pin ไม่ตรง | อ่าน RFC ที่ต้นทางว่าเปลี่ยนอะไร แล้วอัปเดต schema + `derived_from` ให้ตรง |
 | `frozen` — ขาด/เกิน | ถ้าตั้งใจให้ต่าง ต้องมี RFC ที่ต้นทางก่อน (semantic change ตาม RFC-0005 Rule 2) |
+| `binding` | แยก `$defs` ที่เป็น *ชุดค่าที่รู้จัก* ออกจาก `$defs` ที่ *field อ้าง* — ดู `EventType` vs `EventTypeName` ใน `event/v1` |
 | `registry` | อัปเดต `architecture/consumers.md` ให้ตรง manifest |
 | `schema` / `profile` | แก้ไฟล์ที่พัง |
