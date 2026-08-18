@@ -190,8 +190,15 @@ def check_registry(local: pathlib.Path | None) -> None:
         verified = (man.get("conformance") or {}).get("last_verified")
         if status == "passing" and not verified:
             fail("registry", f"{repo}: conformance passing แต่ไม่มี last_verified")
-        elif status and status not in reg:
-            warn("registry", f"{repo}: manifest status={status} แต่ consumers.md ไม่ได้สะท้อน")
+        elif status and f"`{status}`" not in row:
+            # ต้องหาในแถวของ repo นั้น ไม่ใช่หาทั้งไฟล์ — คำว่า `passing` ของ repo อื่น
+            # ทำให้แถวที่ยังเขียน `unknown` ได้ ✅ ปลอม ซึ่งเป็น false ✅ แบบเดียวกับที่
+            # ADR-0011 เขียนขึ้นมาแก้ (เคสนั้นคือคำว่า `approval` โผล่ในย่อหน้าอื่น)
+            fail(
+                "registry",
+                f"{repo}: manifest status={status} แต่แถวใน consumers.md ไม่ตรง "
+                f"— ตารางกำลังรายงานสถานะ conformance ผิด",
+            )
         else:
             ok("registry", f"{repo}: conformance status={status}")
 
