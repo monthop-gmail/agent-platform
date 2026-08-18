@@ -14,6 +14,8 @@ ADR ในโฟลเดอร์นี้เป็น **authority** ของ�
 
 ## สถานะปัจจุบัน — 🔒 VOCABULARY LOCKED (2026-08-17)
 
+> ⏳ **มี 1 ตัวรอเคาะ** — [ADR-0012 Consent Contract](0012-consent-contract.md) จาก [issue #15](https://github.com/monthop-gmail/agent-platform/issues/15) · vocabulary ที่ lock ไว้ไม่กระทบ
+
 **Authority ของทั้งชุด:** Monthop Champaruang — Platform Owner / Architecture Authority of `agent-platform`
 
 | ADR | เรื่อง | Decision | Status |
@@ -29,6 +31,7 @@ ADR ในโฟลเดอร์นี้เป็น **authority** ของ�
 | [0009](0009-capability-model.md) | Capability model | **A** — capability / declaration / requirement | ✅ Accepted |
 | [0010](0010-risk-approval-taxonomy.md) | Risk & approval taxonomy | **A** — `action_risk` / `authority` / `severity` | ✅ Accepted |
 | [0011](0011-conformance-automation.md) | Conformance automation | **C** — `conformance/` เป็นข้อยกเว้นเดียวของ ADR-0008 · supersede คำตอบ "ตรวจด้วยคน" ใน 0006 | ✅ Accepted |
+| [0012](0012-consent-contract.md) | Consent contract | รับ `contracts/consent/v1` ไหม · ใครเป็นเจ้าของ semantics · เกณฑ์รับ contract ใหม่ | ⏳ **Proposed — รอเคาะ** |
 
 การเคาะบันทึกไว้ที่ [issue #1–#10](https://github.com/monthop-gmail/agent-platform/issues?q=is%3Aissue+label%3Aadr) — **ไฟล์บันทึกว่าตัดสินอะไร issue บันทึกว่าใครตัดสินและเมื่อไหร่**
 
@@ -36,7 +39,7 @@ ADR ในโฟลเดอร์นี้เป็น **authority** ของ�
 
 Architecture Owner ของ [`devfactory-core`](https://github.com/monthop-gmail/devfactory-core) ตอบด้วยทางที่สามที่เราไม่ได้เสนอ: **แยก semantics ออกจาก wire schema** — vocabulary และ guarantees เป็นของ repo ต้นทาง · field name, type, โครงสร้างและ versioning เป็นของที่นี่
 
-`contracts/approval/v1` และ `contracts/event/v1` เขียนแล้ว พร้อมบล็อก `derived_from` ที่ pin `semantics_version` — **ไม่มี ADR ใดค้างอยู่อีก**
+`contracts/approval/v1` และ `contracts/event/v1` เขียนแล้ว พร้อมบล็อก `derived_from` ที่ pin `semantics_version`
 
 ## ศัพท์ที่ lock แล้ว
 
@@ -61,11 +64,13 @@ Architecture Owner ของ [`devfactory-core`](https://github.com/monthop-gmai
   ↓                ↓
 0003 (gateway) ✅ ── 0005 (runtime) ✅ ── 0009 (capability) ✅   🔒 vocabulary gate — ผ่านแล้ว
   ↓
-0006 (versioning ✅ / ownership ⏳) ── 0007 (tenancy) ✅ ── 0010 (risk/authority) ✅
+0006 (versioning ✅ / ownership ✅) ── 0007 (tenancy) ✅ ── 0010 (risk/authority) ✅
   ↓
 0008 (stack) ✅
   ↓
 contracts/ P0 ✅ ── profiles/ ✅ ── planes/ ✅
+  ↓
+0011 (conformance automation) ✅ ── 0012 (consent) ⏳ รอเคาะ
 ```
 
 ## ที่มา
