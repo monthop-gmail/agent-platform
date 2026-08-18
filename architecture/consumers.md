@@ -11,14 +11,14 @@ vN ยังมีใคร pin อยู่ไหม  → ปิด vN ได�
 
 ## สถานะปัจจุบัน — 2026-08-18
 
-> ✅ **มี consumer ตัวแรกแล้ว** — [`care-agent-platform`](https://github.com/monthop-gmail/care-agent-platform) ครบทั้ง 3 ข้อของ ADR-0006 (manifest · conformance test ใน CI ที่ validate payload จริง · release gate)
+> ✅ **มี consumer ที่ conform จริง 2 ราย** — [`care-agent-platform`](https://github.com/monthop-gmail/care-agent-platform) และ [`devfactory-core`](https://github.com/monthop-gmail/devfactory-core) ครบทั้ง 3 ข้อของ [ADR-0006](../decisions/0006-contract-versioning.md) (manifest · conformance test ใน CI ที่ validate payload จริง · release gate)
 > ส่วน `devfactory-core` มี `platform-contract.yaml` แล้วแต่ยังไม่มี code จึงไม่มี payload ให้ validate — สถานะยังเป็น `unknown`
 > `—` หมายถึงยังไม่ได้ pin อะไร
 
 | Repo | Manifest | Status | Contracts ที่ pin | last_verified | หมายเหตุ |
 | --- | --- | --- | --- | --- | --- |
 | [`care-agent-platform`](https://github.com/monthop-gmail/care-agent-platform) | ✅ [`platform-contract.yaml`](https://github.com/monthop-gmail/care-agent-platform/blob/main/platform-contract.yaml) | `passing` | `identity/v1` `event/v1` `policy/v1` `capability/v1` `error/v1` | 2026-08-18 | **consumer ตัวแรกที่ conform จริง** — Python/FastAPI บน pstack · [`payload_check.py`](https://github.com/monthop-gmail/care-agent-platform/blob/main/conformance/payload_check.py) รัน scenario จริงแล้ว validate audit event ที่ระบบผลิตออกมา (58 event/รอบ) กับ schema ที่ commit ที่ pin ไว้ · ทำงานใน CI ทุก PR ทั้งบน sqlite และ Postgres · ช่องว่างที่เจอ: [#14](https://github.com/monthop-gmail/agent-platform/issues/14) [#15](https://github.com/monthop-gmail/agent-platform/issues/15) |
-| [`devfactory-core`](https://github.com/monthop-gmail/devfactory-core) | ✅ [`platform-contract.yaml`](https://github.com/monthop-gmail/devfactory-core/blob/main/platform-contract.yaml) | `unknown` | `identity/v1` `execution/v1` `policy/v1` `error/v1` `approval/v1` `event/v1` | — | **consumer นำร่อง** — ยัง conform ไม่ได้เพราะ repo ยังไม่มี code จึงไม่มี payload ให้ validate · ช่องว่างทั้ง 6 มี RFC ปิดแล้ว ([#10](https://github.com/monthop-gmail/devfactory-core/pull/10)) · authority ตาม [RFC-0005](https://github.com/monthop-gmail/devfactory-core/blob/main/rfcs/0005-platform-contract-authority.md) · ผลวิเคราะห์: [`consumer-devfactory-core.md`](consumer-devfactory-core.md) |
+| [`devfactory-core`](https://github.com/monthop-gmail/devfactory-core) | ✅ [`platform-contract.yaml`](https://github.com/monthop-gmail/devfactory-core/blob/main/platform-contract.yaml) | `passing` | `identity/v1` `execution/v1` `policy/v1` `error/v1` `approval/v1` `event/v1` | 2026-08-18 | **consumer ที่เป็นต้นทางของ `approval` และ `event` ด้วย** — Python ไม่มี runtime dependency · [`conformance/payload_check.py`](https://github.com/monthop-gmail/devfactory-core/blob/main/conformance/payload_check.py) รัน 6 job ข้าม 2 tenant ผ่าน job state machine จริง แล้ว validate audit event ที่ผลิตออกมา (37 event/รอบ) กับ schema ที่ commit ที่ pin ไว้ (`72635883`) พร้อมตรวจ guarantee ของ `event/v1` อีก 8 ข้อที่ JSON Schema ตรวจไม่ได้ · ทำงานใน CI ทุก PR บน Python 3.11/3.12/3.13 · ช่องว่างที่เจอ: [#17](https://github.com/monthop-gmail/agent-platform/issues/17) · authority ตาม [RFC-0005](https://github.com/monthop-gmail/devfactory-core/blob/main/rfcs/0005-platform-contract-authority.md) |
 | [`navi-ims`](https://github.com/monthop-gmail/navi-ims) | ❌ ไม่มี | `unknown` | — | — | default branch `master` · Odoo 19 · เป็น system of record ไม่ใช่ agent consumer โดยตรง |
 | [`ai-web-harness`](https://github.com/monthop-gmail/ai-web-harness) | ❌ ไม่มี | `unknown` | — | — | scaffold stage · อยู่ชั้น orchestration เหนือ gateway |
 | `navi-security-agent` | — | ยังไม่มี repo | — | — | Phase 0 ต้องการ event + policy contract |
@@ -45,18 +45,20 @@ vN ยังมีใคร pin อยู่ไหม  → ปิด vN ได�
 
 | Contract | v1 pinned by | v2 pinned by | ปิด v1 ได้? |
 | --- | --- | --- | --- |
-| `identity` | `care-agent-platform` ✅ passing · `devfactory-core` ⚠️ declared | — | ไม่มี v2 |
-| `execution` | `devfactory-core` ⚠️ declared | — | ไม่มี v2 |
-| `policy` | `care-agent-platform` ✅ passing · `devfactory-core` ⚠️ declared | — | ไม่มี v2 |
-| `error` | `care-agent-platform` ✅ passing · `devfactory-core` ⚠️ declared | — | ไม่มี v2 |
-| `approval` 🔗 | `devfactory-core` ⚠️ declared | — | ไม่มี v2 |
-| `event` 🔗 | `care-agent-platform` ✅ passing · `devfactory-core` ⚠️ declared | — | ไม่มี v2 |
+| `identity` | `care-agent-platform` ✅ passing · `devfactory-core` ✅ passing | — | ไม่มี v2 |
+| `execution` | `devfactory-core` ✅ passing | — | ไม่มี v2 |
+| `policy` | `care-agent-platform` ✅ passing · `devfactory-core` ✅ passing | — | ไม่มี v2 |
+| `error` | `care-agent-platform` ✅ passing · `devfactory-core` ✅ passing | — | ไม่มี v2 |
+| `approval` 🔗 | `devfactory-core` ✅ passing | — | ไม่มี v2 |
+| `event` 🔗 | `care-agent-platform` ✅ passing · `devfactory-core` ✅ passing | — | ไม่มี v2 |
 | `capability` | `care-agent-platform` ✅ passing | — | ไม่มี v2 |
 | `agent` `provider` `model` | *(ยังไม่มีใคร)* | — | ไม่มี v2 |
 | `tool` `mcp` `artifact` `profile` | *(ยังไม่มีใคร)* | — | ไม่มี v2 |
 
 ⚠️ **declared** = ประกาศ pin ใน `platform-contract.yaml` แล้ว แต่ยังไม่ผ่าน conformance (`status: unknown`)
 declared ยังไม่ทำให้เป็น consumer ตาม ADR-0006 — **แต่มีผลกับการตัดสินใจปิด version** เพราะมี repo ที่พึ่งพา v1 นั้นอยู่จริงแล้ว
+
+ตอนนี้ไม่มีแถวไหนเป็น `declared` แล้ว — เก็บคำอธิบายไว้เพราะยังเป็นสถานะที่ใช้ได้
 
 🔗 **derived** = semantics เป็นของ `devfactory-core` ([ADR-0006 C2](../decisions/0006-contract-versioning.md)) · pin ปัจจุบัน `semantics_version: "1.1"` ตรงกับต้นทาง
 
