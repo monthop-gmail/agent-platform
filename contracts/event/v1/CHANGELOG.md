@@ -15,3 +15,18 @@
 - `job_id` optional · `subject_type` + `subject_id` required ตาม RFC-0008
 - เพิ่ม field ระดับ platform: `tenant_id` `workspace_id` `correlation_id` `policy_result` `usage` `source` ตาม RFC-0005 Rule 1
 - ตัดสินฝั่ง schema: **เก็บทั้ง `job_id` และ `subject_id`** เพราะเป็นคนละคำถาม (สายเหตุ vs หัวเรื่อง) พร้อมกฎว่าถ้า `subject_type: job` ต้องตรงกัน
+
+## v1.1.0 — 2026-08-19
+
+ไม่ breaking — ผ่อน validation และเพิ่มค่าใน enum เท่านั้น ([ADR-0006](../../../decisions/0006-contract-versioning.md))
+
+- **`event_type` รับค่านอก 7 ตัวได้แล้ว** ([#17](https://github.com/monthop-gmail/agent-platform/issues/17)) — เพิ่ม `$defs.EventTypeName`
+  (`type: string` + `pattern`) และให้ field อ้างตัวนั้นแทน `$defs.EventType`
+  · `EventType` ยังอยู่เป็นชุดค่าที่ platform รับรองความหมาย ให้ consumer generate constant ได้
+  · เดิม description เขียนว่าชุดเปิดแต่ `enum` ยังปิด ทำให้ขัดกับ `platform_rules` ในไฟล์เดียวกัน
+    และขัดกับ ADR-0006 Rule 2 ฉบับแก้ (RFC-0009) · `devfactory-core` `payload_check` เจอตอนรันจริง
+    (`SIGHTING_RECORDED` · `GEOFENCE_CROSSED` validate ไม่ผ่าน)
+- **เพิ่ม `record` ใน `SubjectType`** ([#14](https://github.com/monthop-gmail/agent-platform/issues/14)) — บันทึกของโดเมนที่ต้องตามรอยได้แต่ไม่ได้เกิดจาก job
+  · ชนิดจริงอยู่ใน `metadata.record_type` · แยกจาก `artifact` ที่เป็นผลผลิตของ execution
+- semantics ไม่เปลี่ยน — vocabulary 7 ตัวและ guarantees ทั้ง 8 ข้อคงเดิม ไม่ต้องมี RFC ที่ต้นทาง
+  (`semantics_version` ยัง `1.1`)

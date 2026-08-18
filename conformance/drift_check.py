@@ -51,12 +51,17 @@ def load_yaml(path: pathlib.Path):
 
 
 def fetch(repo: str, path: str, local: pathlib.Path | None):
-    """อ่านไฟล์จาก repo ต้นทาง — local เมื่อรัน offline · raw.githubusercontent เมื่อรันใน CI"""
+    """อ่านไฟล์ของ repo หนึ่ง — จาก clone ในเครื่องถ้าหาได้ ไม่งั้นจาก raw.githubusercontent
+
+    `--local` รับได้ทั้งโฟลเดอร์ของ repo เดียว และโฟลเดอร์แม่ที่มีหลาย clone
+    ต้องแยกตาม repo เพราะถ้าอ่านไฟล์เดียวให้ทุก repo จะได้ผลของ repo ผิดคน
+    ซึ่งเป็น false ✅ ที่มองไม่เห็นตอนมี consumer รายเดียว
+    """
     if local:
-        p = local / path
-        if not p.exists():
-            raise FileNotFoundError(f"{local}/{path}")
-        return yaml.safe_load(p.read_text(encoding="utf-8"))
+        for candidate in (local / repo.split("/")[-1] / path, local / path):
+            if candidate.exists():
+                return yaml.safe_load(candidate.read_text(encoding="utf-8"))
+        # ไม่มี clone ของ repo นี้ในเครื่อง — ดึงจาก network ต่อ ไม่ใช่เดาจากไฟล์ของ repo อื่น
     url = RAW.format(repo=repo, path=path)
     with urllib.request.urlopen(url, timeout=30) as r:  # noqa: S310 - fixed host
         return yaml.safe_load(r.read().decode("utf-8"))
@@ -137,12 +142,60 @@ def check_frozen(name: str, doc: dict, frozen: dict) -> None:
         else:
             ok("frozen", f"{name}.{key}: ครบขั้นต่ำ {len(expected)} ค่า (open)")
 
+    check_binding(name, doc, frozen)
+
     ours = (doc.get("guarantees") or {}).get("rules") or []
     theirs = frozen.get("guarantees") or []
     if theirs and len(ours) < len(theirs):
         fail("frozen", f"{name}.guarantees: schema มี {len(ours)} ข้อ ต้นทางบังคับ {len(theirs)}")
     elif theirs:
         ok("frozen", f"{name}.guarantees: {len(ours)} ข้อ ครอบคลุมของต้นทาง {len(theirs)}")
+
+
+def check_binding(name: str, doc: dict, frozen: dict) -> None:
+    """field ผูกกับ enum ปิด/เปิด ตรงกับ `closed` ของต้นทางไหม
+
+    จับ agent-platform#17: `EventType` มี 7 ค่าครบตามต้นทางที่ประกาศ `closed: false`
+    แต่ field `event_type` ยัง $ref มาที่ enum นั้น ทำให้ค่านอกลิสต์ validate ไม่ผ่าน
+    — เทียบเฉพาะ "ค่าที่มี" จับไม่ได้ เพราะค่าครบทุกตัว
+    """
+    defs = doc.get("$defs", {})
+
+    def bound_to_enum(expected: set[str]) -> list[str]:
+        """ชื่อ property ที่ $ref ไปยัง $defs ซึ่ง enum คลุม expected ทั้งชุด"""
+        hits = []
+        for prop, spec in (doc.get("properties") or {}).items():
+            ref = spec.get("$ref") if isinstance(spec, dict) else None
+            if not (isinstance(ref, str) and ref.startswith("#/$defs/")):
+                continue
+            target = defs.get(ref.split("/")[-1], {})
+            if isinstance(target, dict) and expected <= set(target.get("enum") or []):
+                hits.append(prop)
+        return hits
+
+    for key, block in frozen.items():
+        if not (isinstance(block, (list, dict)) and key.endswith("_types")):
+            continue
+        expected, closed = vocabulary(block)
+        if not expected or closed is None:
+            continue
+        bound = bound_to_enum(set(expected))
+        if closed is False and bound:
+            fail(
+                "binding",
+                f"{name}.{key}: ต้นทาง closed=false แต่ field {bound} ผูกกับ enum ปิด "
+                f"— ค่านอกลิสต์จะ validate ไม่ผ่าน ขัดกับ ADR-0006 Rule 2",
+            )
+        elif closed is False:
+            ok("binding", f"{name}.{key}: closed=false และไม่มี field ผูกกับ enum ปิด")
+        elif closed is True and not bound:
+            warn(
+                "binding",
+                f"{name}.{key}: ต้นทาง closed=true แต่ไม่มี field ไหนผูกกับ enum นี้ "
+                f"— ความเป็นชุดปิดไม่ถูกบังคับที่ schema",
+            )
+        else:
+            ok("binding", f"{name}.{key}: closed=true และ field {bound} ผูกกับ enum ปิด")
 
 
 # ── 2. consumer registry ────────────────────────────────────────────────────

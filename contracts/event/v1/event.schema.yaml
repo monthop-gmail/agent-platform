@@ -34,6 +34,11 @@ $defs:
 
       ต่างจาก `approval/v1` `$defs.Decision` ซึ่งยังเป็นชุดปิด — ที่นั่นการเพิ่มค่า
       เปิดทางให้ execution เดินโดยไม่มี APPROVE ของคนได้ ที่นี่เพิ่มไม่ได้ทำแบบนั้น
+
+      ⚠️ **`$defs` นี้ไม่ใช่สิ่งที่ field `event_type` อ้าง** — field อ้าง `EventTypeName`
+      เพราะถ้าอ้างที่นี่ ค่าที่อยู่นอกลิสต์จะ validate ไม่ผ่าน ซึ่งขัดกับทั้ง
+      `platform_rules` ในไฟล์นี้และ ADR-0006 Rule 2
+      ที่นี่มีไว้ให้ consumer generate constant ของค่าที่ platform รับรองความหมาย
     enum:
       - JOB_CREATED
       - STATE_TRANSITION
@@ -43,11 +48,29 @@ $defs:
       - EXECUTION_FAILED
       - JOB_COMPLETED
 
+  EventTypeName:
+    description: >-
+      สิ่งที่ field `event_type` รับจริง — **ค่านอก `EventType` ใช้ได้**
+      เช่น `SIGHTING_RECORDED` จาก `navi-ims` หรือ `MEDICATION_TAKEN` จาก care domain
+
+      บังคับแค่ *รูปแบบชื่อ* ไม่ใช่ตัวค่า เพื่อให้ vocabulary โตได้ตาม
+      [ADR-0006 Rule 2](../../../decisions/0006-contract-versioning.md)
+      โดยที่ชื่อยังอ่านรู้ว่าเป็น event type ไม่ใช่ string อะไรก็ได้
+
+      consumer ที่เจอค่าที่ไม่รู้จักต้องเก็บ event ไว้แล้วข้ามการตีความ — ดู `platform_rules`
+    type: string
+    pattern: '^[A-Z][A-Z0-9_]{2,63}$'
+
   SubjectType:
     description: >-
       สิ่งที่ event นี้พูดถึง — enum และชื่อ field เป็นของ agent-platform
       ส่วนกฎที่ว่า "ทุก event ต้องตอบได้ว่าเกี่ยวกับอะไร" เป็นของ devfactory-core
-    enum: [job, execution, step, agent, tool_call, artifact, approval, external]
+
+      `record` = บันทึกของโดเมนที่ระบบเก็บไว้และต้องตามรอยได้ แต่**ไม่ได้เกิดจาก job**
+      (ผู้ป่วย · ใบสั่งยาเวอร์ชันหนึ่ง · รายการสินค้า) · ชนิดที่แท้จริงอยู่ใน
+      `metadata.record_type` — platform ไม่รู้จักชนิดของโดเมนและไม่ควรรู้
+      แยกจาก `artifact` ซึ่งเป็นผลผลิตของ execution ([`artifact/v1`](../../artifact/v1/))
+    enum: [job, execution, step, agent, tool_call, artifact, approval, external, record]
 
 type: object
 required: [event_id, event_type, tenant_id, subject_type, subject_id, occurred_at, source]
@@ -55,7 +78,7 @@ properties:
   event_id:
     $ref: https://schemas.agent-platform.internal/identity/v1/identity.schema.yaml#/$defs/Id
   event_type:
-    $ref: '#/$defs/EventType'
+    $ref: '#/$defs/EventTypeName'
 
   tenant_id:
     $ref: https://schemas.agent-platform.internal/identity/v1/identity.schema.yaml#/$defs/TenantId
