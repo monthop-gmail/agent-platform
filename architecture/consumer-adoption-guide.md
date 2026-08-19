@@ -4,7 +4,7 @@
 
 > **เอกสารนี้เป็นคำแนะนำ ไม่ใช่ authority** — ถ้าขัดกับ [`decisions/`](../decisions) หรือ [`contracts/`](../contracts) ให้ยึดสองที่นั้น และเปิด issue แจ้งว่าคู่มือผิด
 >
-> ที่มาที่ผูกพันจริง: [`contracts/README.md`](../contracts/README.md) · [`architecture/consumers.md`](../architecture/consumers.md) · [`planes/README.md`](../planes/README.md) · [ADR-0006](../decisions/0006-contract-versioning.md) · [ADR-0012](../decisions/0012-consent-contract.md)
+> ที่มาที่ผูกพันจริง: [`contracts/README.md`](../contracts/README.md) · [`architecture/consumers.md`](consumers.md) · [`planes/README.md`](../planes/README.md) · [ADR-0006](../decisions/0006-contract-versioning.md) · [ADR-0012](../decisions/0012-consent-contract.md)
 
 ---
 
@@ -738,7 +738,7 @@ unknown ──(เพิ่ม manifest)──► unknown + declared
         ──(มี payload จริงให้ validate + CI)──► passing
 ```
 
-⚠️ **`declared` ไม่ใช่สถานะ** — เป็นหมายเหตุใน [`architecture/consumers.md`](../architecture/consumers.md) ว่า repo ประกาศ pin แล้วแต่ยังไม่ผ่าน conformance · repo ที่ declared **ยังไม่ถือเป็น consumer** ตาม ADR-0006 แต่มีผลกับการตัดสินใจปิด contract version เพราะมีคนพึ่งพา v1 นั้นอยู่จริง
+⚠️ **`declared` ไม่ใช่สถานะ** — เป็นหมายเหตุใน [`architecture/consumers.md`](consumers.md) ว่า repo ประกาศ pin แล้วแต่ยังไม่ผ่าน conformance · repo ที่ declared **ยังไม่ถือเป็น consumer** ตาม ADR-0006 แต่มีผลกับการตัดสินใจปิด contract version เพราะมีคนพึ่งพา v1 นั้นอยู่จริง
 
 **`passing` ต้องพิสูจน์ด้วย payload จริง ไม่ใช่เพียงประกาศใน manifest** — ทั้งสอง consumer ที่ผ่านอยู่ตอนนี้รัน scenario จริงแล้ว validate event ที่ระบบผลิตออกมา ไม่ใช่ fixture ที่เขียนขึ้นเพื่อให้ schema ผ่าน
 

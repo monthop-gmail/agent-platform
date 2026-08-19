@@ -11,7 +11,7 @@ repo นี้มีหน้าที่ **คุมภาพรวมและ
 **code จริงอยู่ใน product/application repo** ที่ consume platform นี้ (ดู [Ecosystem](#ecosystem))
 ถ้าจะเพิ่ม service, build tooling หรือ implementation ใด ๆ ให้ไปที่ repo ปลายทาง ไม่ใช่ที่นี่
 
-> 🚀 **เพิ่ง repo เข้า ecosystem?** เริ่มที่ [`docs/consumer-adoption-guide.md`](./docs/consumer-adoption-guide.md) — คู่มือสำหรับทั้ง repo ใหม่และ repo เดิม พร้อม prompt มาตรฐานและ Definition of Done
+> 🚀 **เพิ่ง repo เข้า ecosystem?** เริ่มที่ [`architecture/consumer-adoption-guide.md`](./architecture/consumer-adoption-guide.md) — คู่มือสำหรับทั้ง repo ใหม่และ repo เดิม พร้อม prompt มาตรฐานและ Definition of Done
 
 ## โฟลเดอร์ไหนเก็บอะไร
 
@@ -20,9 +20,8 @@ repo นี้มีหน้าที่ **คุมภาพรวมและ
 | [`contracts/`](./contracts) | canonical schema (YAML + JSON Schema) | ✅ ผูกพัน |
 | [`profiles/`](./profiles) | ชุด config ต่อประเภทงาน — instance ของ `contracts/profile/v1` | ✅ ผูกพัน |
 | [`conformance/`](./conformance) | drift check — **ข้อยกเว้นเดียวที่มี code ได้** ([ADR-0011](./decisions/0011-conformance-automation.md)) | 🔧 เครื่องมือ |
-| [`docs/`](./docs) | คู่มือสำหรับทีม — วิธีนำ platform ไปใช้กับ repo | 📄 อธิบาย |
 | [`decisions/`](./decisions) | ADR ระดับ ecosystem — ศัพท์และขอบเขตที่ตกลงกันแล้ว | ✅ ผูกพัน |
-| [`architecture/`](./architecture) | คำอธิบาย, mapping, ผลวิเคราะห์ repo อื่น | 📄 อธิบาย |
+| [`architecture/`](./architecture) | คำอธิบาย, mapping, ผลวิเคราะห์ repo อื่น, **คู่มือนำไปใช้** | 📄 อธิบาย |
 | [`planes/`](./planes) | นิยามขอบเขตของแต่ละ plane | 📄 อธิบาย |
 | [`ref/`](./ref) | บันทึกดิบตามเวลา ขัดกันเองได้ | ❌ ไม่ผูกพัน |
 
@@ -105,7 +104,7 @@ monthop-gmail/
 
 ## Reference
 
-- [`docs/consumer-adoption-guide.md`](./docs/consumer-adoption-guide.md) — **เริ่มที่นี่ถ้าจะเอา repo เข้า ecosystem** · repo ใหม่ · repo เดิม · งานข้ามหลาย repo
+- [`architecture/consumer-adoption-guide.md`](./architecture/consumer-adoption-guide.md) — **เริ่มที่นี่ถ้าจะเอา repo เข้า ecosystem** · repo ใหม่ · repo เดิม · งานข้ามหลาย repo
 - [`decisions/`](./decisions) — ADR ทั้งหมดและลำดับที่ควรเคาะ
 - [`contracts/`](./contracts) · [`profiles/`](./profiles) — canonical schema และ config ต่อประเภทงาน
 - [`architecture/platform-architecture.md`](./architecture/platform-architecture.md) — canonical diagram (`Accepted`)
