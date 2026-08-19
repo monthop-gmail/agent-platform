@@ -98,6 +98,19 @@ properties:
   escalation_target:
     $ref: https://schemas.agent-platform.internal/identity/v1/identity.schema.yaml#/$defs/Principal
 
+  supersedes_approval_id:
+    $ref: https://schemas.agent-platform.internal/identity/v1/identity.schema.yaml#/$defs/Id
+    description: >-
+      approval ใบที่ใบนี้มาแทน — **ต้องมีเมื่อเป็นการเปลี่ยนใจ** ตาม guarantee ข้อแรก
+      ใบเดิมยังคงอยู่และห้ามแก้ · ห่วงโซ่นี้คือหลักฐานว่าใครเปลี่ยนใจเมื่อไหร่ ด้วยเหตุผลอะไร
+
+      approval ใบแรกของเรื่องหนึ่งไม่มี field นี้ — จึงเป็น optional
+      **ไม่มี field นี้ ≠ ไม่ได้เปลี่ยนใจ** แต่แปลว่า *อ้างว่าเป็นใบแรก*
+
+      invariant ที่ JSON Schema ตรวจให้ไม่ได้ ผู้ผลิตต้องบังคับเอง:
+      ใบที่อ้างถึงต้องมีอยู่จริง อยู่ `tenant_id` เดียวกัน และมี `subject` เดียวกัน
+      · ห้ามชี้ตัวเอง (`supersedes_approval_id` ≠ `approval_id`) และห้ามเป็นวง
+
 guarantees:
   description: >-
     🔒 frozen — เป็นของ devfactory-core (RFC-0002)

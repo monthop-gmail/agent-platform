@@ -6,7 +6,7 @@
 | --- | --- |
 | Implementation | ยังไม่มี repo · `devfactory-core/packages/governance` เป็นของฝั่ง job |
 | Contracts | [`policy/v1`](../contracts/policy/v1/) · [`profile/v1`](../contracts/profile/v1/) · [`approval/v1`](../contracts/approval/v1/) · [`consent/v1`](../contracts/consent/v1/) |
-| ADR | [0010](../decisions/0010-risk-approval-taxonomy.md) · [0006](../decisions/0006-contract-versioning.md) |
+| ADR | [0010](../decisions/0010-risk-approval-taxonomy.md) · [0006](../decisions/0006-contract-versioning.md) · [0013](../decisions/0013-approval-supersedes-chain.md) |
 
 ## รับผิดชอบ
 
@@ -52,6 +52,7 @@ constraint: none | rate_limited | budget_exceeded | quota_exhausted
 * **hard-code mapping `action_risk → authority`** — ต้องเป็น config ต่อ tenant/profile ([ADR-0010](../decisions/0010-risk-approval-taxonomy.md)) เพราะ tenant หนึ่งให้ high = `approval_required` อีก tenant ให้ high = `human_command_required`
 * ให้ execution ประเมิน policy ของตัวเอง
 * นำ decision ที่ `expires_at` ผ่านแล้วกลับมาใช้ซ้ำ
+* **แก้ approval ที่บันทึกไปแล้ว** — เปลี่ยนใจ = ใบใหม่ที่มี `supersedes_approval_id` ชี้ใบเดิม · ใบเดิมยังคงอยู่ ([ADR-0013](../decisions/0013-approval-supersedes-chain.md))
 
 ## fallback ที่บังคับ
 
@@ -60,3 +61,5 @@ constraint: none | rate_limited | budget_exceeded | quota_exhausted
 ## สถานะ
 
 `policy/v1` และ [`approval/v1`](../contracts/approval/v1/) เขียนแล้วทั้งคู่ · semantics ของ approval (decision vocabulary + guarantees) เป็นของ `devfactory-core` แก้ที่นี่ไม่ได้ ([ADR-0006](../decisions/0006-contract-versioning.md))
+
+`approval/v1` v1.1.0 เพิ่ม `supersedes_approval_id` เพื่อให้ guarantee ข้อ *"การเปลี่ยนใจคือ approval ใบใหม่ที่อ้างใบเดิม"* ทำตามได้จริง — เป็น field ระดับ platform ที่เพิ่มผ่าน ADR ที่นี่ได้เอง ไม่ใช่การแตะ semantics ([ADR-0013](../decisions/0013-approval-supersedes-chain.md))

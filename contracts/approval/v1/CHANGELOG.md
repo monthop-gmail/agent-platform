@@ -1,5 +1,20 @@
 # approval/v1
 
+## v1.1.0 — 2026-08-19
+
+ไม่ breaking — เพิ่ม optional field อย่างเดียว ([ADR-0006](../../../decisions/0006-contract-versioning.md) · [ADR-0013](../../../decisions/0013-approval-supersedes-chain.md))
+
+- **เพิ่ม `supersedes_approval_id`** ([#22](https://github.com/monthop-gmail/agent-platform/issues/22)) — approval ใบที่ใบนี้มาแทน
+  · `$ref` ไปที่ `identity/v1#/$defs/Id` เหมือน `approval_id` ที่มันชี้ไป
+- ปิดช่องว่างที่ guarantee ข้อแรกบังคับให้ *"การเปลี่ยนใจคือ approval ใบใหม่ที่อ้างใบเดิม"*
+  แต่ `properties` **ไม่มี field ไหนอ้างใบเดิมได้เลย** — consumer ทำตาม guarantee แล้วห่วงโซ่ยังขาดใน audit trail
+- **optional โดยเจตนา** — ใบแรกของเรื่องหนึ่งไม่มีใบให้อ้าง · การบังคับอยู่ที่ description
+  (*ต้องมีเมื่อเป็นการเปลี่ยนใจ*) ไม่ใช่ที่ `required` · ไม่มี field นี้ = **อ้างว่าเป็นใบแรก** ไม่ใช่ *ไม่ระบุ*
+- semantics ไม่เปลี่ยน — `$defs.Decision` ยัง 3 ค่า · guarantees ทั้ง 4 ข้อคงเดิมทุกตัวอักษร
+  · เป็น field ระดับ platform ตาม [ADR-0006 กฎข้อ 1](../../../decisions/0006-contract-versioning.md)
+  และ `platform_may_add_freely` ของต้นทาง จึงไม่ต้องมี RFC ที่ `devfactory-core` (`semantics_version` ยัง `1.1`)
+- payload ที่ valid กับ v1.0.1 **ยัง valid ทุกใบ** · `required` ไม่ขยับ (7 ตัวเท่าเดิม)
+
 ## v1.0.1 — 2026-08-18
 - `derived_from.semantics_version` `1.0` → `1.1` ตามต้นทางที่ขยับจาก [RFC-0009](https://github.com/monthop-gmail/devfactory-core/blob/main/rfcs/0009-vocabulary-extension.md)
 - **`$defs.Decision` ยังเป็นชุดปิดเหมือนเดิม — ไม่มีอะไรเปลี่ยนในสัญญา** RFC-0009 เปิดเฉพาะ `event/v1` `EventType`
