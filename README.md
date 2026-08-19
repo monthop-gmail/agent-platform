@@ -11,6 +11,8 @@ repo นี้มีหน้าที่ **คุมภาพรวมและ
 **code จริงอยู่ใน product/application repo** ที่ consume platform นี้ (ดู [Ecosystem](#ecosystem))
 ถ้าจะเพิ่ม service, build tooling หรือ implementation ใด ๆ ให้ไปที่ repo ปลายทาง ไม่ใช่ที่นี่
 
+> 🚀 **เพิ่ง repo เข้า ecosystem?** เริ่มที่ [`docs/consumer-adoption-guide.md`](./docs/consumer-adoption-guide.md) — คู่มือสำหรับทั้ง repo ใหม่และ repo เดิม พร้อม prompt มาตรฐานและ Definition of Done
+
 ## โฟลเดอร์ไหนเก็บอะไร
 
 | โฟลเดอร์ | เนื้อหา | ผลผูกพัน |
@@ -18,6 +20,7 @@ repo นี้มีหน้าที่ **คุมภาพรวมและ
 | [`contracts/`](./contracts) | canonical schema (YAML + JSON Schema) | ✅ ผูกพัน |
 | [`profiles/`](./profiles) | ชุด config ต่อประเภทงาน — instance ของ `contracts/profile/v1` | ✅ ผูกพัน |
 | [`conformance/`](./conformance) | drift check — **ข้อยกเว้นเดียวที่มี code ได้** ([ADR-0011](./decisions/0011-conformance-automation.md)) | 🔧 เครื่องมือ |
+| [`docs/`](./docs) | คู่มือสำหรับทีม — วิธีนำ platform ไปใช้กับ repo | 📄 อธิบาย |
 | [`decisions/`](./decisions) | ADR ระดับ ecosystem — ศัพท์และขอบเขตที่ตกลงกันแล้ว | ✅ ผูกพัน |
 | [`architecture/`](./architecture) | คำอธิบาย, mapping, ผลวิเคราะห์ repo อื่น | 📄 อธิบาย |
 | [`planes/`](./planes) | นิยามขอบเขตของแต่ละ plane | 📄 อธิบาย |
@@ -86,9 +89,11 @@ monthop-gmail/
 
 **ADR-0006 ownership ปิดแล้ว (2026-08-18)** — Architecture Owner ของ [`devfactory-core`](https://github.com/monthop-gmail/devfactory-core) ตอบด้วยทางที่สาม: **แยก semantics (repo ต้นทาง) ออกจาก wire schema (ที่นี่)** ดู [ADR-0006](./decisions/0006-contract-versioning.md)
 
-**[`contracts/` v1 เขียนแล้ว](./contracts)** — `identity` `agent` `capability` `provider` `model` `tool` `mcp` `execution` `policy` `artifact` `error` `profile` · ทั้งหมด validate ผ่าน JSON Schema draft 2020-12 และ cross-ref ระหว่างไฟล์ resolve ครบ
+**[`contracts/` v1 เขียนแล้ว](./contracts)** — `identity` `agent` `capability` `provider` `model` `tool` `mcp` `execution` `policy` `approval` `consent` `event` `artifact` `error` `profile` · ทั้งหมด validate ผ่าน JSON Schema draft 2020-12 และ cross-ref ระหว่างไฟล์ resolve ครบ
 
-`approval/v1` และ `event/v1` เขียนแล้ว — มีบล็อก `derived_from` ที่ pin `semantics_version` ของ [`devfactory-core/contract-semantics.yaml`](https://github.com/monthop-gmail/devfactory-core/blob/main/contract-semantics.yaml) และกำกับ 🔒 ที่ส่วนซึ่งเป็น semantics ของ repo ต้นทาง
+`approval/v1` และ `event/v1` เป็น **derived contract** — มีบล็อก `derived_from` ที่ pin `semantics_version` ของ [`devfactory-core/contract-semantics.yaml`](https://github.com/monthop-gmail/devfactory-core/blob/main/contract-semantics.yaml) และกำกับ 🔒 ที่ส่วนซึ่งเป็น semantics ของ repo ต้นทาง
+
+`consent/v1` เป็น contract ที่ platform ถือ semantics เอง ([ADR-0012](./decisions/0012-consent-contract.md)) · เกณฑ์รับ contract ใหม่ 4 ข้ออยู่ที่ [`contracts/README.md`](./contracts/README.md)
 
 **[`profiles/`](./profiles)** — `coding` `security` `knowledge` `enterprise` `workflow` `autonomous` · validate ผ่าน `contracts/profile/v1` ทั้งหมด
 
@@ -100,6 +105,7 @@ monthop-gmail/
 
 ## Reference
 
+- [`docs/consumer-adoption-guide.md`](./docs/consumer-adoption-guide.md) — **เริ่มที่นี่ถ้าจะเอา repo เข้า ecosystem** · repo ใหม่ · repo เดิม · งานข้ามหลาย repo
 - [`decisions/`](./decisions) — ADR ทั้งหมดและลำดับที่ควรเคาะ
 - [`contracts/`](./contracts) · [`profiles/`](./profiles) — canonical schema และ config ต่อประเภทงาน
 - [`architecture/platform-architecture.md`](./architecture/platform-architecture.md) — canonical diagram (`Accepted`)
