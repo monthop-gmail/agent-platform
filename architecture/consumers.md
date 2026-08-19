@@ -9,10 +9,9 @@
 vN ยังมีใคร pin อยู่ไหม  → ปิด vN ได้หรือยัง
 ```
 
-## สถานะปัจจุบัน — 2026-08-18
+## สถานะปัจจุบัน — 2026-08-19
 
 > ✅ **มี consumer ที่ conform จริง 2 ราย** — [`care-agent-platform`](https://github.com/monthop-gmail/care-agent-platform) และ [`devfactory-core`](https://github.com/monthop-gmail/devfactory-core) ครบทั้ง 3 ข้อของ [ADR-0006](../decisions/0006-contract-versioning.md) (manifest · conformance test ใน CI ที่ validate payload จริง · release gate)
-> ส่วน `devfactory-core` มี `platform-contract.yaml` แล้วแต่ยังไม่มี code จึงไม่มี payload ให้ validate — สถานะยังเป็น `unknown`
 > `—` หมายถึงยังไม่ได้ pin อะไร
 
 | Repo | Manifest | Status | Contracts ที่ pin | last_verified | หมายเหตุ |
@@ -27,6 +26,7 @@ vN ยังมีใคร pin อยู่ไหม  → ปิด vN ได�
 | `agent-fleet` | — | ยังไม่มี repo | — | — | ต้องการ execution + capability |
 | `model-gateway` | — | ยังไม่มี repo | — | — | ต้องการ provider + capability |
 | `farm-agent` | — | ยังไม่มี repo | — | — | ต้องการ agent + tool |
+| `odoo-farm` | — | ยังไม่มี repo | — | — | ปรากฏใน README เดิมแต่ไม่เคยมีแถวในทะเบียน — ยังไม่ระบุ contract ที่ต้องการ ([#20](https://github.com/monthop-gmail/agent-platform/issues/20)) |
 
 ## วิธีอ่านคอลัมน์ Status
 
@@ -82,7 +82,10 @@ declared ยังไม่ทำให้เป็น consumer ตาม ADR-00
 | RFC-0003 บังคับ `job_id` — เข้ากันได้ทางเดียว | 🟡 low | RFC-0008 — `job_id` optional · subject required · ห้ามสร้าง `job_id` ปลอม |
 | `packages/proxy` = outbound provider access → ชนกับชื่อ `model-gateway` | 🟡 low | RFC-0005 — เปลี่ยนชื่อเป็น `packages/provider-proxy` + `apps/control-api` · internal ทั้งคู่ |
 
-⚠️ **ยังไม่ใช่ conformance จริง** — เป็น *document alignment* เพราะ `devfactory-core` ไม่มี code ให้ validate · ถ้าต้องการ conformance ที่พิสูจน์ด้วย payload จริง consumer ที่มี code อยู่แล้วคือ `navi-ims`
+> 📌 **บันทึกไว้ตามประวัติ** — ตอนนำร่อง (2026-08-17) `devfactory-core` ยังไม่มี code
+> การตรวจรอบนั้นจึงเป็น *document alignment* ไม่ใช่ conformance จริง
+> **ตั้งแต่ PR #13 และ #15 (2026-08-18) มี code แล้ว** และ conformance รัน payload จริงใน CI
+> — สถานะปัจจุบันดูที่ตารางด้านบน ไม่ใช่ย่อหน้านี้
 
 ### `approval/` และ `event/` ไม่ติด external-authority-pending แล้ว
 

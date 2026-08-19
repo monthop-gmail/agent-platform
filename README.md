@@ -68,19 +68,20 @@ repo นี้มีหน้าที่ **คุมภาพรวมและ
 
 repo นี้เป็น core — repo อื่นเป็น products/applications ที่ consume platform นี้ ไม่ใช่คู่แข่งกันเอง
 
-```text
-monthop-gmail/
-│
-├── agent-platform          ⭐ CORE
-│
-├── devfactory-core         Product
-├── ai-web-harness          Harness
-├── navi-ims                Product
-├── navi-security-agent     Agent
-├── enterprise-knowledge    Knowledge
-├── odoo-farm               Application
-└── farm-agent              Agent
-```
+**ทะเบียนที่ผูกพันคือ [`architecture/consumers.md`](./architecture/consumers.md)** — ตารางข้างล่างเป็นภาพย่อ
+ถ้าสองที่ไม่ตรงกันให้ยึดทะเบียน และแก้ที่ทะเบียนที่เดียว
+
+| repo | บทบาท | conformance |
+| --- | --- | --- |
+| [`agent-platform`](https://github.com/monthop-gmail/agent-platform) | ⭐ CORE — contract · ADR · plane | — |
+| [`care-agent-platform`](https://github.com/monthop-gmail/care-agent-platform) | Product — care agent (รันบน pstack) | ✅ `passing` |
+| [`devfactory-core`](https://github.com/monthop-gmail/devfactory-core) | Product — governed DevOps | ✅ `passing` |
+| [`navi-ims`](https://github.com/monthop-gmail/navi-ims) | Product — system of record (Odoo 19) | `unknown` |
+| [`ai-web-harness`](https://github.com/monthop-gmail/ai-web-harness) | Harness — orchestration เหนือ gateway | `unknown` |
+
+**ยังไม่มี repo:** `navi-security-agent` · `enterprise-knowledge` · `agent-backend-os`
+· `agent-fleet` · `model-gateway` · `farm-agent` · `odoo-farm`
+— ดูว่าแต่ละตัวต้องการ contract อะไรได้ในทะเบียน
 
 ## Status
 
