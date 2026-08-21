@@ -1,5 +1,15 @@
 # event/v1
 
+## v1.6.1 — 2026-08-21
+
+`derived_from.semantics_version` `1.1` → `1.2` ตามต้นทาง
+
+[RFC-0012](https://github.com/monthop-gmail/devfactory-core/blob/main/rfcs/0012-terminal-closing-record.md) เพิ่ม guarantee ข้อที่สามให้ `event` — **ทุกการจบแบบ terminal ต้องออกใบปิดท้าย ไม่ใช่แค่ทางที่จบสำเร็จ** — ปิดช่องที่ [#23](https://github.com/monthop-gmail/agent-platform/issues/23) ยกมาเอง
+
+* **ไม่มีอะไรใน schema เปลี่ยน** — guarantee เป็นของ `devfactory-core` และ `guarantees` block ในไฟล์นี้เป็นของเรา ซึ่งครอบ 3 ข้อของเขาอยู่แล้ว (8 ≥ 3)
+* **ไม่มี field ใหม่** — ใบปิดท้ายเป็น event type ไม่ใช่ field · `event_type` อ้าง `EventTypeName` ชุดเปิด `JOB_SETTLED` จึง validate ผ่านตั้งแต่วันนี้
+* ADR-0015 บอกไว้เองว่าครึ่งความครบถ้วนปิดด้วยใบปิดท้าย และเป็น semantics ของเขา — นี่คือครึ่งนั้นกลับมาแล้ว
+
 ## v1.6.0 — 2026-08-21
 
 `consent/v1` `consent_rules` ข้อ 2 บังคับให้การให้ · การใช้ · การเพิกถอน ออก audit event ทุกครั้ง แต่ 7 ค่าที่ platform รับรองไม่มีตัวไหนเกี่ยวกับ consent — [ADR-0020](../../../decisions/0020-consent-event-vocabulary.md) option B
