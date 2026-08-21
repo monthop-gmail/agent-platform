@@ -1,5 +1,58 @@
 # event/v1
 
+## v1.3.0 — 2026-08-21
+
+เพิ่ม optional `sequence` ตาม [ADR-0015](../../../decisions/0015-event-sequence-and-trail-closure.md) (option C) จาก [issue #23](https://github.com/monthop-gmail/agent-platform/issues/23)
+
+* `sequence` — integer, `minimum: 1` · **สำหรับเรียงเท่านั้น** · ผู้อ่านเรียงด้วย `(occurred_at, sequence)`
+* `platform_rules` +2 — ช่องว่างไม่มีความหมาย ห้ามตีความว่ามีใบหาย · event ที่ไม่มี `sequence` เรียงด้วย `occurred_at` อย่างเดียว ห้ามถือว่าอยู่ก่อนหรือหลังใบที่มีโดยอัตโนมัติ
+* **`guarantees` ไม่ขยับ** (ยัง 8 ข้อ) · `derived_from.semantics_version` ยัง `"1.1"`
+
+### ปิดอะไร ไม่ปิดอะไร
+
+| ต้องการ | ปิดแล้วไหม |
+| --- | --- |
+| เรียง event ที่ `occurred_at` เท่ากันเป๊ะ (`care-agent-platform` บน Postgres) | ✅ ปิดด้วย field นี้ |
+| จับใบหายกลางทาง | ✅ `devfactory-core` มีอยู่แล้วผ่าน from→to ของ `STATE_TRANSITION` |
+| จับ trail ที่ถูกตัดท้าย | ❌ **field นี้ปิดไม่ได้** — ต้องมีใบปิดท้ายหรือ checkpoint |
+
+**เลขลำดับบน event บอกไม่ได้ว่าใบสุดท้ายควรเป็นเลขอะไร** เพราะคำตอบไม่ได้อยู่ในใบไหนเลย · `sequence` เป็นตัวจับช่องว่าง*กลางทาง* ไม่ใช่ตัวจับ*ปลายที่ขาด* · จึงไม่รับข้อเสนอ contiguous-ต่อ-subject ที่จะบังคับให้ทุก consumer serialize การเขียนโดยไม่ได้ปิดช่องที่ผู้ขอยกมา
+
+สอดคล้องกับ guarantee ข้อ 8 ที่มีอยู่แล้ว — *"trace ที่ไม่มี step ย่อยถือว่าถูกต้อง"* — สัญญาบอกอยู่แล้วว่าการไม่มี event ไม่ใช่หลักฐานว่าไม่มีเหตุการณ์
+
+### ไม่ breaking
+
+`required` ยัง 7 ตัวเท่าเดิม · ไม่มี `sequence` = เรียงด้วย `occurred_at` เหมือนเดิม → payload ที่ valid กับ `v1.2.0` ยัง valid ทุกใบ
+
+### ยังไม่ทำในรอบนี้
+
+* **ใบปิดท้ายสำหรับทุกการจบแบบ terminal** (`FAILED` · `CANCELLED` · `TIMED_OUT`) — เป็น semantics ของ `devfactory-core` ต้องมี RFC ที่ต้นทางตาม [ADR-0006](../../../decisions/0006-contract-versioning.md)
+* **ตัวตนของผู้ผลิต** — `source` มีแค่ `kind` กับ `system` · การรับประกันระดับ producer จึงยังเขียนลงสัญญาไม่ได้
+* **event ที่บันทึกว่าเงื่อนไข consent ถูกประเมินแล้ว** — ฝากมาจาก [ADR-0014](../../../decisions/0014-consent-access-time-conditions.md) เป็นเรื่องเนื้อหาของ event ไม่ใช่ลำดับ
+
+### หมายเหตุการนับเลข — แก้เลขซ้ำที่ค้างอยู่
+
+ไฟล์นี้เคยมี **`v1.1.0` สองอัน** — 2026-08-18 (RFC-0009 ประกาศว่า `EventType` เป็นชุดเปิด) กับ 2026-08-19 ([#17](https://github.com/monthop-gmail/agent-platform/issues/17) แก้ให้ schema ทำตามที่ประกาศ + เพิ่ม `record` ใน `SubjectType`) และ `v1.0.0` ถูกแทรกอยู่ระหว่างกลาง
+
+ตัวหลังเปลี่ยนเป็น **`v1.2.0`** และเรียงใหม่ตามเวลา · รอบนี้จึงเป็น `v1.3.0` ไม่ใช่ `v1.2.0`
+ไม่มี consumer รายไหน pin ด้วยเลข semver ของ contract (pin ด้วยชื่อ contract + commit SHA ตาม [ADR-0006](../../../decisions/0006-contract-versioning.md)) การแก้เลขจึงไม่กระทบใคร
+
+
+## v1.2.0 — 2026-08-19
+
+ไม่ breaking — ผ่อน validation และเพิ่มค่าใน enum เท่านั้น ([ADR-0006](../../../decisions/0006-contract-versioning.md))
+
+- **`event_type` รับค่านอก 7 ตัวได้แล้ว** ([#17](https://github.com/monthop-gmail/agent-platform/issues/17)) — เพิ่ม `$defs.EventTypeName`
+  (`type: string` + `pattern`) และให้ field อ้างตัวนั้นแทน `$defs.EventType`
+  · `EventType` ยังอยู่เป็นชุดค่าที่ platform รับรองความหมาย ให้ consumer generate constant ได้
+  · เดิม description เขียนว่าชุดเปิดแต่ `enum` ยังปิด ทำให้ขัดกับ `platform_rules` ในไฟล์เดียวกัน
+    และขัดกับ ADR-0006 Rule 2 ฉบับแก้ (RFC-0009) · `devfactory-core` `payload_check` เจอตอนรันจริง
+    (`SIGHTING_RECORDED` · `GEOFENCE_CROSSED` validate ไม่ผ่าน)
+- **เพิ่ม `record` ใน `SubjectType`** ([#14](https://github.com/monthop-gmail/agent-platform/issues/14)) — บันทึกของโดเมนที่ต้องตามรอยได้แต่ไม่ได้เกิดจาก job
+  · ชนิดจริงอยู่ใน `metadata.record_type` · แยกจาก `artifact` ที่เป็นผลผลิตของ execution
+- semantics ไม่เปลี่ยน — vocabulary 7 ตัวและ guarantees ทั้ง 8 ข้อคงเดิม ไม่ต้องมี RFC ที่ต้นทาง
+  (`semantics_version` ยัง `1.1`)
+
 ## v1.1.0 — 2026-08-18
 - **`EventType` เปลี่ยนจากชุดปิดเป็นชุดเปิด** — 7 ค่าเดิมเป็น *ขั้นต่ำที่ต้องมี* ไม่ใช่ชุดทั้งหมด
 - **เพิ่ม event type ใหม่เป็น additive** ทำได้ผ่าน ADR ที่ repo นี้ ไม่ต้องมี RFC ที่ `devfactory-core`
@@ -15,18 +68,3 @@
 - `job_id` optional · `subject_type` + `subject_id` required ตาม RFC-0008
 - เพิ่ม field ระดับ platform: `tenant_id` `workspace_id` `correlation_id` `policy_result` `usage` `source` ตาม RFC-0005 Rule 1
 - ตัดสินฝั่ง schema: **เก็บทั้ง `job_id` และ `subject_id`** เพราะเป็นคนละคำถาม (สายเหตุ vs หัวเรื่อง) พร้อมกฎว่าถ้า `subject_type: job` ต้องตรงกัน
-
-## v1.1.0 — 2026-08-19
-
-ไม่ breaking — ผ่อน validation และเพิ่มค่าใน enum เท่านั้น ([ADR-0006](../../../decisions/0006-contract-versioning.md))
-
-- **`event_type` รับค่านอก 7 ตัวได้แล้ว** ([#17](https://github.com/monthop-gmail/agent-platform/issues/17)) — เพิ่ม `$defs.EventTypeName`
-  (`type: string` + `pattern`) และให้ field อ้างตัวนั้นแทน `$defs.EventType`
-  · `EventType` ยังอยู่เป็นชุดค่าที่ platform รับรองความหมาย ให้ consumer generate constant ได้
-  · เดิม description เขียนว่าชุดเปิดแต่ `enum` ยังปิด ทำให้ขัดกับ `platform_rules` ในไฟล์เดียวกัน
-    และขัดกับ ADR-0006 Rule 2 ฉบับแก้ (RFC-0009) · `devfactory-core` `payload_check` เจอตอนรันจริง
-    (`SIGHTING_RECORDED` · `GEOFENCE_CROSSED` validate ไม่ผ่าน)
-- **เพิ่ม `record` ใน `SubjectType`** ([#14](https://github.com/monthop-gmail/agent-platform/issues/14)) — บันทึกของโดเมนที่ต้องตามรอยได้แต่ไม่ได้เกิดจาก job
-  · ชนิดจริงอยู่ใน `metadata.record_type` · แยกจาก `artifact` ที่เป็นผลผลิตของ execution
-- semantics ไม่เปลี่ยน — vocabulary 7 ตัวและ guarantees ทั้ง 8 ข้อคงเดิม ไม่ต้องมี RFC ที่ต้นทาง
-  (`semantics_version` ยัง `1.1`)

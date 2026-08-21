@@ -118,6 +118,20 @@ properties:
   occurred_at:
     type: string
     format: date-time
+  sequence:
+    type: integer
+    minimum: 1
+    description: >-
+      ลำดับสำหรับ **เรียง** event ภายใน subject เดียวกันจากผู้ผลิตเดียวกัน — เพิ่มขึ้นเสมอ
+      ([ADR-0015](../../../decisions/0015-event-sequence-and-trail-closure.md))
+
+      มีอยู่เพราะ `occurred_at` เท่ากันเป๊ะได้ (หลาย event ใน transaction เดียว นาฬิกาเดียวกัน)
+      แล้วฐานข้อมูลไม่รับประกันลำดับของแถวที่เท่ากัน — ผู้อ่านเรียงด้วย `(occurred_at, sequence)`
+
+      ⚠️ **ไม่รับประกันความต่อเนื่อง** — ช่องว่างไม่ได้แปลว่ามีใบหาย · เลขนี้ตอบได้แค่ว่า
+      *ใบไหนมาก่อนใบไหน* ไม่ได้ตอบว่า *ครบหรือยัง* · การรู้ว่าใบสุดท้ายควรเป็นเลขอะไร
+      ต้องมาจากคำแถลงที่อยู่นอกลำดับ (ใบปิดท้ายของ subject ที่จบแล้ว หรือ checkpoint
+      ที่ชั้น store) ไม่ใช่จากตัวเลขบน event
   source:
     type: object
     description: >-
@@ -179,3 +193,7 @@ platform_rules:
   rules:
     - "ถ้า `subject_type: job` และมี `job_id` ทั้งสองค่าต้องตรงกัน"
     - "consumer ที่เจอ `event_type` ที่ไม่รู้จักต้องเก็บ event ไว้แล้วข้ามการตีความ ห้าม drop และห้าม fail"
+    - "sequence ใช้เรียงเท่านั้น — ช่องว่างไม่มีความหมาย ห้ามตีความว่ามีใบหาย
+       ผู้ผลิตที่ใช้ transaction ที่ rollback ได้จะสร้างช่องว่างโดยไม่มีใครทำผิด"
+    - "event ที่ไม่มี sequence เรียงด้วย occurred_at อย่างเดียว — ห้ามถือว่าอยู่ก่อนหรือหลัง
+       ใบที่มี sequence โดยอัตโนมัติ (กันกรณี producer เก่ากับใหม่เขียนปนกันระหว่าง migrate)"
