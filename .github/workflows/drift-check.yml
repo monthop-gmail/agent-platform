@@ -7,20 +7,13 @@ name: drift check
 # ห้าม generate · ห้าม commit · ห้าม deploy · ห้ามเรียก service อื่นนอกจาก raw.githubusercontent.com
 
 on:
+  # ไม่มี paths: filter โดยเจตนา — check นี้เป็น required check ของ branch protection
+  # และ required check ที่ไม่ทำงานจะไม่รายงานผล ทำให้ PR ค้างที่
+  # "Expected — waiting for status to be reported" โดยไม่มีทางไปต่อ
+  # PR ที่แตะแค่ decisions/ หรือ ref/ จะติดกับดักนั้นพอดี ซึ่งเป็น PR ส่วนใหญ่ของ repo นี้
   push:
     branches: [main]
-    paths:
-      - 'contracts/**'
-      - 'profiles/**'
-      - 'architecture/consumers.md'
-      - 'conformance/**'
-      - '.github/workflows/drift-check.yml'
   pull_request:
-    paths:
-      - 'contracts/**'
-      - 'profiles/**'
-      - 'architecture/consumers.md'
-      - 'conformance/**'
   schedule:
     # ทุกวัน 02:00 UTC — จับกรณีที่ repo ต้นทางขยับ semantics_version
     # โดยที่ไม่มีอะไรใน repo นี้เปลี่ยน ซึ่ง push/PR trigger จับไม่ได้
