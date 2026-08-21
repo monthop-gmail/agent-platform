@@ -37,6 +37,14 @@ canonical schema ที่ทุก repo ใน ecosystem ต้องใช้�
 
 คำขอที่ไม่ครบ 4 ข้อไม่ได้ถูกปฏิเสธถาวร — แต่ต้องรอให้ครบก่อน ไม่ใช่ผ่านด้วยความน่าเชื่อของผู้ขอ
 
+### ⏳ field ที่ deprecated รอลบใน major ถัดไป
+
+| contract | field | แทนด้วย | ลบเมื่อ |
+| --- | --- | --- | --- |
+| `policy/v1` | `Request.subject` | `Request.actor` | `policy/v2` ([ADR-0017](../decisions/0017-the-word-subject.md)) |
+
+field ที่ติด `deprecated: true` **ยังใช้ได้และยัง valid** — มีอยู่เพื่อไม่ให้ consumer ที่ pin อยู่ต้องขึ้น major เพราะชื่อ · แต่ **major ถัดไปที่เกิดด้วยเหตุอื่นต้องลบมันทิ้งพร้อมกัน** ไม่ใช่ปล่อยไว้เป็นชื่อที่สองถาวร — สองชื่อสำหรับสิ่งเดียวกันคือสิ่งที่ repo นี้ห้ามไว้ทุกที่ ([`expires_at: null`](consent/v1/) · `conditions: []`)
+
 ### 🔗 Derived contracts
 
 `approval/v1` และ `event/v1` **derive semantics มาจาก `devfactory-core`** ตาม [ADR-0006 C2](../decisions/0006-contract-versioning.md) — เราเป็นเจ้าของ *รูปร่างบน wire* เขาเป็นเจ้าของ *ความหมาย*

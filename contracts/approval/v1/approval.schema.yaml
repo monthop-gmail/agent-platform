@@ -53,7 +53,10 @@ properties:
 
   subject:
     type: object
-    description: อนุมัติให้อะไร
+    description: >-
+      อนุมัติให้อะไร — `subject` ที่นี่คือ **สิ่งที่ถูกอนุมัติ** ไม่ใช่ผู้กระทำ
+      และไม่ใช่เจ้าของข้อมูล ([ADR-0017](../../../decisions/0017-the-word-subject.md))
+      🔒 เป็น semantics ของ devfactory-core — เปลี่ยนชื่อที่นี่ไม่ได้
     required: [type, id]
     properties:
       type:

@@ -24,21 +24,45 @@ $defs:
     description: เหตุผลเชิงปริมาณที่ทำให้ถูกปฏิเสธหรือถูกจำกัด
     enum: [none, rate_limited, budget_exceeded, quota_exhausted, out_of_window]
 
+  Actor:
+    description: >-
+      **ผู้กระทำ** — *"ใครจะทำ"* ([ADR-0017](../../../decisions/0017-the-word-subject.md))
+
+      🔒 คนละอย่างกับ `subject` ในความหมายที่ contract อื่นใช้ · ดูตารางศัพท์ที่ lock ไว้
+      ใน [`decisions/README.md`](../../../decisions/README.md) — โดยเฉพาะ `consent/v1.subject_id`
+      ที่หมายถึง **เจ้าของข้อมูล** ซึ่งเป็นคนละคนกับผู้กระทำเสมอในกรณีที่น่ากังวลที่สุด
+    type: object
+    required: [principal]
+    properties:
+      principal:
+        $ref: https://schemas.agent-platform.internal/identity/v1/identity.schema.yaml#/$defs/Principal
+      agent_id:
+        $ref: https://schemas.agent-platform.internal/identity/v1/identity.schema.yaml#/$defs/AgentId
+
 Request:
   type: object
-  required: [context, subject, action]
+  required: [context, action]
+  # ต้องมี actor หรือ subject อย่างใดอย่างหนึ่ง — ห้ามมีทั้งคู่
+  # ([ADR-0017](../../../decisions/0017-the-word-subject.md)) · payload เดิมที่ส่ง `subject`
+  # ยัง valid ทุกใบ และไม่มีใบเดิมใบไหนส่งทั้งคู่ได้เพราะ `actor` เพิ่งเกิด
+  oneOf:
+    - required: [actor]
+    - required: [subject]
   properties:
     context:
       $ref: https://schemas.agent-platform.internal/identity/v1/identity.schema.yaml#/$defs/RequestContext
+    actor:
+      $ref: '#/$defs/Actor'
     subject:
-      type: object
-      description: ใครจะทำ
-      required: [principal]
-      properties:
-        principal:
-          $ref: https://schemas.agent-platform.internal/identity/v1/identity.schema.yaml#/$defs/Principal
-        agent_id:
-          $ref: https://schemas.agent-platform.internal/identity/v1/identity.schema.yaml#/$defs/AgentId
+      $ref: '#/$defs/Actor'
+      deprecated: true
+      description: >-
+        ⚠️ **เลิกใช้ — ใช้ `actor` แทน** · รูปเหมือนกันทุกอย่าง เปลี่ยนแค่ชื่อ
+
+        ชื่อนี้ผิดตามคำวินิจฉัยของ [ADR-0017](../../../decisions/0017-the-word-subject.md):
+        `subject` แปลว่า *สิ่งที่บันทึกนั้นเกี่ยวกับ* ไม่ใช่ *ผู้กระทำ* — และในไฟล์นี้มันคือผู้กระทำ
+
+        ยังอยู่เพื่อไม่ให้ consumer ที่ pin อยู่ต้องขึ้น major เพราะชื่อ · **จะถูกลบใน `policy/v2`**
     action:
       type: object
       description: จะทำอะไร

@@ -88,6 +88,9 @@ properties:
     $ref: https://schemas.agent-platform.internal/identity/v1/identity.schema.yaml#/$defs/WorkspaceId
     description: optional เฉพาะ event ระดับ tenant ตาม ADR-0007
 
+  # ⚠️ `subject` ที่นี่ = **หัวเรื่องของบันทึก** ไม่ใช่ผู้กระทำและไม่ใช่เจ้าของข้อมูล
+  #    ผู้กระทำอยู่ที่ `actor` · ดูตารางศัพท์ที่ lock ไว้ ([ADR-0017](../../../decisions/0017-the-word-subject.md))
+  #    🔒 ชื่อคู่นี้เป็น semantics ของ devfactory-core (RFC-0008) — เปลี่ยนที่นี่ไม่ได้
   subject_type:
     $ref: '#/$defs/SubjectType'
   subject_id:
