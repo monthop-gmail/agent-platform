@@ -135,6 +135,11 @@ properties:
     $ref: https://schemas.agent-platform.internal/identity/v1/identity.schema.yaml#/$defs/Id
     description: >-
       **เจ้าของข้อมูล** — 🔒 ไม่ใช่ actor และไม่ใช่ resource
+
+      ⚠️ คำว่า `subject` ในไฟล์นี้คือ **data subject** ตามศัพท์กฎหมาย (PDPA/GDPR)
+      ซึ่งเป็นข้อยกเว้นที่ [ADR-0017](../../../decisions/0017-the-word-subject.md) อนุญาตไว้ · `policy/v1` ใช้ `actor` เรียกผู้กระทำ
+      **อย่าจับคู่ `consent/v1.subject_id` กับ `policy/v1.actor` ว่าเป็นคนเดียวกัน**
+      — ในเคสที่สำคัญที่สุด (หมออ่านข้อมูลผู้ป่วย) มันคนละคนเสมอ
       ชื่อ field เป็น `subject_id` ไม่ใช่ชื่อของโดเมน (`patient_id`, `customer_id`)
       โดยเจตนา เพราะ platform ไม่รู้จักโดเมนและไม่ควรรู้
 

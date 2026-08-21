@@ -11,7 +11,9 @@ required: [subject, capabilities]
 properties:
   subject:
     type: object
-    description: ใครเป็นคนประกาศ
+    description: >-
+      ใครเป็นคนประกาศ — `subject` ที่นี่คือ **สิ่งที่ declaration นี้เกี่ยวกับ**
+      ซึ่งตรงกับคำวินิจฉัยใน [ADR-0017](../../../decisions/0017-the-word-subject.md) · ผู้กระทำใน `policy/v1` ใช้ `actor`
     required: [kind, id]
     properties:
       kind:
