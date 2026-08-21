@@ -155,18 +155,18 @@ properties:
       to: { type: string }
       reason: { type: string }
   policy_result:
-    type: object
+    $ref: https://schemas.agent-platform.internal/policy/v1/policy-decision.schema.yaml#/$defs/DecisionSummary
     description: >-
       บันทึก **ทั้ง `action_risk` และ `authority` ที่ใช้ตัดสิน** ไม่ใช่แค่ผลลัพธ์
-      เพื่อให้ audit ย้อนหลังรู้ว่าตัดสินจากอะไร (ADR-0010)
-    properties:
-      effect:
-        $ref: https://schemas.agent-platform.internal/policy/v1/policy-decision.schema.yaml#/$defs/Effect
-      authority:
-        $ref: https://schemas.agent-platform.internal/policy/v1/policy-decision.schema.yaml#/$defs/Authority
-      action_risk:
-        $ref: https://schemas.agent-platform.internal/capability/v1/capability.schema.yaml#/$defs/ActionRisk
-      policy_id: { type: string }
+      เพื่อให้ audit ย้อนหลังรู้ว่าตัดสินจากอะไร ([ADR-0010](../../../decisions/0010-risk-approval-taxonomy.md))
+
+      อ้าง `policy/v1` `$defs.DecisionSummary` **ไม่ประกาศรูปเอง**
+      ([ADR-0018](../../../decisions/0018-policy-result-single-source.md)) — เดิมประกาศซ้ำ
+      ทำให้ field ที่เพิ่มใน `Decision` ไม่ไหลมาที่นี่เองและไม่มีอะไรคอยจับว่าเพี้ยน
+
+      ⚠️ ไม่ใช่ทั้ง `Decision` โดยเจตนา — `reason` เป็น free text และ `expires_at`
+      ไม่มีความหมายในบันทึกที่ immutable แล้ว · `consent` ก็ไม่อยู่ในนี้เพราะ event
+      มี `consent` ของตัวเองที่ระดับบนสุด ใส่ซ้ำสองที่ในบันทึกเดียวคือ drift ที่รอเกิด
   consent:
     $ref: https://schemas.agent-platform.internal/consent/v1/consent.schema.yaml#/$defs/Evaluation
     description: >-

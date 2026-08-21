@@ -1,5 +1,25 @@
 # event/v1
 
+## v1.5.0 — 2026-08-21
+
+`event/v1.policy_result` เคยประกาศรูปของตัวเอง ไม่ได้ `$ref` ไป `policy/v1` — มีสองที่ที่บอกว่า *"ผลของ policy หน้าตาอย่างไร"* และไม่มีอะไรคอยจับว่ายังตรงกัน · `consent` ที่ [ADR-0016](../../../decisions/0016-recording-which-consent-allowed-access.md) เพิ่มเข้า `Decision` ไม่ไหลไปที่นั่นเอง — พิสูจน์แล้วว่าเพี้ยนจริง ไม่ใช่ความเสี่ยงทางทฤษฎี
+
+[ADR-0018](../../../decisions/0018-policy-result-single-source.md) เคาะ option B — **ปัญหาคือประกาศซ้ำ ไม่ใช่ย่อ**
+
+* `policy_result` เปลี่ยนจาก**ประกาศรูปเอง** เป็น `$ref` ไป `policy/v1#/$defs/DecisionSummary`
+
+### ไม่ breaking — และไม่เข้มขึ้นแม้แต่นิดเดียว
+
+`DecisionSummary` ไม่มี `required` เหมือนที่ `policy_result` เดิมไม่มี · **รูปที่ยอมรับเหมือนเดิมเป๊ะ** — ใส่ครบ 4 field · ใส่บางส่วน · หรือ `{}` ก็ยัง valid เหมือนก่อน
+
+ที่เลือกทางนี้แทนการ `$ref` ทั้ง `Decision` เพราะ `Decision.required` มี 4 ตัว ซึ่งจะทำให้ `policy_result` ที่ใส่ไม่ครบกลายเป็น invalid = เข้มขึ้น = breaking ตามตัวอักษรของ [ADR-0006](../../../decisions/0006-contract-versioning.md)
+
+### `consent` จงใจไม่อยู่ใน `policy_result`
+
+event มี `consent` ของตัวเองที่ระดับบนสุดแล้ว (`v1.4.0`) — ใส่ซ้ำสองที่ในบันทึกเดียวคือ drift ที่รอเกิด
+
+**`guarantees` ไม่ขยับ** (ยัง 8 ข้อ) · `derived_from.semantics_version` ยัง `"1.1"`
+
 ## v1.4.0 — 2026-08-21
 
 เพิ่ม **ผลการประเมินความยินยอม** ตาม [ADR-0016](../../../decisions/0016-recording-which-consent-allowed-access.md) (option C)

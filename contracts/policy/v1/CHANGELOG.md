@@ -1,5 +1,24 @@
 # policy/v1
 
+## v1.3.0 — 2026-08-21
+
+`event/v1.policy_result` เคยประกาศรูปของตัวเอง ไม่ได้ `$ref` ไป `policy/v1` — มีสองที่ที่บอกว่า *"ผลของ policy หน้าตาอย่างไร"* และไม่มีอะไรคอยจับว่ายังตรงกัน · `consent` ที่ [ADR-0016](../../../decisions/0016-recording-which-consent-allowed-access.md) เพิ่มเข้า `Decision` ไม่ไหลไปที่นั่นเอง — พิสูจน์แล้วว่าเพี้ยนจริง ไม่ใช่ความเสี่ยงทางทฤษฎี
+
+[ADR-0018](../../../decisions/0018-policy-result-single-source.md) เคาะ option B — **ปัญหาคือประกาศซ้ำ ไม่ใช่ย่อ**
+
+* `$defs.DecisionSummary` — `effect` · `authority` · `action_risk` · `policy_id` · **ไม่มี `required`**
+* `Decision` อ้าง Summary ผ่าน `allOf` แล้วประกาศเฉพาะส่วนที่เกิน (`constraint` `reason` `evaluated_at` `expires_at` `consent`)
+
+### ชุดย่อยเป็นชุดย่อยโดยเจตนา
+
+🔒 **field ใหม่ใน `Decision` ไม่ไหลเข้า Summary เอง — ต้องเคาะทุกครั้ง**
+
+`reason` เป็น free text และ `expires_at` ไม่มีความหมายในบันทึกที่ immutable แล้ว · โดยเฉพาะ `reason` ที่ถ้าไหลเข้า audit เองจะเฉียดกับ guarantee ข้อ 7 ของ `event/v1` (*ห้ามเก็บ private reasoning เป็น audit record*) **โดยไม่มีใครตัดสินใจ** — ซึ่งเป็นเหตุผลที่ไม่เลือกทางยกทั้ง `Decision` ไปให้ event
+
+### ไม่ breaking
+
+ชุด property และ `required` ของ `Decision` **เท่าเดิมทุกตัว** — ย้ายที่ประกาศ ไม่ได้ย้ายความหมาย · payload ที่ valid กับ `v1.2.0` ยัง valid ทุกใบ
+
 ## v1.2.0 — 2026-08-21
 
 `Request` เรียกผู้กระทำว่า `subject` ขณะที่ `consent/v1` เขียนกำกับ field ชื่อเดียวกันไว้เองว่า 🔒 *"ไม่ใช่ actor"* — [ADR-0017](../../../decisions/0017-the-word-subject.md) ไล่ทั้ง `contracts/` แล้วพบว่าคำนี้ถูกใช้ใน **5 contract 3 ความหมาย** และวินิจฉัยว่า **`subject` = สิ่งที่บันทึกนั้นเกี่ยวกับ · ผู้กระทำคือ `actor`** ซึ่งทำให้ 4 ใน 5 ถูกอยู่แล้ว และเหลือไฟล์นี้ไฟล์เดียวที่ต้องแก้

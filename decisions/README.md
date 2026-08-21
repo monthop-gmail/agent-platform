@@ -35,6 +35,7 @@ ADR ในโฟลเดอร์นี้เป็น **authority** ของ�
 | [0015](0015-event-sequence-and-trail-closure.md) | `event/v1` ลำดับ + trail ที่ถูกตัดท้าย | **C** — `sequence` เรียงอย่างเดียว · ช่องว่างไม่มีความหมาย · ความครบถ้วนปิดด้วยใบปิดท้าย (RFC ที่ต้นทาง) | ✅ Accepted |
 | [0016](0016-recording-which-consent-allowed-access.md) | บันทึกว่าอนุญาตด้วยความยินยอมใบไหน | **C** — `consent/v1` `$defs.Evaluation` นิยามครั้งเดียว · `policy/v1` + `event/v1` `$ref` · แช่แข็งผล ไม่ใช่เก็บ id | ✅ Accepted |
 | [0017](0017-the-word-subject.md) | คำว่า `subject` | **B** — `subject` = สิ่งที่บันทึกเกี่ยวกับ · ผู้กระทำคือ `actor` · `policy/v1` เพิ่ม `actor` deprecate `subject` | ✅ Accepted |
+| [0018](0018-policy-result-single-source.md) | `policy_result` เป็นสำเนามือของ `Decision` | **B** — `$defs.DecisionSummary` ประกาศครั้งเดียว · ชุดย่อยเป็นชุดย่อยโดยเจตนา ต้องเคาะทุกครั้ง | ✅ Accepted |
 
 การเคาะบันทึกไว้ที่ [issue #1–#10](https://github.com/monthop-gmail/agent-platform/issues?q=is%3Aissue+label%3Aadr) — **ไฟล์บันทึกว่าตัดสินอะไร issue บันทึกว่าใครตัดสินและเมื่อไหร่**
 
@@ -78,7 +79,7 @@ contracts/ P0 ✅ ── profiles/ ✅ ── planes/ ✅
   ↓
 0014 (consent conditions) ✅ ── 0015 (event sequence) ✅ ── 0016 (consent evaluation) ✅
   ↓
-0017 (คำว่า subject) ✅
+0017 (คำว่า subject) ✅ ── 0018 (policy_result ที่เดียว) ✅
 ```
 
 ## ที่มา
