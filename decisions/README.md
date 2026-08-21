@@ -31,6 +31,7 @@ ADR ในโฟลเดอร์นี้เป็น **authority** ของ�
 | [0011](0011-conformance-automation.md) | Conformance automation | **C** — `conformance/` เป็นข้อยกเว้นเดียวของ ADR-0008 · supersede คำตอบ "ตรวจด้วยคน" ใน 0006 | ✅ Accepted |
 | [0012](0012-consent-contract.md) | Consent contract | **A + D1** — รับเป็น `consent/v1` · platform ถือ semantics · เกณฑ์รับ contract ใหม่ 4 ข้อ | ✅ Accepted |
 | [0013](0013-approval-supersedes-chain.md) | `approval/v1` supersedes chain | **A** — เพิ่ม optional `supersedes_approval_id` · ไม่ bump major · guarantees ไม่ขยับ | ✅ Accepted |
+| [0014](0014-consent-access-time-conditions.md) | `consent/v1` เงื่อนไขตอนเข้าถึง | **B** — `conditions` = `kind` + `params` · ตรวจทุกครั้งที่ใช้ · ไม่รู้จัก = ไม่อนุญาต | ✅ Accepted |
 
 การเคาะบันทึกไว้ที่ [issue #1–#10](https://github.com/monthop-gmail/agent-platform/issues?q=is%3Aissue+label%3Aadr) — **ไฟล์บันทึกว่าตัดสินอะไร issue บันทึกว่าใครตัดสินและเมื่อไหร่**
 
@@ -70,6 +71,8 @@ Architecture Owner ของ [`devfactory-core`](https://github.com/monthop-gmai
 contracts/ P0 ✅ ── profiles/ ✅ ── planes/ ✅
   ↓
 0011 (conformance automation) ✅ ── 0012 (consent) ✅ ── 0013 (approval supersedes) ✅
+  ↓
+0014 (consent conditions) ✅ ── 0015 (event sequence) ยังไม่เขียน
 ```
 
 ## ที่มา
