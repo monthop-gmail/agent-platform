@@ -1,8 +1,16 @@
 # Code owners — ทำให้ authority ใน ADR-0006 มีผลจริง ไม่ใช่แค่เขียนในเอกสาร
 #
-# หมายเหตุ: CODEOWNERS จะบังคับให้ต้อง review ก่อน merge ได้จริง
-# ต่อเมื่อเปิด branch protection + "Require review from Code Owners" บน main
-# ตอนนี้ยังไม่เปิด — ไฟล์นี้จึงทำหน้าที่ auto-request reviewer เท่านั้น
+# ⚠️ วันนี้ไฟล์นี้ยังไม่ให้ผลอะไรเลย และไม่ใช่เพราะลืมเปิดอะไร
+#
+# branch protection เปิดแล้วตั้งแต่ 2026-08-22 — required status check `drift`
+# พร้อม enforce_admins · ทำให้ ADR-0006 ข้อ 3 (test fail = ปล่อยไม่ได้) มีผลจริง
+#
+# แต่ **ไม่ได้เปิด "Require review from Code Owners" โดยเจตนา** เพราะ repo นี้มี
+# collaborator คนเดียว และ GitHub ไม่ให้อนุมัติ PR ของตัวเอง — เปิดแล้วจะ merge
+# ไม่ได้เลยสักอัน ไม่ใช่ได้ gate ที่เข้มขึ้น
+#
+# ไฟล์นี้จะเริ่มทำงานเมื่อมี maintainer คนที่สอง หรือมีคนนอก fork มาเปิด PR
+# — ตอนนั้นค่อยเปิด required code-owner review ได้โดยไม่ล็อกตัวเอง
 
 # ค่าเริ่มต้น
 *                       @monthop-gmail
