@@ -47,6 +47,14 @@ $defs:
       - EXECUTION_STARTED
       - EXECUTION_FAILED
       - JOB_COMPLETED
+      # consent — `consent/v1` consent_rules ข้อ 2 บังคับให้ออก event ทุกครั้ง
+      # ([ADR-0020](../../../decisions/0020-consent-event-vocabulary.md))
+      # ⚠️ ไม่มี CONSENT_USED โดยเจตนา — การใช้บันทึกด้วย field `consent` บน event
+      #    ที่เกิดการเข้าถึงจริง ไม่ใช่ด้วย event type แยก ไม่งั้นจะมีสองบันทึก
+      #    ของเหตุการณ์เดียวกัน และ query ด้วย event_type จะตกหล่นการใช้
+      #    ที่ถูกบันทึกบน event ของโดเมน ซึ่งเป็นส่วนใหญ่
+      - CONSENT_GRANTED
+      - CONSENT_REVOKED
 
   EventTypeName:
     description: >-
@@ -70,7 +78,11 @@ $defs:
       (ผู้ป่วย · ใบสั่งยาเวอร์ชันหนึ่ง · รายการสินค้า) · ชนิดที่แท้จริงอยู่ใน
       `metadata.record_type` — platform ไม่รู้จักชนิดของโดเมนและไม่ควรรู้
       แยกจาก `artifact` ซึ่งเป็นผลผลิตของ execution ([`artifact/v1`](../../artifact/v1/))
-    enum: [job, execution, step, agent, tool_call, artifact, approval, external, record]
+
+      `consent` = ใบยินยอมตาม [`consent/v1`](../../consent/v1/) — เป็น contract ระดับ platform
+      เหมือน `approval` จึงมีค่าของตัวเอง ไม่รวมใน `record` ที่สงวนไว้ให้บันทึกของโดเมน
+      ([ADR-0020](../../../decisions/0020-consent-event-vocabulary.md))
+    enum: [job, execution, step, agent, tool_call, artifact, approval, consent, external, record]
 
 type: object
 required: [event_id, event_type, tenant_id, subject_type, subject_id, occurred_at, source]

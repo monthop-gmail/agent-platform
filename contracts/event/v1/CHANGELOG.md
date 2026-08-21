@@ -1,5 +1,32 @@
 # event/v1
 
+## v1.6.0 — 2026-08-21
+
+`consent/v1` `consent_rules` ข้อ 2 บังคับให้การให้ · การใช้ · การเพิกถอน ออก audit event ทุกครั้ง แต่ 7 ค่าที่ platform รับรองไม่มีตัวไหนเกี่ยวกับ consent — [ADR-0020](../../../decisions/0020-consent-event-vocabulary.md) option B
+
+* `EventType` +2 — **`CONSENT_GRANTED`** · **`CONSENT_REVOKED`**
+* `SubjectType` +1 — **`consent`**
+
+### ⚠️ ไม่มี `CONSENT_USED` โดยเจตนา
+
+การใช้บันทึกด้วย field `consent` (`consent/v1` `$defs.Evaluation`) บน event ที่เกิดการเข้าถึงจริง ซึ่ง [ADR-0016](../../../decisions/0016-recording-which-consent-allowed-access.md) เพิ่มไว้แล้ว
+
+ถ้ามี event type แยกจะเกิด **สองบันทึกของเหตุการณ์เดียวกัน** และที่แย่กว่านั้น — query ด้วย `event_type` จะ **ตกหล่นการใช้ที่บันทึกบน event ของโดเมน ซึ่งเป็นส่วนใหญ่** · query ที่ถูกต้องคือหาจาก `consent.grant_id` ซึ่งครอบทั้งสองแบบอยู่แล้ว
+
+### ทำไม `consent` มีค่าใน `SubjectType` ของตัวเอง
+
+เป็น contract ระดับ platform เหมือน `approval` ที่มีค่าของตัวเองอยู่แล้ว — ไม่ใช่ record ของโดเมนที่ควรไปรวมใน `record` (ซึ่งสงวนไว้ให้บันทึกที่ platform ไม่รู้จักชนิด)
+
+### ทำได้เองไม่ต้องรอ RFC
+
+`contract-semantics.yaml` ของ `devfactory-core` ระบุใน `contracts.event.platform_may_add_freely` ตรง ๆ ว่า **"event type ใหม่"** และ **"subject_type / subject_id"** · `event_types.closed: false`
+
+**`guarantees` ไม่ขยับ** (ยัง 8 ข้อ) · `derived_from.semantics_version` ยัง `"1.1"`
+
+### ไม่ breaking — ผ่อนอย่างเดียว
+
+7 ค่าเดิมของ `EventType` ไม่ขยับ · `SubjectType` รับค่าเพิ่มหนึ่งค่า · field `event_type` ยังผูกกับ `EventTypeName` (ชุดเปิด) เหมือนเดิม
+
 ## v1.5.0 — 2026-08-21
 
 `event/v1.policy_result` เคยประกาศรูปของตัวเอง ไม่ได้ `$ref` ไป `policy/v1` — มีสองที่ที่บอกว่า *"ผลของ policy หน้าตาอย่างไร"* และไม่มีอะไรคอยจับว่ายังตรงกัน · `consent` ที่ [ADR-0016](../../../decisions/0016-recording-which-consent-allowed-access.md) เพิ่มเข้า `Decision` ไม่ไหลไปที่นั่นเอง — พิสูจน์แล้วว่าเพี้ยนจริง ไม่ใช่ความเสี่ยงทางทฤษฎี
