@@ -1,5 +1,24 @@
 # event/v1
 
+## v1.4.0 — 2026-08-21
+
+เพิ่ม **ผลการประเมินความยินยอม** ตาม [ADR-0016](../../../decisions/0016-recording-which-consent-allowed-access.md) (option C)
+
+`consent_rules` ข้อ 6 บังคับว่าการเข้าถึงต้องผ่านทั้ง `policy/v1` และ consent แต่ไม่มี record ไหนบอกได้ว่า **อนุญาตด้วยความยินยอมใบไหน** — และหลัง [ADR-0014](../../../decisions/0014-consent-access-time-conditions.md) การเก็บแค่ `grant_id` ก็ยังไม่พอ เพราะใบที่มี `conditions` ตอบตัวเองไม่ได้ ประเมินใหม่ทีหลังจะได้คำตอบของ *วันที่ประเมิน* ไม่ใช่ของ *วันที่เข้าถึง*
+
+* `consent` — optional · `$ref` ไป `consent/v1#/$defs/Evaluation`
+* **`guarantees` ไม่ขยับ** (ยัง 8 ข้อ) · `derived_from.semantics_version` ยัง `"1.1"` — เป็น field ระดับ platform ที่ [ADR-0006 กฎข้อ 1](../../../decisions/0006-contract-versioning.md) ให้เพิ่มได้เองโดยไม่ต้องมี RFC ที่ต้นทาง
+
+### บ้านของ audit อยู่ที่นี่
+
+`consent_rules` ข้อ 2 บังคับให้การให้ · การใช้ · และการเพิกถอน ออก event ทุกครั้งอยู่แล้ว แต่ไม่ได้ระบุว่าต้องมีอะไรในนั้น · field นี้ทำให้ event ตอบได้ว่า **ใบไหน** และ **ตอนนั้นเงื่อนไขผ่านจริงไหม** ซึ่งประเมินย้อนหลังไม่ได้
+
+ปิดของค้างที่ [ADR-0014](../../../decisions/0014-consent-access-time-conditions.md) ฝากไว้ — *"`event/v1` บันทึกว่าเงื่อนไขถูกประเมินแล้วและผ่าน"*
+
+### ไม่ breaking
+
+optional · `required` ยัง 7 ตัว · payload ที่ valid กับ `v1.3.0` ยัง valid ทุกใบ
+
 ## v1.3.0 — 2026-08-21
 
 เพิ่ม optional `sequence` ตาม [ADR-0015](../../../decisions/0015-event-sequence-and-trail-closure.md) (option C) จาก [issue #23](https://github.com/monthop-gmail/agent-platform/issues/23)

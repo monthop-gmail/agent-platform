@@ -53,6 +53,16 @@ Request:
         resource:
           type: string
           description: สิ่งที่ถูกกระทำ เช่น `github:monthop-gmail/agent-platform#12`
+    consent:
+      $ref: https://schemas.agent-platform.internal/consent/v1/consent.schema.yaml#/$defs/Evaluation
+      description: >-
+        ผลการประเมินความยินยอมที่ผู้เรียก**ประเมินมาแล้ว**และส่งเข้ามาเป็น input
+        ([ADR-0016](../../../decisions/0016-recording-which-consent-allowed-access.md))
+
+        🔒 **policy ไม่ได้เป็นคนประเมิน consent** — สองด่านถูก AND กันโดยผู้เรียก
+        field นี้มีไว้ให้ policy *ใช้ประกอบ* การตัดสินได้ (เช่นกฎ "ไม่มีใบที่ยังใช้ได้ = deny")
+        ไม่ใช่ให้ policy ไปตรวจเอง · ไม่มี field นี้ = ผู้เรียกไม่ได้ส่งมา
+        **ไม่ได้แปลว่าไม่ต้องมีความยินยอม**
 
 Decision:
   type: object
@@ -81,6 +91,14 @@ Decision:
       type: string
       format: date-time
       description: decision ที่หมดอายุแล้วต้องประเมินใหม่ ห้ามนำกลับมาใช้ซ้ำ
+    consent:
+      $ref: https://schemas.agent-platform.internal/consent/v1/consent.schema.yaml#/$defs/Evaluation
+      description: >-
+        สำเนาของ `Request.consent` ที่ได้รับมา — **มีได้ก็ต่อเมื่อผู้เรียกส่งเข้ามา**
+        เพื่อให้ decision record ตอบได้ว่าอนุญาตโดยอาศัยความยินยอมใบไหนและผลตอนนั้นเป็นอย่างไร
+        หลักเดียวกับ `action_risk` ที่บันทึกสิ่งที่ใช้ตัดสิน ไม่ใช่แค่ผลลัพธ์
+
+        🔒 **ห้ามเติมเองถ้าไม่ได้รับมา** — record ที่อ้างว่าพิจารณาสิ่งที่ไม่เคยเห็นคือ audit ที่โกหก
 
   description: >-
     การ mapping `action_risk × tenant/profile → authority` ต้องเป็น config

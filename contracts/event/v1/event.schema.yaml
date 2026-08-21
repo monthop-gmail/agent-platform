@@ -164,6 +164,17 @@ properties:
       action_risk:
         $ref: https://schemas.agent-platform.internal/capability/v1/capability.schema.yaml#/$defs/ActionRisk
       policy_id: { type: string }
+  consent:
+    $ref: https://schemas.agent-platform.internal/consent/v1/consent.schema.yaml#/$defs/Evaluation
+    description: >-
+      ผลการประเมินความยินยอม ณ เวลาที่เกิด event นี้
+      ([ADR-0016](../../../decisions/0016-recording-which-consent-allowed-access.md))
+
+      นี่คือ **บ้านของ audit จริง ๆ** — `consent_rules` ข้อ 2 บังคับให้การให้ · การใช้ ·
+      และการเพิกถอน ออก event ทุกครั้งอยู่แล้ว field นี้ทำให้ event นั้นตอบได้ว่า
+      *ใบไหน* และ *ตอนนั้นเงื่อนไขผ่านจริงไหม* ซึ่งประเมินย้อนหลังไม่ได้
+
+      ปิดช่องที่ [ADR-0014](../../../decisions/0014-consent-access-time-conditions.md) ฝากไว้
   usage:
     $ref: https://schemas.agent-platform.internal/model/v1/inference.schema.yaml#/$defs/Usage
   error:

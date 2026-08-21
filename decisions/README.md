@@ -33,6 +33,7 @@ ADR ในโฟลเดอร์นี้เป็น **authority** ของ�
 | [0013](0013-approval-supersedes-chain.md) | `approval/v1` supersedes chain | **A** — เพิ่ม optional `supersedes_approval_id` · ไม่ bump major · guarantees ไม่ขยับ | ✅ Accepted |
 | [0014](0014-consent-access-time-conditions.md) | `consent/v1` เงื่อนไขตอนเข้าถึง | **B** — `conditions` = `kind` + `params` · ตรวจทุกครั้งที่ใช้ · ไม่รู้จัก = ไม่อนุญาต | ✅ Accepted |
 | [0015](0015-event-sequence-and-trail-closure.md) | `event/v1` ลำดับ + trail ที่ถูกตัดท้าย | **C** — `sequence` เรียงอย่างเดียว · ช่องว่างไม่มีความหมาย · ความครบถ้วนปิดด้วยใบปิดท้าย (RFC ที่ต้นทาง) | ✅ Accepted |
+| [0016](0016-recording-which-consent-allowed-access.md) | บันทึกว่าอนุญาตด้วยความยินยอมใบไหน | **C** — `consent/v1` `$defs.Evaluation` นิยามครั้งเดียว · `policy/v1` + `event/v1` `$ref` · แช่แข็งผล ไม่ใช่เก็บ id | ✅ Accepted |
 
 การเคาะบันทึกไว้ที่ [issue #1–#10](https://github.com/monthop-gmail/agent-platform/issues?q=is%3Aissue+label%3Aadr) — **ไฟล์บันทึกว่าตัดสินอะไร issue บันทึกว่าใครตัดสินและเมื่อไหร่**
 
@@ -73,7 +74,7 @@ contracts/ P0 ✅ ── profiles/ ✅ ── planes/ ✅
   ↓
 0011 (conformance automation) ✅ ── 0012 (consent) ✅ ── 0013 (approval supersedes) ✅
   ↓
-0014 (consent conditions) ✅ ── 0015 (event sequence) ✅
+0014 (consent conditions) ✅ ── 0015 (event sequence) ✅ ── 0016 (consent evaluation) ✅
 ```
 
 ## ที่มา

@@ -1,5 +1,27 @@
 # policy/v1
 
+## v1.1.0 — 2026-08-21
+
+เพิ่ม **ผลการประเมินความยินยอม** ตาม [ADR-0016](../../../decisions/0016-recording-which-consent-allowed-access.md) (option C)
+
+`consent_rules` ข้อ 6 บังคับว่าการเข้าถึงต้องผ่านทั้ง `policy/v1` และ consent แต่ไม่มี record ไหนบอกได้ว่า **อนุญาตด้วยความยินยอมใบไหน** — และหลัง [ADR-0014](../../../decisions/0014-consent-access-time-conditions.md) การเก็บแค่ `grant_id` ก็ยังไม่พอ เพราะใบที่มี `conditions` ตอบตัวเองไม่ได้ ประเมินใหม่ทีหลังจะได้คำตอบของ *วันที่ประเมิน* ไม่ใช่ของ *วันที่เข้าถึง*
+
+* `Request.consent` — optional input · `$ref` ไป `consent/v1#/$defs/Evaluation`
+* `Decision.consent` — สำเนาของสิ่งที่ได้รับมา หลักเดียวกับ `action_risk` ที่บันทึกสิ่งที่ใช้ตัดสิน ไม่ใช่แค่ผลลัพธ์
+
+### 🔒 policy ไม่ได้เป็นคนประเมิน consent
+
+`Request` เดิมมีแค่ `context` · `subject` (ผู้กระทำ) · `action` — **ไม่มี field ไหนบอกว่าเป็นข้อมูลของใคร** สองด่านถูก AND กันโดยผู้เรียก ไม่ใช่โดย policy engine
+
+field นี้จึงเป็น **input ที่ผู้เรียกประเมินมาแล้วส่งเข้ามา** ให้ policy *ใช้ประกอบ* การตัดสินได้ (เช่นกฎ "ไม่มีใบที่ยังใช้ได้ = deny") ไม่ใช่ให้ policy ไปตรวจเอง
+
+* **ไม่มี `Request.consent` = ผู้เรียกไม่ได้ส่งมา ไม่ได้แปลว่าไม่ต้องมีความยินยอม**
+* **ห้ามเติม `Decision.consent` เองถ้าไม่ได้รับมา** — record ที่อ้างว่าพิจารณาสิ่งที่ไม่เคยเห็นคือ audit ที่โกหก
+
+### ไม่ breaking
+
+optional ทั้งคู่ · `required` ของ `Request` (3) และ `Decision` (4) ไม่ขยับ
+
 ## v1.0.0 — 2026-08-17
 - ตั้งต้นตาม [ADR-0010](../../../decisions/0010-risk-approval-taxonomy.md)
 - แยก `effect` (allow/deny) ออกจาก `authority` (ใครอนุมัติ) และ `constraint` (rate/budget)
