@@ -1,6 +1,6 @@
 # ADR-0015: `event/v1` — ลำดับของ event และ trail ที่ถูกตัดท้าย
 
-**Status:** Proposed
+**Status:** Accepted (2026-08-21)
 **Date:** 2026-08-21
 **Depends on:** [ADR-0006](0006-contract-versioning.md) · [ADR-0011](0011-conformance-automation.md)
 **Blocking:** [issue #23](https://github.com/monthop-gmail/agent-platform/issues/23) · `contracts/event/v1/event.schema.yaml`
@@ -132,9 +132,7 @@ guarantee ข้อ 8 ของ `event/v1` (🔒 frozen เป็นของ `d
 
 ## Decision
 
-⏳ **รอเคาะ** — Options อยู่ข้างบน
-
-### Recommendation ⭐ **C**
+**C** — แยกสามชั้น · ship เฉพาะชั้นที่เป็นของเราและพร้อมแล้ว
 
 **Reason:** ก่อนเลือกระหว่างสองรูปที่ consumer เสนอ ต้องตอบก่อนว่ารูปไหนแก้ปัญหาได้จริง — และคำตอบคือ **ไม่มีรูปไหนปิดปลายที่ขาดได้** เพราะเลขที่ติดมากับ event บอกไม่ได้ว่าใบสุดท้ายควรเป็นเลขอะไร · การรับ option A ไปคือการ ship ความมั่นใจปลอมพร้อมราคาที่ทุกคนต้องจ่าย ซึ่งเป็นความผิดพลาดแบบเดียวกับ false-✅ ของ `drift_check` ที่ repo นี้เจอมาสามครั้ง · ครึ่งที่ปิดได้จริงวันนี้คือการเรียง ซึ่งเป็น wire ล้วนและเป็นของเรา · ส่วนความครบถ้วนปิดด้วย **ใบปิดท้ายทุก terminal** ซึ่งถูกกว่า ได้ผลกว่า และเป็น semantics ของ `devfactory-core` ที่ต้องมี RFC ที่ต้นทางตาม ADR-0006 — เราประกาศแทนเขาไม่ได้
 
@@ -171,11 +169,11 @@ sequence:
 | เปลี่ยน default ที่ทำให้พฤติกรรมเดิมเปลี่ยน | ❌ ไม่มี default · ไม่มี `sequence` = เรียงด้วย `occurred_at` เหมือนเดิม |
 | เข้มขึ้นใน validation | ❌ ผ่อนอย่างเดียว |
 
-→ `v1.1.0` ใน `CHANGELOG.md`
+→ `v1.3.0` ใน `CHANGELOG.md` — **ไม่ใช่ `v1.2.0`** เพราะ CHANGELOG ของ `event/v1` มีเลขซ้ำค้างอยู่ (`v1.1.0` สองอัน · 08-18 กับ 08-19) แก้เลขและเรียงใหม่ในคอมมิตเดียวกัน — ไม่มีใคร pin ด้วย semver ของ contract จึงไม่กระทบ
 
 ## Consequences
 
-* `contracts/event/v1/event.schema.yaml` เพิ่ม `sequence` + `platform_rules` 2 ข้อ · `CHANGELOG.md` → `v1.1.0`
+* `contracts/event/v1/event.schema.yaml` เพิ่ม `sequence` + `platform_rules` 2 ข้อ · `CHANGELOG.md` → `v1.3.0` (พร้อมแก้เลขซ้ำที่ค้างอยู่)
 * `care-agent-platform` ย้าย `sequence_no` ของตัวเองมาใช้ชื่อกลาง — บั๊กการเรียงบน Postgres ปิดโดยไม่ต้อง serialize อะไร
 * **ต้องเปิดเรื่องที่ `devfactory-core`** ขอ RFC สำหรับ "ทุกการจบแบบ terminal ต้องออกใบปิดท้าย" — ถ้าไม่เปิด ข้อ 3 จะค้างเงียบ ๆ และ issue #23 จะถูกปิดทั้งที่ยังไม่ได้แก้สิ่งที่เขาถาม
 * **`event/v1` ยังไม่มีตัวตนของผู้ผลิต** — การรับประกันระดับ producer (รวม option B ครึ่งหลัง) เขียนลงสัญญาไม่ได้จนกว่าจะเพิ่ม · บันทึกไว้ ไม่ทำในรอบนี้
