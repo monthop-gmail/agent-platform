@@ -1,5 +1,15 @@
 # approval/v1
 
+## v1.2.0 — 2026-08-21
+
+* `correlation_id` (optional) — ผูกใบอนุมัติเข้ากับสายงานเดียวกันข้าม service ([ADR-0019](../../../decisions/0019-execution-records-its-approval.md))
+
+contract อื่นเกือบทั้งหมดมี field นี้ (`event/v1` · `identity/v1` `RequestContext` ที่ `execution/v1` ใช้ผ่าน `context`) แต่ไฟล์นี้ไม่มี — `execution_id` กับ `subject` ทำแทนไม่ได้ เพราะการอนุมัติหนึ่งครั้งอาจเกิดก่อน execution ถูกสร้าง หรือครอบหลาย execution ในสายเดียวกัน
+
+เป็น **field ระดับ platform** ตาม [ADR-0006 กฎข้อ 1](../../../decisions/0006-contract-versioning.md) — เพิ่มได้เองโดยไม่ต้องมี RFC ที่ `devfactory-core`
+
+**`guarantees` ไม่ขยับ** (ยัง 4 ข้อ) · `derived_from.semantics_version` ยัง `"1.1"` · optional · `required` ยัง 7 ตัวเท่าเดิม
+
 ## v1.1.0 — 2026-08-19
 
 ไม่ breaking — เพิ่ม optional field อย่างเดียว ([ADR-0006](../../../decisions/0006-contract-versioning.md) · [ADR-0013](../../../decisions/0013-approval-supersedes-chain.md))
