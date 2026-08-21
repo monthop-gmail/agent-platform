@@ -330,6 +330,79 @@ def check_profiles() -> None:
         ok("profile", f"{len(files)} profile ผ่าน contracts/profile/v1")
 
 
+# ── 5. แถวที่อ้างว่ายังไม่มี repo ───────────────────────────────────────────
+GHOST_ROW = re.compile(r"^\|\s*`([\w.-]+)`\s*\|.*ยังไม่มี repo")
+
+
+def repo_visible(repo: str) -> bool:
+    """เห็น README ของ repo นี้บน raw.githubusercontent ไหม
+
+    ⚠️ **ตรวจได้ทางเดียวเท่านั้น** — True แปลว่า repo มีจริงแน่นอน
+    แต่ False **ไม่ได้แปลว่าไม่มี repo** · repo ที่ไม่มี README หรือที่ default branch
+    ชื่ออื่น (navi-ims ใช้ `master`) ก็ได้ False เหมือนกัน
+
+    ที่ไม่ใช้ api.github.com ทั้งที่แม่นกว่า เพราะ ADR-0011 จำกัดขอบเขตของโฟลเดอร์นี้
+    ไว้ที่ host เดียวคือ raw.githubusercontent.com — ขยายขอบเขตต้องแก้ ADR ไม่ใช่แก้เงียบ ๆ
+
+    ยก URLError ขึ้นไปให้ผู้เรียกเมื่อเน็ตไม่ถึง เพื่อไม่ให้ "ออฟไลน์" อ่านเป็น "ไม่มี repo"
+    """
+    for branch in ("main", "master"):
+        url = f"https://raw.githubusercontent.com/{repo}/{branch}/README.md"
+        try:
+            req = urllib.request.Request(url, method="HEAD")
+            with urllib.request.urlopen(req, timeout=15):  # noqa: S310 - fixed host
+                return True
+        except urllib.error.HTTPError:
+            continue  # 404 — ยังตอบไม่ได้ ลอง branch ถัดไป
+    return False
+
+
+def check_ghost_rows() -> None:
+    """แถวที่เขียนว่า "ยังไม่มี repo" — ตรวจว่ายังจริงอยู่ไหม
+
+    `check_registry` เริ่มเดินจาก manifest ของ repo ที่ pin ไว้ · แถวพวกนี้ไม่มี manifest
+    ให้เริ่มเดิน จึงไม่เคยมีอะไรมาเทียบ และค้างเป็นข้อมูลผิดได้จนกว่าจะมีคนเห็นด้วยตา
+    (`enterprise-knowledge` ค้างอยู่หนึ่งวัน — เจอด้วยตาคน ไม่ใช่ด้วย check)
+    """
+    reg = (ROOT / "architecture/consumers.md").read_text(encoding="utf-8")
+    lines = reg.splitlines()
+
+    # owner เอาจากแถวที่มีลิงก์จริงในตาราง ไม่ใช่ hardcode และไม่ใช่ลิงก์ทั้งไฟล์
+    owners = sorted({
+        m.group(1)
+        for line in lines if line.startswith("| [`")
+        for m in [re.search(r"github\.com/([\w.-]+)/[\w.-]+", line)] if m
+    })
+    # ต้อง match ที่ต้นบรรทัด — แถวของ repo ที่มีจริงอาจ *พูดถึง* คำว่า "ยังไม่มี repo"
+    # ในหมายเหตุได้ (แถว enterprise-knowledge เขียนว่าเคยถูกลงไว้แบบนั้น) ซึ่งไม่ใช่ ghost row
+    ghosts = [m.group(1) for m in map(GHOST_ROW.match, lines) if m]
+
+    if not ghosts:
+        ok("ghost", "ไม่มีแถวที่อ้างว่ายังไม่มี repo")
+        return
+    if not owners:
+        warn("ghost", "หา owner จากแถวที่มีลิงก์ไม่ได้ — ข้ามการตรวจ")
+        return
+
+    found = []
+    try:
+        for name in ghosts:
+            for owner in owners:
+                if repo_visible(f"{owner}/{name}"):
+                    found.append(f"{owner}/{name}")
+                    break
+    except urllib.error.URLError as exc:
+        warn("ghost", f"ตรวจไม่ได้ — เน็ตไม่ถึง raw.githubusercontent.com ({exc.reason})")
+        return
+
+    for repo in found:
+        fail("ghost", f"{repo}: ทะเบียนเขียนว่า \"ยังไม่มี repo\" แต่ repo มีอยู่จริงแล้ว "
+                      f"— ทะเบียนที่ผูกพันกำลังรายงานข้อเท็จจริงผิด")
+    if not found:
+        ok("ghost", f"ตรวจ {len(ghosts)} แถว × {len(owners)} owner — ยังไม่พบว่ามี repo "
+                    f"(⚠️ พิสูจน์ได้ทางเดียว: ไม่เห็น README ไม่ได้แปลว่าไม่มี repo)")
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description="ecosystem drift check")
     ap.add_argument("--local", type=pathlib.Path, help="โฟลเดอร์ของ repo ต้นทางเมื่อรันแบบ offline")
@@ -347,6 +420,8 @@ def main() -> int:
     check_internal()
     print("\n[4] profiles — validate กับ contracts/profile/v1")
     check_profiles()
+    print("\n[5] ghost rows — แถวที่อ้างว่ายังไม่มี repo")
+    check_ghost_rows()
 
     fails = [f for f in findings if f[0] == "FAIL"]
     warns = [f for f in findings if f[0] == "WARN"]
