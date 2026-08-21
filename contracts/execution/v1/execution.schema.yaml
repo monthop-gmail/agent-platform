@@ -54,6 +54,33 @@ properties:
     $ref: https://schemas.agent-platform.internal/capability/v1/requirement.schema.yaml
   policy_decision:
     $ref: https://schemas.agent-platform.internal/policy/v1/policy-decision.schema.yaml#/Decision
+  approval_id:
+    $ref: https://schemas.agent-platform.internal/identity/v1/identity.schema.yaml#/$defs/Id
+    description: >-
+      **ใบอนุมัติที่อนุญาตให้ execution นี้เดินต่อ**
+      ([ADR-0019](../../../decisions/0019-execution-records-its-approval.md))
+
+      มีอยู่เพราะ `approval/v1` `guarantees` ข้อ 3 (🔒 frozen) เขียนว่า
+      *"execution ที่ไม่มี APPROVE เป็นสิ่งที่ห้าม"* แต่เดิมไม่มีที่ให้บันทึกว่าใบไหน
+      — `policy_decision` บอกได้แค่ว่า *ต้องขออนุมัติไหม* ไม่ได้บอกว่า *มีใครอนุมัติแล้วหรือยัง*
+
+      เก็บเป็น **id ก็พอ** เพราะใบอนุมัติเป็น immutable ตาม `approval/v1` `guarantees` ข้อ 1
+      — อ่านปีหน้าได้คำตอบเดียวกับวันนี้เสมอ · ต่างจาก `consent/v1` ที่ต้องแช่แข็ง
+      **ผลการประเมิน** ไว้ ([ADR-0016](../../../decisions/0016-recording-which-consent-allowed-access.md))
+      เพราะใบยินยอมที่มีเงื่อนไขเปลี่ยนคำตอบได้ · เกณฑ์คือ **สิ่งที่ชี้ไปเปลี่ยนได้ไหม**
+
+      🔒 invariant ที่ JSON Schema ตรวจให้ไม่ได้ — ผู้ผลิตต้องบังคับเอง:
+
+      · ใบที่อ้างต้องมีอยู่จริง · `tenant_id` เดียวกัน · `subject` ตรงกับ execution นี้
+
+      · `decision` ของใบนั้นต้องเป็น `APPROVE` — ใบที่ `REJECT` หรือ `REQUIRE_CHANGES` อ้างไม่ได้
+
+      · ต้องมีก่อนออกจาก `awaiting_approval` ไปสู่ `running`
+
+      ⚠️ **ไม่มีค่านี้เมื่อจบที่ `rejected` · `cancelled` · `timed_out` = ถูกต้อง ไม่ใช่ข้อมูลขาด**
+      — execution ที่ถูกปฏิเสธหรือยกเลิกก่อนมีใครอนุมัติไม่มี APPROVE ให้ชี้ตามนิยาม
+      ถ้า implementation ตีความว่าไม่มีค่านี้ = ผิดเสมอ จะเกิดสัญญาณลวง
+      ซึ่งอันตรายพอ ๆ กับการตรวจไม่เจอ
   observability_depth:
     enum: [step, turn]
     description: >-

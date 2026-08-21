@@ -100,6 +100,17 @@ properties:
       งานที่ค้างรออนุมัติจนเลยกำหนดควรเข้าสถานะ timeout ไม่ใช่รอตลอดไป
   escalation_target:
     $ref: https://schemas.agent-platform.internal/identity/v1/identity.schema.yaml#/$defs/Principal
+  correlation_id:
+    $ref: https://schemas.agent-platform.internal/identity/v1/identity.schema.yaml#/$defs/Id
+    description: >-
+      ผูกใบอนุมัติเข้ากับสายงานเดียวกันข้าม service — ค่าเดียวกับที่ `event/v1` และ
+      `identity/v1` `RequestContext` ใช้ ([ADR-0019](../../../decisions/0019-execution-records-its-approval.md))
+
+      `execution_id` กับ `subject` ทำแทนไม่ได้ เพราะการอนุมัติหนึ่งครั้งอาจเกิดก่อน
+      execution ถูกสร้าง หรือครอบหลาย execution ในสายเดียวกัน
+
+      เป็น field ระดับ platform ตาม [ADR-0006 กฎข้อ 1](../../../decisions/0006-contract-versioning.md)
+      — เพิ่มได้เองโดยไม่ต้องมี RFC ที่ repo ต้นทาง · `guarantees` ไม่ขยับ
 
   supersedes_approval_id:
     $ref: https://schemas.agent-platform.internal/identity/v1/identity.schema.yaml#/$defs/Id
