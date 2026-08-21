@@ -23,7 +23,19 @@ Ingest → Parse → Classify → Chunk → Embed → Index → Retrieve → Fee
 
 * **retrieval ที่ไม่ enforce ACL** — ความเสี่ยงหลักของ plane นี้ไม่ใช่ทำข้อมูลพัง แต่คือ *เห็นสิ่งที่ไม่ควรเห็น*
 * ข้าม tenant boundary ไม่ว่ากรณีใด ([ADR-0007](../decisions/0007-multi-tenancy.md))
+* **ข้าม workspace โดยไม่มีการตัดสินที่บันทึกไว้** ([ADR-0021](../decisions/0021-workspace-is-a-scope-not-a-boundary.md)) — ต่างจาก tenant ตรงที่ *มีคนอนุญาตให้ข้ามได้* ไม่ใช่ตรงที่เข้มน้อยกว่า
 * กลายเป็น RAG แยกที่มี identity/policy ของตัวเอง — ต้องใช้ของ platform
+
+## ขอบเขตของการค้น
+
+knowledge อยู่ **ใน workspace** ไม่ใช่ลอยอยู่ใน tenant ([ADR-0007](../decisions/0007-multi-tenancy.md) · [ADR-0021](../decisions/0021-workspace-is-a-scope-not-a-boundary.md))
+
+| ชั้น | บังคับที่ไหน | ข้ามได้ไหม |
+| --- | --- | --- |
+| `tenant_id` | **ชั้นเก็บข้อมูล** — RLS · partition · index | ไม่ได้ทุกกรณี · โค้ดเขียนผิดก็ยังข้ามไม่ได้ |
+| `workspace_id` | **ชั้นตรวจสิทธิ์** — scope โดยปริยายทุก query | ได้ ถ้ามีการตัดสินจาก [`policy/v1`](../contracts/policy/v1/) และ **บันทึกไว้ทุกครั้ง** |
+
+`Project` และ `Department` เป็น **label ของ workspace** ไม่ใช่ชั้น id ใหม่ · **metadata filter ที่ลอยอยู่โดยไม่มี workspace คือชั้นที่สามที่ ADR-0007 ห้ามไว้ ในชื่ออื่น**
 
 ## เข้าถึงผ่าน tool ไม่ใช่ API พิเศษ
 

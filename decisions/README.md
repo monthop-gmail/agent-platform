@@ -38,6 +38,7 @@ ADR ในโฟลเดอร์นี้เป็น **authority** ของ�
 | [0018](0018-policy-result-single-source.md) | `policy_result` เป็นสำเนามือของ `Decision` | **B** — `$defs.DecisionSummary` ประกาศครั้งเดียว · ชุดย่อยเป็นชุดย่อยโดยเจตนา ต้องเคาะทุกครั้ง | ✅ Accepted |
 | [0019](0019-execution-records-its-approval.md) | `execution/v1` บันทึกใบอนุมัติ | **A** — optional `approval_id` · เก็บ id พอเพราะใบอนุมัติ immutable · ไม่ใส่ `if/then` เพราะจะแดงกับ `rejected`/`cancelled` | ✅ Accepted |
 | [0020](0020-consent-event-vocabulary.md) | event type ของ consent | **B** — `CONSENT_GRANTED` / `CONSENT_REVOKED` + `SubjectType: consent` · **ไม่มี `CONSENT_USED`** การใช้บันทึกด้วย field `consent` | ✅ Accepted |
+| [0021](0021-workspace-is-a-scope-not-a-boundary.md) | `workspace_id` เป็นขอบเขตอนุญาต ไม่ใช่กำแพง | **B** — deny by default · ข้ามได้ผ่าน `policy/v1` ที่บันทึกไว้ · ต่างจาก `tenant_id` ที่ข้ามไม่ได้ทุกกรณี | ✅ Accepted |
 
 การเคาะบันทึกไว้ที่ [issue #1–#10](https://github.com/monthop-gmail/agent-platform/issues?q=is%3Aissue+label%3Aadr) — **ไฟล์บันทึกว่าตัดสินอะไร issue บันทึกว่าใครตัดสินและเมื่อไหร่**
 
@@ -82,6 +83,8 @@ contracts/ P0 ✅ ── profiles/ ✅ ── planes/ ✅
 0014 (consent conditions) ✅ ── 0015 (event sequence) ✅ ── 0016 (consent evaluation) ✅
   ↓
 0017 (คำว่า subject) ✅ ── 0018 (policy_result ที่เดียว) ✅ ── 0019 (execution ↔ approval) ✅ ── 0020 (consent event vocab) ✅
+  ↓
+0021 (workspace = scope) ✅
 ```
 
 ## ที่มา
