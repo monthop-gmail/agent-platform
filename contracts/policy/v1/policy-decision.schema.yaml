@@ -39,6 +39,37 @@ $defs:
       agent_id:
         $ref: https://schemas.agent-platform.internal/identity/v1/identity.schema.yaml#/$defs/AgentId
 
+  DecisionSummary:
+    description: >-
+      **ผลของ policy เท่าที่ audit ต้องใช้** — ตัดสินว่าอะไร และตัดสินจากอะไร
+      ([ADR-0018](../../../decisions/0018-policy-result-single-source.md))
+
+      มีอยู่เพราะ `event/v1.policy_result` เคยประกาศรูปนี้ซ้ำเอง ทำให้มีสองที่ที่บอกว่า
+      "ผลของ policy หน้าตาอย่างไร" และไม่มีอะไรคอยจับว่ายังตรงกัน — `consent` ที่เพิ่มเข้า
+      `Decision` ใน ADR-0016 ไม่ไหลไปที่นั่นเอง ต้องอาศัยคนจำ
+
+      🔒 **field ใหม่ใน `Decision` ไม่ไหลเข้าที่นี่เอง — ต้องเคาะทุกครั้ง**
+      ชุดย่อยนี้เป็นชุดย่อย *โดยเจตนา* ไม่ใช่เพราะหลงลืม · `reason` เป็น free text และ
+      `expires_at` ไม่มีความหมายในบันทึกที่ immutable แล้ว ทั้งคู่จึงอยู่นอกชุดนี้
+      โดยเฉพาะ `reason` ที่ถ้าไหลเข้า audit เองจะเฉียดกับ guarantee ข้อ 7 ของ `event/v1`
+      (*ห้ามเก็บ private reasoning เป็น audit record*) โดยไม่มีใครตัดสินใจ
+
+      ไม่มี `required` — ผู้ใช้แต่ละที่กำหนดเองว่าอะไรบังคับ (`Decision` บังคับ 4 ตัว
+      ส่วน `event/v1.policy_result` ไม่บังคับอะไรเลย เพราะ event บางชนิดไม่ผ่าน policy)
+    type: object
+    properties:
+      effect:
+        $ref: '#/$defs/Effect'
+      authority:
+        $ref: '#/$defs/Authority'
+      action_risk:
+        $ref: https://schemas.agent-platform.internal/capability/v1/capability.schema.yaml#/$defs/ActionRisk
+        description: >-
+          ค่าที่ใช้ประกอบการตัดสิน — บันทึกไว้ด้วยเพื่อให้ audit ย้อนหลังรู้ว่าตัดสินจากอะไร
+          ไม่ใช่แค่ผลลัพธ์ (ต่อยอดจาก backend-os §14 ที่มีแค่ `policy_result`)
+      policy_id:
+        type: string
+
 Request:
   type: object
   required: [context, action]
@@ -90,22 +121,16 @@ Request:
 
 Decision:
   type: object
+  # `effect` `authority` `action_risk` `policy_id` มาจาก $defs/DecisionSummary
+  # ซึ่ง `event/v1.policy_result` อ้างตัวเดียวกัน — ประกาศที่เดียว ([ADR-0018](../../../decisions/0018-policy-result-single-source.md))
+  # ข้างล่างนี้คือ **ส่วนที่ Decision มีเกินจาก Summary** เท่านั้น
+  allOf:
+    - $ref: '#/$defs/DecisionSummary'
   required: [effect, authority, policy_id, evaluated_at]
   properties:
-    effect:
-      $ref: '#/$defs/Effect'
-    authority:
-      $ref: '#/$defs/Authority'
     constraint:
       $ref: '#/$defs/Constraint'
       default: none
-    action_risk:
-      $ref: https://schemas.agent-platform.internal/capability/v1/capability.schema.yaml#/$defs/ActionRisk
-      description: >-
-        ค่าที่ใช้ประกอบการตัดสิน — บันทึกไว้ด้วยเพื่อให้ audit ย้อนหลังรู้ว่าตัดสินจากอะไร
-        ไม่ใช่แค่ผลลัพธ์ (ต่อยอดจาก backend-os §14 ที่มีแค่ `policy_result`)
-    policy_id:
-      type: string
     reason:
       type: string
     evaluated_at:
