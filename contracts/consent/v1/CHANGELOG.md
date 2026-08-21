@@ -1,5 +1,27 @@
 # consent/v1
 
+## v1.2.0 — 2026-08-21
+
+เพิ่ม **ผลการประเมินความยินยอม** ตาม [ADR-0016](../../../decisions/0016-recording-which-consent-allowed-access.md) (option C)
+
+`consent_rules` ข้อ 6 บังคับว่าการเข้าถึงต้องผ่านทั้ง `policy/v1` และ consent แต่ไม่มี record ไหนบอกได้ว่า **อนุญาตด้วยความยินยอมใบไหน** — และหลัง [ADR-0014](../../../decisions/0014-consent-access-time-conditions.md) การเก็บแค่ `grant_id` ก็ยังไม่พอ เพราะใบที่มี `conditions` ตอบตัวเองไม่ได้ ประเมินใหม่ทีหลังจะได้คำตอบของ *วันที่ประเมิน* ไม่ใช่ของ *วันที่เข้าถึง*
+
+* `$defs.Evaluation` — `grant_id` · `evaluated_at` · `satisfied` (required ทั้งสาม) + `conditions_checked` (optional) · `additionalProperties: false`
+* `consent_rules` +2 — ต้องเก็บ **ผลการประเมิน** ไม่ใช่แค่ `grant_id` · ถ้าใบมี `conditions` ต้องระบุ `conditions_checked` ให้ครบทุกข้อ
+* **นิยามอยู่ที่นี่ที่เดียว** — `policy/v1` และ `event/v1` `$ref` มาที่ตัวนี้ ไม่ประกาศเอง
+
+### ทำไมต้องแช่แข็งผลไว้ ไม่ใช่เก็บ id
+
+หมอที่ลาออกไปแล้ววันนี้จะทำให้ replay สรุปว่าการเข้าถึงเมื่อปีที่แล้ว **ไม่ชอบ** ทั้งที่ตอนนั้นเขายังสังกัดอยู่ — ผิดอย่างมั่นใจ และผิดในทางที่กล่าวหาคนที่ทำถูก
+
+### ข้อจำกัดที่รู้อยู่
+
+`conditions_checked` เก็บแค่ `kind` ไม่เก็บ `params` — ใบที่มีเงื่อนไขชนิดเดียวกันสองข้อจะแยกกันไม่ออกในบันทึกนี้ · ยอมรับเพราะสิ่งที่ต้องพิสูจน์คือ *ตรวจครบไหม* ส่วน *ตรวจค่าอะไร* อ่านได้จากตัวใบที่ immutable อยู่แล้ว
+
+### ไม่ breaking
+
+`$defs` ใหม่ล้วน · `required` ของ grant ยัง 8 ตัว · payload ที่ valid กับ `v1.1.0` ยัง valid ทุกใบ
+
 ## v1.1.0 — 2026-08-21
 
 เพิ่ม optional `conditions` ตาม [ADR-0014](../../../decisions/0014-consent-access-time-conditions.md) (option B) จาก [issue #25](https://github.com/monthop-gmail/agent-platform/issues/25) ที่ `care-agent-platform` เปิดตอนทำ multi-organization (M6)
