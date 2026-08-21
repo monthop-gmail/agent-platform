@@ -79,6 +79,7 @@ repo นี้เป็น core — repo อื่นเป็น products/appli
 | [`navi-ims`](https://github.com/monthop-gmail/navi-ims) | Product — system of record (Odoo 19) | `unknown` |
 | [`ai-web-harness`](https://github.com/monthop-gmail/ai-web-harness) | Harness — orchestration เหนือ gateway | `unknown` |
 | [`enterprise-knowledge`](https://github.com/monthop-gmail/enterprise-knowledge) | Knowledge Plane — hybrid RAG หลัง `knowledge.search` | `unknown` |
+| [`ecosystem-intelligence`](https://github.com/monthop-gmail/ecosystem-intelligence) | Engineering intelligence — **ผู้ผลิต event** | ✅ `passing` |
 
 **ยังไม่มี repo:** `navi-security-agent` · `agent-backend-os`
 · `agent-fleet` · `model-gateway` · `farm-agent` · `odoo-farm`
