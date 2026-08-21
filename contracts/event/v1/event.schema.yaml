@@ -11,10 +11,11 @@ description: >-
 derived_from:
   repo: monthop-gmail/devfactory-core
   manifest: contract-semantics.yaml
-  semantics_version: "1.1"
+  semantics_version: "1.2"
   rfcs:
     - rfcs/0003-audit-event-log-schema.md
     - rfcs/0008-external-event-intake.md
+    - rfcs/0012-terminal-closing-record.md
     - rfcs/0009-vocabulary-extension.md
   license: MIT
   # ตรวจ drift โดยเทียบ semantics_version ไม่ใช่ SHA ของไฟล์ RFC

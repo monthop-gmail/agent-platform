@@ -14,7 +14,7 @@ description: >-
 derived_from:
   repo: monthop-gmail/devfactory-core
   manifest: contract-semantics.yaml
-  semantics_version: "1.1"
+  semantics_version: "1.2"
   rfcs:
     - rfcs/0002-governance-decision-contract.md
   license: MIT

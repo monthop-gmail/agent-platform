@@ -1,5 +1,11 @@
 # approval/v1
 
+## v1.2.1 — 2026-08-21
+
+`derived_from.semantics_version` `1.1` → `1.2` ตามต้นทาง · **สัญญาไม่ขยับแม้แต่ตัวอักษรเดียว**
+
+RFC-0012 แตะเฉพาะ guarantee ของ `event` · pointer ต้องขยับเพราะ `semantics_version` เป็นของ manifest ทั้งไฟล์ ไม่ได้แยกต่อ contract — ถ้าอยากให้ contract ที่ไม่เกี่ยวไม่ต้องขยับตาม ต้องแยก version ต่อ contract ที่ต้นทาง ซึ่งเป็นการเปลี่ยนกลไก ไม่ใช่การแก้รอบนี้
+
 ## v1.2.0 — 2026-08-21
 
 * `correlation_id` (optional) — ผูกใบอนุมัติเข้ากับสายงานเดียวกันข้าม service ([ADR-0019](../../../decisions/0019-execution-records-its-approval.md))
