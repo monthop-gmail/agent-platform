@@ -1,5 +1,21 @@
 # event/v1
 
+## v1.7.0 — 2026-08-22
+
+`EventType` +1 — **`JOB_SETTLED`**
+
+[RFC-0012](https://github.com/monthop-gmail/devfactory-core/blob/main/rfcs/0012-terminal-closing-record.md) กำหนดว่าทุกการจบแบบ terminal ต้องออกใบปิดท้าย · v1.6.1 รับ guarantee นั้นมาแล้ว (`semantics_version` `1.2`) แต่ค่าที่ใช้ยังไม่อยู่ใน `$defs.EventType`
+
+`description` ของ `$defs` นั้นเขียนเองว่ามีไว้ **"ให้ consumer generate constant ของค่าที่ platform รับรองความหมาย"** — ค่าที่มี guarantee ผูกอยู่แต่ไม่อยู่ในลิสต์ ทำให้ consumer ที่ generate constant ไม่มีมันและต้อง hardcode string เอง
+
+### ไม่ breaking · ไม่มีอะไรรอมันอยู่
+
+`event_type` อ้าง `EventTypeName` (ชุดเปิด) มาตั้งแต่ v1.2.0 → payload ที่ใช้ `JOB_SETTLED` **validate ผ่านตั้งแต่ก่อน PR นี้** · การเพิ่มค่าเป็น additive ตาม [ADR-0006 Rule 2](../../../decisions/0006-contract-versioning.md) และ RFC-0009
+
+### ไม่มีข้อยกเว้นให้ `COMPLETED`
+
+`COMPLETED` ออกทั้ง `JOB_COMPLETED` และ `JOB_SETTLED` · สองใบตอบคนละคำถาม — งานถูกส่งมอบไหม vs บันทึกจบหรือยัง · ถ้ายกเว้นให้ terminal ที่จบสวย ผู้อ่านต้องรู้ว่า "การจบแบบไหนพิเศษ" ซึ่งการไม่รู้เรื่องนั้นคือสาเหตุของ [#23](https://github.com/monthop-gmail/agent-platform/issues/23) ตั้งแต่ต้น
+
 ## v1.6.1 — 2026-08-21
 
 `derived_from.semantics_version` `1.1` → `1.2` ตามต้นทาง
