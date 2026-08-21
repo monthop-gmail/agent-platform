@@ -1,5 +1,29 @@
 # consent/v1
 
+## v1.1.0 — 2026-08-21
+
+เพิ่ม optional `conditions` ตาม [ADR-0014](../../../decisions/0014-consent-access-time-conditions.md) (option B) จาก [issue #25](https://github.com/monthop-gmail/agent-platform/issues/25) ที่ `care-agent-platform` เปิดตอนทำ multi-organization (M6)
+
+**ปัญหา:** ใบยินยอมตอบได้ว่ายังใช้ได้ไหมจาก `revoked_at` และ `expires_at` เท่านั้น ซึ่งทั้งคู่ต้องมีคนหรือเวลามาทำให้เกิด — ใบที่ผูกกับข้อเท็จจริงที่เปลี่ยนได้เอง (หมอที่ลาออกจากโรงพยาบาลที่ครอบครัวยินยอมให้) **ยังใช้ได้ตามสัญญา** ทั้งที่เงื่อนไขที่ยินยอมไม่เป็นจริงแล้ว
+
+* `$defs.Condition` — `kind` (required · ชุดเปิด · `^[a-z][a-z0-9_]{2,63}$` แบบเดียวกับ `event/v1` `EventTypeName`) + `params` (optional object · โดเมนเป็นเจ้าของ) · **`additionalProperties: false` ที่ตัวเงื่อนไข**
+* `conditions` — array, `minItems: 1` · **ไม่มี field = ไม่มีเงื่อนไข · `[]` ใช้ไม่ได้** (หลักเดียวกับ `expires_at: null`)
+* `consent_rules` เพิ่ม 5 ข้อ — ตรวจทุกครั้งที่ใช้ · `kind` ไม่รู้จัก = ไม่อนุญาต · ตัวตรวจ error = ไม่อนุญาต · ออกใบที่ตรวจไม่ได้ไม่ได้ตั้งแต่แรก · narrow ได้อย่างเดียว
+* `platform_rules` เพิ่มว่าใบที่มี `conditions` **ไม่ self-contained** ห้าม cache ผล valid ตามอายุใบ · และ `conditions` เข้ากฎ immutable เดียวกับ `scope`/`purpose`
+
+### ทำไม `kind` + `params` ไม่ใช่ field โดเมนเรียงข้าง `kind`
+
+ชั้นนอกสงวนไว้ให้ platform เพิ่ม field กลางทีหลังได้แบบ additive โดยไม่ชนคำของโดเมนที่มีคนใช้ไปแล้ว · ตรงกับที่ `event/v1` (`metadata`) และ `policy/v1` (`constraint`) ทำมาก่อน · `care-agent-platform` ที่ ship รูปแบน ๆ ไปแล้วต้อง migrate หนึ่งชั้น
+
+### ไม่ breaking — payload ที่ valid กับ `v1.0.0` ยัง valid ทุกใบ
+
+`additionalProperties: false` อยู่ที่ **ตัว `Condition` เท่านั้น** ซึ่งเป็น object ที่เพิ่งเกิด · ตัว grant ยังเปิดเหมือนเดิม · `required` ยัง 8 ตัวเท่าเดิม
+
+### ยังไม่ทำในรอบนี้
+
+* `event/v1` บันทึกว่าเงื่อนไขถูกประเมินแล้วและผ่าน — จำเป็นสำหรับ audit ย้อนหลัง แต่ผูกกับ [issue #23](https://github.com/monthop-gmail/agent-platform/issues/23) ไม่ควรตัดสินแยกกัน
+* `policy/v1` `Decision` เพิ่ม optional `consent_id` — ค้างจาก `v1.0.0`
+
 ## v1.0.0 — 2026-08-19
 
 ตั้งต้นตาม [ADR-0012](../../../decisions/0012-consent-contract.md) (option A + D1) จาก [issue #15](https://github.com/monthop-gmail/agent-platform/issues/15) ที่ `care-agent-platform` เสนอ
