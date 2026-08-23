@@ -36,6 +36,12 @@ python3 conformance/drift_check.py --local /opt/docker-test
 
 **ข้อ 1–3 auto-discover จากบล็อก `derived_from`** — เพิ่ม derived contract ใหม่แล้วครอบคลุมเองทันที ไม่ต้องแก้ checker
 
+**ข้อ 4 อ่าน manifest จาก branch ที่แถวระบุ ไม่ใช่ `main` เสมอ** — ref มาจากลิงก์ `/blob/<ref>/platform-contract.yaml` ในแถวเอง **ไม่มีคอลัมน์ใหม่** เพราะลิงก์นั้นคือสิ่งที่คนกดอยู่แล้ว · ไม่มี `/blob/<ref>/` → `main` เหมือนเดิม
+
+ทะเบียนไม่ควรเดาว่าทุก repo วาง manifest ไว้บน `main` — `navi-ims` ใช้ `master` และ repo ที่ freeze สายเก่าไว้จะวาง manifest บน branch ที่มันบรรยายจริง · **การบังคับให้เอาไปไว้บน default branch คือการบังคับให้ไฟล์บรรยายโค้ดที่ไม่ใช่ตัวเอง**
+
+⚠️ `--local` อ่านไฟล์ในเครื่องตาม branch ที่ checkout อยู่ ซึ่งอาจไม่ใช่ ref ที่ทะเบียนระบุ — โหมดนั้นมีไว้ทำงานออฟไลน์ **ผลที่ผูกพันคือผลจาก network**
+
 **ข้อ 8 พิสูจน์ได้ทางเดียว — และต้องอ่านแบบนั้น** เห็น `README.md` ของ repo บน `raw.githubusercontent` แปลว่า repo **มีจริงแน่นอน** → FAIL · แต่ **ไม่เห็นไม่ได้แปลว่าไม่มี** — repo ที่ไม่มี README หรือที่ default branch ชื่ออื่น (`navi-ims` ใช้ `master`) ก็ไม่เห็นเหมือนกัน · check นี้จึงเป็น **ตัวจับ ไม่ใช่ตัวรับรอง** และข้อความตอน ok เขียนกำกับไว้ตรง ๆ ไม่งั้นมันจะกลายเป็นความมั่นใจปลอมตัวที่สี่
 
 ตรวจทั้ง `main` และ `master` · owner เอาจากแถวที่มีลิงก์จริงในตาราง ไม่ hardcode · **ที่ไม่ใช้ `api.github.com` ทั้งที่แม่นกว่า** เพราะ [ADR-0011](../decisions/0011-conformance-automation.md) จำกัด host ไว้ที่ `raw.githubusercontent.com` ตัวเดียว — ขยายขอบเขตต้องแก้ ADR ไม่ใช่แก้เงียบ ๆ · เน็ตไม่ถึงจะได้ WARN ไม่ใช่ ok เพื่อไม่ให้ "ออฟไลน์" อ่านเป็น "ไม่มี repo"
@@ -63,6 +69,8 @@ check ที่ไม่เคยเห็นสถานะ FAIL คือ chec
 | ถอด `decision` ออกจาก enum ปิด | `binding: closed=true แต่ไม่มี field ไหนผูกกับ enum นี้` (WARN) |
 | ใส่แถว `\| \`devfactory-core\` \| — \| ยังไม่มี repo` (repo ที่มีจริง) | `ghost: monthop-gmail/devfactory-core: ทะเบียนเขียนว่า "ยังไม่มี repo" แต่ repo มีอยู่จริงแล้ว` |
 | ใช้ `consumers.md` ของ `main` ตอนที่ `enterprise-knowledge` ยังเป็น ghost row | `ghost: monthop-gmail/enterprise-knowledge: …` — **เคสจริงที่เคยหลุด** |
+| แถวชี้ `/blob/main/` ทั้งที่ manifest อยู่บน `v2` | `registry: … อ่าน platform-contract.yaml ที่ ref \`main\` ไม่ได้: HTTP Error 404` |
+| แถวชี้ ref ที่ไม่มีอยู่จริง | เหมือนกัน — **พิสูจน์ว่า ref ถูกใช้จริง ไม่ได้ถูกเมิน** |
 
 เคสที่ **binding** เพิ่มเข้ามาเพราะ check ที่มีอยู่จับไม่ได้: `EventType` มี 7 ค่าครบตามที่ต้นทางบังคับทุกตัว จึงผ่าน check ที่เทียบ *ค่าที่มี* — แต่ field ยังผูกกับ enum ปิด ทำให้ค่านอกลิสต์ validate ไม่ผ่าน **check ที่เทียบค่าอย่างเดียวมองไม่เห็นความปิดของ enum**
 
