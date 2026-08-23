@@ -24,7 +24,7 @@ import yaml
 from jsonschema import Draft202012Validator
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-RAW = "https://raw.githubusercontent.com/{repo}/main/{path}"
+RAW = "https://raw.githubusercontent.com/{repo}/{ref}/{path}"
 
 findings: list[tuple[str, str, str]] = []
 passed = 0
@@ -50,19 +50,37 @@ def load_yaml(path: pathlib.Path):
     return yaml.safe_load(path.read_text(encoding="utf-8"))
 
 
-def fetch(repo: str, path: str, local: pathlib.Path | None):
+def ref_of(row: str) -> str:
+    """branch/tag ที่ manifest ของ consumer รายนี้อยู่ — อ่านจากลิงก์ในแถวเอง
+
+    ทะเบียนไม่ควรเดาว่าทุก repo วาง manifest ไว้บน `main` — `navi-ims` ใช้ `master`
+    และ repo ที่ freeze สายเก่าไว้จะวาง manifest บน branch ที่มันบรรยายจริง
+    การบังคับให้เอาไปไว้บน default branch คือการบังคับให้ไฟล์บรรยายโค้ดที่ไม่ใช่ตัวเอง
+
+    ref มาจากลิงก์ `/blob/<ref>/platform-contract.yaml` ในแถว — **ไม่มีคอลัมน์ใหม่**
+    เพราะลิงก์นั้นคือสิ่งที่คนกดอยู่แล้ว ถ้าลิงก์ชี้ผิดที่ คนก็เปิดไม่เจอเหมือนกัน
+    ไม่มี `/blob/<ref>/` → `main` เหมือนเดิม
+    """
+    m = re.search(r"/blob/([\w.\-/]+?)/platform-contract\.yaml", row)
+    return m.group(1) if m else "main"
+
+
+def fetch(repo: str, path: str, local: pathlib.Path | None, ref: str = "main"):
     """อ่านไฟล์ของ repo หนึ่ง — จาก clone ในเครื่องถ้าหาได้ ไม่งั้นจาก raw.githubusercontent
 
     `--local` รับได้ทั้งโฟลเดอร์ของ repo เดียว และโฟลเดอร์แม่ที่มีหลาย clone
     ต้องแยกตาม repo เพราะถ้าอ่านไฟล์เดียวให้ทุก repo จะได้ผลของ repo ผิดคน
     ซึ่งเป็น false ✅ ที่มองไม่เห็นตอนมี consumer รายเดียว
+
+    ⚠️ `--local` อ่านไฟล์ในเครื่องตาม **branch ที่ checkout อยู่** ซึ่งอาจไม่ใช่ `ref`
+    ที่ทะเบียนระบุ — โหมดนี้มีไว้ทำงานออฟไลน์ ผลที่ผูกพันคือผลจาก network
     """
     if local:
         for candidate in (local / repo.split("/")[-1] / path, local / path):
             if candidate.exists():
                 return yaml.safe_load(candidate.read_text(encoding="utf-8"))
         # ไม่มี clone ของ repo นี้ในเครื่อง — ดึงจาก network ต่อ ไม่ใช่เดาจากไฟล์ของ repo อื่น
-    url = RAW.format(repo=repo, path=path)
+    url = RAW.format(repo=repo, ref=ref, path=path)
     with urllib.request.urlopen(url, timeout=30) as r:  # noqa: S310 - fixed host
         return yaml.safe_load(r.read().decode("utf-8"))
 
@@ -214,10 +232,11 @@ def check_registry(local: pathlib.Path | None) -> None:
             warn("registry", f"แถวไม่มี repo URL: {row[:60]}")
             continue
         repo = m.group(1)
+        ref = ref_of(row)
         try:
-            man = fetch(repo, "platform-contract.yaml", local)
+            man = fetch(repo, "platform-contract.yaml", local, ref)
         except (urllib.error.URLError, FileNotFoundError) as exc:
-            fail("registry", f"{repo}: อ่าน platform-contract.yaml ไม่ได้: {exc}")
+            fail("registry", f"{repo}: อ่าน platform-contract.yaml ที่ ref `{ref}` ไม่ได้: {exc}")
             continue
 
         pins = man.get("contracts") or []
