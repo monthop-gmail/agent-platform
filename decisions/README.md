@@ -43,6 +43,7 @@ ADR ในโฟลเดอร์นี้เป็น **authority** ของ�
 | [0023](0023-frozen-bindings-and-identity.md) | binding ที่แช่แข็งกับ identity | **B** — lockfile ไม่ใช่ hard-code · ถูกต้องก็ต่อเมื่อ identity ครอบผลการ resolve | ✅ Accepted |
 | [0024](0024-tool-calling-and-canonical-scope.md) | `tool_calling` + แผนที่ scope | **C** — เพิ่มค่า + ตีพิมพ์ `canonical_scope` ที่ทุก catalog ต้องยึด · บังคับด้วย check | ✅ Accepted |
 | [0025](0025-provider-switch-and-what-identity-covers.md) | ย้าย provider กลางรอบ + identity ครอบอะไร | **B** — identity ครอบทั้งชุดที่แช่แข็ง · ตัวที่ใช้จริงเป็นของ execution · `provider_switches` | ✅ Accepted |
+| [0026](0026-tool-identity-ceiling-is-namespace-bound.md) | เพดานเชิงชื่อ tool ผูกกับ namespace | **B** — ไม่มี `allow` ≠ `[]` · ต่อสาย capability→tool · ไม่ตรงเลย = reject ไม่ใช่ deny-all | ✅ Accepted |
 
 การเคาะบันทึกไว้ที่ [issue #1–#10](https://github.com/monthop-gmail/agent-platform/issues?q=is%3Aissue+label%3Aadr) — **ไฟล์บันทึกว่าตัดสินอะไร issue บันทึกว่าใครตัดสินและเมื่อไหร่**
 
@@ -92,7 +93,7 @@ contracts/ P0 ✅ ── profiles/ ✅ ── planes/ ✅
   ↓
 0022 (agent มีปากเสียง) ✅ ── 0023 (frozen binding + identity) ✅ ── 0024 (tool_calling + scope) ✅
   ↓
-0025 (provider switch + identity) ✅
+0025 (provider switch + identity) ✅ ── 0026 (tool namespace) ✅
 ```
 
 ## ที่มา
