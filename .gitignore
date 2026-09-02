@@ -1,5 +1,6 @@
 # Claude Code local settings
 .claude/settings.local.json
+settings.local.json
 
 # Dependencies
 node_modules/
