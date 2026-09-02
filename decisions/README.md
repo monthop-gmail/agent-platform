@@ -42,6 +42,7 @@ ADR ในโฟลเดอร์นี้เป็น **authority** ของ�
 | [0022](0022-agent-may-narrow-its-own-scope.md) | agent ลดขอบเขตของตัวเองได้ | **A** — บล็อก `policy` ตัดออกได้อย่างเดียว · ไม่มี `allow` และ `authority_map` โดยเจตนา | ✅ Accepted |
 | [0023](0023-frozen-bindings-and-identity.md) | binding ที่แช่แข็งกับ identity | **B** — lockfile ไม่ใช่ hard-code · ถูกต้องก็ต่อเมื่อ identity ครอบผลการ resolve | ✅ Accepted |
 | [0024](0024-tool-calling-and-canonical-scope.md) | `tool_calling` + แผนที่ scope | **C** — เพิ่มค่า + ตีพิมพ์ `canonical_scope` ที่ทุก catalog ต้องยึด · บังคับด้วย check | ✅ Accepted |
+| [0025](0025-provider-switch-and-what-identity-covers.md) | ย้าย provider กลางรอบ + identity ครอบอะไร | **B** — identity ครอบทั้งชุดที่แช่แข็ง · ตัวที่ใช้จริงเป็นของ execution · `provider_switches` | ✅ Accepted |
 
 การเคาะบันทึกไว้ที่ [issue #1–#10](https://github.com/monthop-gmail/agent-platform/issues?q=is%3Aissue+label%3Aadr) — **ไฟล์บันทึกว่าตัดสินอะไร issue บันทึกว่าใครตัดสินและเมื่อไหร่**
 
@@ -90,6 +91,8 @@ contracts/ P0 ✅ ── profiles/ ✅ ── planes/ ✅
 0021 (workspace = scope) ✅
   ↓
 0022 (agent มีปากเสียง) ✅ ── 0023 (frozen binding + identity) ✅ ── 0024 (tool_calling + scope) ✅
+  ↓
+0025 (provider switch + identity) ✅
 ```
 
 ## ที่มา

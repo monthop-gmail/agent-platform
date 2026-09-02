@@ -1,5 +1,29 @@
 # execution/v1
 
+## v1.2.0 — 2026-09-02
+
+เพิ่ม `provider_switches` ตาม [ADR-0025](../../../decisions/0025-provider-switch-and-what-identity-covers.md) จาก [issue #52](https://github.com/monthop-gmail/agent-platform/issues/52)
+
+`provider_id` เป็น string ตัวเดียว — execution ที่ย้าย provider กลางรอบเมื่อโดน 429/5xx จึงบันทึกได้แค่ตัวเดียว **ทั้งที่ครึ่งหลังรันด้วยอีกตัว** · record ที่อ่านแล้วได้ความจริงไม่ครบ แบบเดียวกับที่ [ADR-0013](../../../decisions/0013-approval-supersedes-chain.md) · [ADR-0016](../../../decisions/0016-recording-which-consent-allowed-access.md) · [ADR-0019](../../../decisions/0019-execution-records-its-approval.md) ปิดไปแล้วสามครั้ง
+
+**ไม่ใช่กรณีสมมติ** — `agent-builder-dsh-poc` ชน 429/502/503 ห้าครั้งใน 8 attempt กับ endpoint ฟรีจริง
+
+* `provider_switches` — array, `minItems: 1` · `{from, to, at, reason}` · `additionalProperties: false`
+* `reason` ใช้ `error/v1` `$defs.Category` ที่มีอยู่แล้ว **ไม่ตั้ง enum ใหม่**
+* `provider_id` เขียนกำกับว่าหมายถึง **ตัวที่มีผลล่าสุด ไม่ใช่ตัวเดียวที่เคยใช้**
+
+### 🔒 platform ไม่ได้ตัดสินว่าใครเป็นคนย้าย
+
+router หรือ adapter ก็ได้ — **สิ่งที่บังคับคือถ้าย้ายแล้วต้องบันทึก** · สัญญานี้เป็นเจ้าของ *บันทึก* ไม่ใช่ *วิธีทำ*
+
+### ⚠️ `usage` ของ execution ที่ย้าย provider ใช้คิด cost ตรง ๆ ไม่ได้
+
+รวม token จากหลาย provider ที่ราคาต่อ token คนละอัตราเข้าด้วยกัน · **เขียนเป็นกฎไว้ก่อน ยังไม่สร้าง field** เพราะยังไม่มี consumer รายไหนคำนวณ cost จริง — การออกแบบรูปตอนนี้คือเดารูปให้งานที่ยังไม่มีใครทำ
+
+### ไม่ breaking
+
+optional · `required` ยัง 5 ตัวเท่าเดิม · `provider_id` ไม่เปลี่ยน type และความหมายไม่เปลี่ยนสำหรับ execution ที่ไม่เคยย้าย
+
 ## v1.1.0 — 2026-08-21
 
 `approval/v1` `guarantees` ข้อ 3 (🔒 frozen) เขียนว่า *"execution ที่ไม่มี APPROVE เป็นสิ่งที่ห้าม"* แต่ `execution/v1` มี `policy_decision` เต็มใบ (จึงรู้ว่า **ต้องขออนุมัติไหม**) และไม่มี field ไหนชี้ไปยังใบอนุมัติได้เลย — [ADR-0019](../../../decisions/0019-execution-records-its-approval.md) option A

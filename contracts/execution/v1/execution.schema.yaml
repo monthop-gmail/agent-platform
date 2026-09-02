@@ -46,8 +46,54 @@ properties:
   execution_mode:
     $ref: '#/$defs/ExecutionMode'
   provider_id:
-    type: [string, "null"]
-    description: null = native runtime · มีค่า = external agent provider
+    type: ["string", "null"]
+    description: >-
+      `null` = native runtime · มีค่า = external agent provider
+
+      ⚠️ **หมายถึงตัวที่มีผลล่าสุด ไม่ใช่ตัวเดียวที่เคยใช้**
+      ([ADR-0025](../../../decisions/0025-provider-switch-and-what-identity-covers.md))
+      — execution ที่ย้าย provider กลางรอบต้องมี `provider_switches` ด้วย
+      · ถ้ามี `provider_switches` การอ่าน `provider_id` อย่างเดียวจะได้ความจริงไม่ครบ
+  provider_switches:
+    type: array
+    minItems: 1
+    description: >-
+      **การย้าย provider ที่เกิดขึ้นกลางรอบ** — เรียงตามเวลา
+      ([ADR-0025](../../../decisions/0025-provider-switch-and-what-identity-covers.md))
+
+      มีอยู่เพราะ `provider_id` เป็นค่าเดี่ยว · execution ที่เริ่มด้วย provider หนึ่ง
+      แล้วย้ายเมื่อโดน 429/5xx จะบันทึกได้แค่ตัวเดียว ทั้งที่ครึ่งหลังรันด้วยอีกตัว
+      — **record ที่อ่านแล้วได้ความจริงไม่ครบ** แบบเดียวกับที่ ADR-0013 · ADR-0016
+      · ADR-0019 ปิดไปแล้วสามครั้ง
+
+      🔒 platform **ไม่ได้ตัดสินว่าใครเป็นคนย้าย** — router หรือ adapter ก็ได้
+      สิ่งที่บังคับคือ **ถ้าย้ายแล้วต้องบันทึก**
+
+      ⚠️ **ไม่มี field นี้ = ไม่เคยย้าย** ไม่ใช่ "ไม่ได้บันทึก" · `[]` ใช้ไม่ได้
+      (`minItems: 1`) หลักเดียวกับ `conditions` ของ `consent/v1`
+
+      ⚠️ `usage` ของ execution ที่มี `provider_switches` **ใช้คิด cost ตรง ๆ ไม่ได้**
+      เพราะรวม token จากหลาย provider ที่ราคาต่อ token คนละอัตราเข้าด้วยกัน
+      · ผู้ที่ต้องคิด cost ต้องแยกตาม provider เอง จนกว่าจะมีรูปกลาง
+    items:
+      type: object
+      required: [to, at]
+      additionalProperties: false
+      properties:
+        from:
+          type: ["string", "null"]
+          description: provider ก่อนหน้า — `null` ได้ถ้าย้ายจาก native runtime
+        to:
+          type: string
+          description: provider ที่ย้ายไป
+        at:
+          type: string
+          format: date-time
+        reason:
+          $ref: https://schemas.agent-platform.internal/error/v1/error.schema.yaml#/$defs/Category
+          description: >-
+            ทำไมถึงย้าย — ใช้ `error/v1` `Category` ที่มีอยู่แล้ว ไม่ตั้ง enum ใหม่
+            (`rate_limited` · `timeout` · `provider_error` ครอบเคสที่พบจริง)
   state:
     $ref: '#/$defs/ExecutionState'
   capability_requirement:
