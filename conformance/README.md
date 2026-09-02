@@ -32,6 +32,7 @@ python3 conformance/drift_check.py --local /opt/docker-test
 | 5 | ตาราง version usage | ตารางอ่านว่าปิด version ได้ทั้งที่มีคน pin |
 | 6 | schema draft 2020-12 · `$ref` · `CHANGELOG.md` | contract พังหรือชี้ไปไม่มีอะไร |
 | 7 | profile ทุกตัวกับ `contracts/profile/v1` | profile หลุด schema |
+| 4b | **แผนที่ `canonical_scope` ครอบ `CapabilityId` พอดีเป๊ะ** | เพิ่มค่าใน enum แล้วลืมบอกว่าอยู่ scope ไหน · ค่าเดียวอยู่สอง scope · แผนที่มีค่าที่ถูกลบจาก taxonomy แล้ว ([ADR-0024](../decisions/0024-tool-calling-and-canonical-scope.md)) |
 | 8 | **แถวที่อ้างว่า "ยังไม่มี repo"** — repo นั้นเกิดขึ้นแล้วหรือยัง | ทะเบียนที่ผูกพันรายงานข้อเท็จจริงผิดโดยไม่มีอะไรมาเทียบ — [PR #27](https://github.com/monthop-gmail/agent-platform/pull/27) |
 
 **ข้อ 1–3 auto-discover จากบล็อก `derived_from`** — เพิ่ม derived contract ใหม่แล้วครอบคลุมเองทันที ไม่ต้องแก้ checker
@@ -85,6 +86,9 @@ check ที่ไม่เคยเห็นสถานะ FAIL คือ chec
 | `urlopen` โยน `URLError` (connection reset) | **WARN ไม่ใช่ FAIL** · และเรียกซ้ำ 3 ครั้งต่อ repo — พิสูจน์ว่า retry ทำงาน |
 | `urlopen` โยน `HTTPError` **404** | **FAIL** · เรียกครั้งเดียวต่อ repo — พิสูจน์ว่า 404 ไม่ retry |
 | `urlopen` โยน `HTTPError` **503** | **WARN ไม่ใช่ FAIL** — เซิร์ฟเวอร์ตอบแต่ไม่ได้บอกว่าไฟล์ไม่มี · เคสนี้จับบั๊กในแพตช์แรกได้จริง |
+| เพิ่มค่าใน `CapabilityId` แต่ไม่ใส่ใน `canonical_scope` | `capability: ไม่มีใครบอกว่า ['embedding'] อยู่ scope ไหน` — **เคสที่จะเกิดจริงที่สุด** |
+| ใส่ค่าเดียวในสอง scope | `capability: capability อยู่มากกว่าหนึ่ง scope: ['streaming']` |
+| `canonical_scope` มีค่าที่ไม่อยู่ใน enum แล้ว | `capability: canonical_scope มี ['gpu'] ที่ไม่อยู่ใน CapabilityId แล้ว` |
 
 เคสที่ **binding** เพิ่มเข้ามาเพราะ check ที่มีอยู่จับไม่ได้: `EventType` มี 7 ค่าครบตามที่ต้นทางบังคับทุกตัว จึงผ่าน check ที่เทียบ *ค่าที่มี* — แต่ field ยังผูกกับ enum ปิด ทำให้ค่านอกลิสต์ validate ไม่ผ่าน **check ที่เทียบค่าอย่างเดียวมองไม่เห็นความปิดของ enum**
 

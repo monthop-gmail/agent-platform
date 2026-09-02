@@ -380,6 +380,44 @@ def check_profiles() -> None:
         ok("profile", f"{len(files)} profile ผ่าน contracts/profile/v1")
 
 
+# ── 4b. capability taxonomy กับแผนที่ scope ─────────────────────────────────
+def check_capability_scope() -> None:
+    """แผนที่ id → scope ต้องครอบ `CapabilityId` พอดีเป๊ะ
+
+    `capability/v1` เขียนกฎไว้ว่า "capability ตัวเดียวกันอยู่ได้แค่ scope เดียว"
+    แต่ `scope` เป็น field ของแต่ละรายการใน catalog — คนทำ catalog ตัดสินเอง
+    กฎนั้นจึงไม่มีอะไรทำให้จริงจนกว่าจะมีแผนที่กลาง ([ADR-0024](../decisions/))
+
+    แผนที่ list ค่าซ้ำกับ enum โดยจำเป็น (JSON Schema derive ไม่ได้) — check นี้
+    คือสิ่งที่ทำให้การซ้ำนั้นไม่ drift เงียบ ๆ ซึ่งเป็นเงื่อนไขที่ ADR-0024 ตั้งไว้เอง
+    """
+    f = ROOT / "contracts/capability/v1/capability.schema.yaml"
+    doc = load_yaml(f)
+    defs = doc.get("$defs") or {}
+    enum = defs.get("CapabilityId", {}).get("enum")
+    scope_map = defs.get("canonical_scope")
+    if not enum or not scope_map:
+        fail("capability", "capability/v1 ขาด CapabilityId.enum หรือ canonical_scope")
+        return
+
+    flat = [v for group in scope_map.values() for v in group]
+    dupes = sorted({v for v in flat if flat.count(v) > 1})
+    missing = sorted(set(enum) - set(flat))
+    extra = sorted(set(flat) - set(enum))
+
+    if dupes:
+        fail("capability", f"capability อยู่มากกว่าหนึ่ง scope: {dupes} "
+                           f"— ละเมิดกฎ 'ตัวเดียวกันอยู่ได้แค่ scope เดียว'")
+    if missing:
+        fail("capability", f"ไม่มีใครบอกว่า {missing} อยู่ scope ไหน "
+                           f"— เพิ่มค่าใน enum แล้วต้องเพิ่มใน canonical_scope ด้วย")
+    if extra:
+        fail("capability", f"canonical_scope มี {extra} ที่ไม่อยู่ใน CapabilityId แล้ว")
+    if not (dupes or missing or extra):
+        named = {k: len(v) for k, v in scope_map.items()}
+        ok("capability", f"canonical_scope ครอบ CapabilityId ครบ {len(enum)} ค่า พอดี · {named}")
+
+
 # ── 5. แถวที่อ้างว่ายังไม่มี repo ───────────────────────────────────────────
 GHOST_ROW = re.compile(r"^\|\s*`([\w.-]+)`\s*\|.*ยังไม่มี repo")
 
@@ -470,6 +508,8 @@ def main() -> int:
     check_internal()
     print("\n[4] profiles — validate กับ contracts/profile/v1")
     check_profiles()
+    print("\n[4b] capability — แผนที่ scope ครอบ taxonomy ครบไหม")
+    check_capability_scope()
     print("\n[5] ghost rows — แถวที่อ้างว่ายังไม่มี repo")
     check_ghost_rows()
 
