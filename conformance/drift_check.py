@@ -380,6 +380,52 @@ def check_profiles() -> None:
         ok("profile", f"{len(files)} profile ผ่าน contracts/profile/v1")
 
 
+# ── 3b. YAML ที่ parser ตัวอื่นอ่านได้ ───────────────────────────────────────
+def check_yaml_shape() -> None:
+    """ไม่มีไฟล์ไหนมี key ซ้ำในระดับเดียวกัน
+
+    PyYAML **รับ key ซ้ำแล้วเก็บอันหลังเงียบ ๆ** ส่วน YAML 1.2 (`yaml` ของ npm)
+    ปฏิเสธด้วย `Map keys must be unique` — schema ที่ผ่าน check ของเราจึงพังที่
+    consumer ที่ vendor ไปใช้กับ parser อื่นได้ ([#56](https://github.com/monthop-gmail/agent-platform/issues/56))
+
+    และที่แย่กว่าพัง: ถ้า parser ทั้งสองฝั่งรับ **ค่าที่ถูกทับจะหายไปโดยไม่มีใครรู้**
+    — `capability/v1` มี `description` สองครั้ง คำอธิบายระดับไฟล์จึงไม่เคยถูกอ่าน
+    โดย parser ตัวไหนเลยตั้งแต่ v1.0.0
+
+    เจอโดย consumer ไม่ใช่โดยเรา ซึ่งเป็นสัญญาณว่ามันหลุดได้จริง
+    """
+    dupes: list[str] = []
+    files = sorted(list((ROOT / "contracts").rglob("*.yaml")) + list((ROOT / "profiles").rglob("*.yaml")))
+    for f in files:
+        try:
+            node = yaml.compose(f.read_text(encoding="utf-8"))
+        except yaml.YAMLError as exc:
+            fail("yaml", f"{f.relative_to(ROOT)}: parse ไม่ผ่าน: {exc}")
+            continue
+        for path, key, line in _dup_keys(node):
+            dupes.append(f"{f.relative_to(ROOT)}:{line} `{key}`" + (f" ใต้ {path}" if path else ""))
+    if dupes:
+        for d in dupes:
+            fail("yaml", f"key ซ้ำ — YAML 1.2 ปฏิเสธ และ PyYAML ทับเงียบ ๆ: {d}")
+    else:
+        ok("yaml", f"{len(files)} ไฟล์ ไม่มี key ซ้ำในระดับเดียวกัน")
+
+
+def _dup_keys(node, path: str = ""):
+    """ไล่ทุก MappingNode หา key ที่ซ้ำในระดับเดียวกัน"""
+    if isinstance(node, yaml.MappingNode):
+        seen: dict = {}
+        for k, v in node.value:
+            key = getattr(k, "value", None)
+            if key in seen:
+                yield path, key, k.start_mark.line + 1
+            seen[key] = True
+            yield from _dup_keys(v, f"{path}.{key}" if path else str(key))
+    elif isinstance(node, yaml.SequenceNode):
+        for i, item in enumerate(node.value):
+            yield from _dup_keys(item, f"{path}[{i}]")
+
+
 # ── 4b. capability taxonomy กับแผนที่ scope ─────────────────────────────────
 def check_capability_scope() -> None:
     """แผนที่ id → scope ต้องครอบ `CapabilityId` พอดีเป๊ะ
@@ -508,6 +554,8 @@ def main() -> int:
     check_internal()
     print("\n[4] profiles — validate กับ contracts/profile/v1")
     check_profiles()
+    print("\n[3b] yaml — key ซ้ำที่ parser ตัวอื่นปฏิเสธ")
+    check_yaml_shape()
     print("\n[4b] capability — แผนที่ scope ครอบ taxonomy ครบไหม")
     check_capability_scope()
     print("\n[5] ghost rows — แถวที่อ้างว่ายังไม่มี repo")

@@ -32,6 +32,7 @@ python3 conformance/drift_check.py --local /opt/docker-test
 | 5 | ตาราง version usage | ตารางอ่านว่าปิด version ได้ทั้งที่มีคน pin |
 | 6 | schema draft 2020-12 · `$ref` · `CHANGELOG.md` | contract พังหรือชี้ไปไม่มีอะไร |
 | 7 | profile ทุกตัวกับ `contracts/profile/v1` | profile หลุด schema |
+| 3b | **ไม่มีไฟล์ไหนมี key ซ้ำในระดับเดียวกัน** | YAML ที่ PyYAML ทับเงียบ ๆ แต่ YAML 1.2 ปฏิเสธ — schema ที่ผ่าน check เราแล้วพังที่ consumer ที่ใช้ parser อื่น ([#56](https://github.com/monthop-gmail/agent-platform/issues/56)) |
 | 4b | **แผนที่ `canonical_scope` ครอบ `CapabilityId` พอดีเป๊ะ** | เพิ่มค่าใน enum แล้วลืมบอกว่าอยู่ scope ไหน · ค่าเดียวอยู่สอง scope · แผนที่มีค่าที่ถูกลบจาก taxonomy แล้ว ([ADR-0024](../decisions/0024-tool-calling-and-canonical-scope.md)) |
 | 8 | **แถวที่อ้างว่า "ยังไม่มี repo"** — repo นั้นเกิดขึ้นแล้วหรือยัง | ทะเบียนที่ผูกพันรายงานข้อเท็จจริงผิดโดยไม่มีอะไรมาเทียบ — [PR #27](https://github.com/monthop-gmail/agent-platform/pull/27) |
 
@@ -89,6 +90,9 @@ check ที่ไม่เคยเห็นสถานะ FAIL คือ chec
 | เพิ่มค่าใน `CapabilityId` แต่ไม่ใส่ใน `canonical_scope` | `capability: ไม่มีใครบอกว่า ['embedding'] อยู่ scope ไหน` — **เคสที่จะเกิดจริงที่สุด** |
 | ใส่ค่าเดียวในสอง scope | `capability: capability อยู่มากกว่าหนึ่ง scope: ['streaming']` |
 | `canonical_scope` มีค่าที่ไม่อยู่ใน enum แล้ว | `capability: canonical_scope มี ['gpu'] ที่ไม่อยู่ใน CapabilityId แล้ว` |
+| `description` ซ้ำที่ระดับบนสุด (**เคสจริงที่ consumer เจอให้**) | `yaml: key ซ้ำ … capability.schema.yaml:72 \`description\`` |
+| key ซ้ำในระดับซ้อน (ใต้ `$defs`) | จับได้พร้อมบอก path — `\`CapabilityId\` ใต้ $defs` |
+| key ซ้ำใน profile instance | จับได้เหมือนกัน — check เดินทั้ง `contracts/` และ `profiles/` |
 
 เคสที่ **binding** เพิ่มเข้ามาเพราะ check ที่มีอยู่จับไม่ได้: `EventType` มี 7 ค่าครบตามที่ต้นทางบังคับทุกตัว จึงผ่าน check ที่เทียบ *ค่าที่มี* — แต่ field ยังผูกกับ enum ปิด ทำให้ค่านอกลิสต์ validate ไม่ผ่าน **check ที่เทียบค่าอย่างเดียวมองไม่เห็นความปิดของ enum**
 

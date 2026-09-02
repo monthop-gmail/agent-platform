@@ -11,7 +11,7 @@ vN ยังมีใคร pin อยู่ไหม  → ปิด vN ได�
 
 ## สถานะปัจจุบัน — 2026-09-03
 
-> ✅ **มี consumer ที่ conform จริง 5 ราย** — [`care-agent-platform`](https://github.com/monthop-gmail/care-agent-platform) และ [`devfactory-core`](https://github.com/monthop-gmail/devfactory-core) ครบทั้ง 3 ข้อของ [ADR-0006](../decisions/0006-contract-versioning.md) (manifest · conformance test ใน CI ที่ validate payload จริง · release gate)
+> ✅ **มี consumer ที่ conform จริง 5 ราย** — [`care-agent-platform`](https://github.com/monthop-gmail/care-agent-platform) · [`devfactory-core`](https://github.com/monthop-gmail/devfactory-core) · [`ecosystem-intelligence`](https://github.com/monthop-gmail/ecosystem-intelligence) · [`botforge`](https://github.com/monthop-gmail/botforge) · [`agent-builder-dsh-poc`](https://github.com/monthop-gmail/agent-builder-dsh-poc) — ครบทั้ง 3 ข้อของ [ADR-0006](../decisions/0006-contract-versioning.md) (manifest · conformance test ใน CI ที่ validate payload จริง · release gate)
 > `—` หมายถึงยังไม่ได้ pin อะไร
 
 | Repo | Manifest | Status | Contracts ที่ pin | last_verified | หมายเหตุ |

@@ -1,5 +1,20 @@
 # capability/v1
 
+## v1.1.1 — 2026-09-03
+
+แก้ **`description` ซ้ำที่ระดับบนสุด** ตาม [issue #56](https://github.com/monthop-gmail/agent-platform/issues/56) — เจอโดย `agent-builder-dsh-poc` ตอน vendor schema มา parse ด้วย `yaml` ของ npm
+
+| parser | ผลเดิม |
+| --- | --- |
+| PyYAML (ที่ `drift_check` ใช้) | รับ · **เก็บอันหลังเงียบ ๆ** |
+| YAML 1.2 (`yaml` ของ npm) | **`Map keys must be unique`** — parse ไม่ผ่านเลย |
+
+ผลคือคำอธิบายระดับไฟล์ — *"capability คือ ทำอะไรได้ ไม่ใช่ ใครให้บริการ"* และกฎ breaking ของ enum — **ไม่เคยถูกอ่านโดย parser ตัวไหนเลยตั้งแต่ v1.0.0** เหลือแค่ `หนึ่งรายการใน catalog`
+
+รวมเป็น `description` เดียวที่ root แล้ว · **ไม่มี schema semantics เปลี่ยน** ไม่มี field ไม่มี enum ขยับ — เป็นการทำให้ข้อความที่ตั้งใจให้อ่านได้ กลับมาอ่านได้
+
+`drift_check` เพิ่ม check ข้อ 3b จับ key ซ้ำในทุกไฟล์ตั้งแต่รอบนี้ — **ปัญหานี้เจอโดย consumer ไม่ใช่โดยเรา ซึ่งเป็นสัญญาณว่ามันหลุดได้จริง**
+
 ## v1.1.0 — 2026-09-02
 
 เพิ่ม `tool_calling` และตีพิมพ์ **แผนที่ id → scope ที่เป็นทางการ** ตาม [ADR-0024](../../../decisions/0024-tool-calling-and-canonical-scope.md) จาก [issue #50](https://github.com/monthop-gmail/agent-platform/issues/50)
