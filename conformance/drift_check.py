@@ -17,6 +17,7 @@ import json
 import pathlib
 import re
 import sys
+import time
 import urllib.error
 import urllib.request
 
@@ -81,8 +82,20 @@ def fetch(repo: str, path: str, local: pathlib.Path | None, ref: str = "main"):
                 return yaml.safe_load(candidate.read_text(encoding="utf-8"))
         # ไม่มี clone ของ repo นี้ในเครื่อง — ดึงจาก network ต่อ ไม่ใช่เดาจากไฟล์ของ repo อื่น
     url = RAW.format(repo=repo, ref=ref, path=path)
-    with urllib.request.urlopen(url, timeout=30) as r:  # noqa: S310 - fixed host
-        return yaml.safe_load(r.read().decode("utf-8"))
+    last: Exception | None = None
+    for attempt in range(3):
+        try:
+            with urllib.request.urlopen(url, timeout=30) as r:  # noqa: S310 - fixed host
+                return yaml.safe_load(r.read().decode("utf-8"))
+        except urllib.error.HTTPError as exc:
+            if exc.code == 404:
+                raise  # เซิร์ฟเวอร์ตอบชัดว่าไม่มีไฟล์ที่ ref นี้ — retry ไม่ช่วยและไม่ควรช่วย
+            last = exc  # 403 rate limit · 5xx — ตอบแล้วแต่ไม่ใช่คำตอบที่ใช้ได้
+        except urllib.error.URLError as exc:
+            last = exc  # connection reset · DNS · timeout — ไม่ได้คำตอบเลย
+        if attempt < 2:
+            time.sleep(2 ** attempt)
+    raise last  # type: ignore[misc]
 
 
 def vocabulary(block):
@@ -114,8 +127,14 @@ def check_derived(local: pathlib.Path | None) -> None:
         if key not in sources:
             try:
                 sources[key] = fetch(repo, manifest, local)
+            except urllib.error.HTTPError as exc:
+                if exc.code != 404:
+                    warn("derived", f"ตรวจ {key} ไม่ได้ — เซิร์ฟเวอร์ตอบ HTTP {exc.code} · ยังไม่ได้ตรวจ ไม่ใช่ผ่าน")
+                    return
+                fail("derived", f"ไม่มี {key} ที่ต้นทาง (HTTP 404)")
+                return
             except (urllib.error.URLError, FileNotFoundError) as exc:
-                fail("derived", f"อ่าน {key} ไม่ได้: {exc}")
+                warn("derived", f"ตรวจ {key} ไม่ได้ — เน็ตไม่ถึงต้นทาง ({exc}) · ยังไม่ได้ตรวจ ไม่ใช่ผ่าน")
                 return
         sem = sources[key]
 
@@ -235,8 +254,20 @@ def check_registry(local: pathlib.Path | None) -> None:
         ref = ref_of(row)
         try:
             man = fetch(repo, "platform-contract.yaml", local, ref)
+        except urllib.error.HTTPError as exc:
+            if exc.code != 404:
+                # 403 rate limit · 5xx — เซิร์ฟเวอร์ตอบ แต่ไม่ได้ตอบว่าไฟล์ไม่มี
+                # เราจึงยังไม่รู้อะไรเลย · บอกว่า "ไม่มีไฟล์" ตรงนี้คือการโกหก
+                warn("registry", f"{repo}: ตรวจไม่ได้ที่ ref `{ref}` — เซิร์ฟเวอร์ตอบ HTTP {exc.code} · ยังไม่ได้ตรวจ ไม่ใช่ผ่าน")
+                continue
+            # 404 = ไฟล์ไม่มีอยู่ที่ ref นั้นจริง ๆ — เป็นข้อค้นพบ ไม่ใช่ความล้มเหลวของการตรวจ
+            fail("registry", f"{repo}: ไม่มี platform-contract.yaml ที่ ref `{ref}` (HTTP 404)")
+            continue
         except (urllib.error.URLError, FileNotFoundError) as exc:
-            fail("registry", f"{repo}: อ่าน platform-contract.yaml ที่ ref `{ref}` ไม่ได้: {exc}")
+            # ไม่ได้คำตอบเลย (connection reset · DNS · timeout) — retry ครบแล้วยังไม่ได้
+            # **ตอบว่า "ยังไม่ได้ตรวจ" ไม่ใช่ "ผิด"** — เราไม่รู้อะไรเลยเกี่ยวกับ manifest ใบนั้น
+            # CI แดงที่ไม่ใช่ของจริงจะสอนให้คนเลิกเชื่อสีแดง ซึ่งเป็นโรคเดียวกับ false ✅ คนละด้าน
+            warn("registry", f"{repo}: ตรวจไม่ได้ที่ ref `{ref}` — เน็ตไม่ถึง raw.githubusercontent.com ({exc})")
             continue
 
         pins = man.get("contracts") or []
