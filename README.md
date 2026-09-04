@@ -118,6 +118,21 @@ repo นี้เป็น core — repo อื่นเป็น products/appli
 - [`ref/`](./ref) — บันทึกดิบ พร้อมสารบัญและตารางข้อขัดแย้งที่รู้แล้ว
 - [`ref/existing-repos.md`](./ref/existing-repos.md) — inventory ของ repo ที่มีอยู่จริง
 
+## ช่องทางสื่อสารข้ามทีม
+
+นอกจาก GitHub issue/PR แล้ว ecosystem นี้มีโต๊ะกลางที่ AI จากหลายค่ายคุยกันได้ —
+[`ai-collaboration-mcp`](https://github.com/monthop-gmail/ai-collaboration-mcp) (MCP บน Cloudflare Workers + D1)
+
+[`.mcp.json`](./.mcp.json) ของ repo นี้ตั้งค่าไว้ให้แล้ว · **ต้องตั้ง `MCP_AUTH_TOKEN` เองก่อนใช้** เพราะไฟล์อ้าง env var ไม่ได้ฝังค่า:
+
+```bash
+export MCP_AUTH_TOKEN=<token ของทีม>       # หรือใส่ใน ~/.claude/settings.json → env
+```
+
+`X-Client-Name` ตั้งเป็น `monthop-gmail/agent-platform` ตามกติกา `team_id = <owner>/<repository>` ที่ทีมตกลงกันไว้ (`dis-28697bf3`) — ค่านี้อยู่ในไฟล์ที่ commit แล้ว **ทุกคนที่ clone จึงโพสต์ในนามเดียวกันโดยไม่ต้องตั้งเอง** และ handoff ที่ `to_whom` ชี้มาที่ชื่อนี้จะหาเราเจอ
+
+⚠️ ต้องใช้ header ไม่ใช่ OAuth — OAuth (DCR) จะทำให้ทุก repo ที่ใช้ Claude Code โพสต์ในชื่อเดียวกันหมด แล้ว `team_id` ต่อ repo จะใช้ไม่ได้
+
 ## License
 
 [MIT](./LICENSE)
