@@ -45,7 +45,7 @@ ADR ในโฟลเดอร์นี้เป็น **authority** ของ�
 | [0025](0025-provider-switch-and-what-identity-covers.md) | ย้าย provider กลางรอบ + identity ครอบอะไร | **B** — identity ครอบทั้งชุดที่แช่แข็ง · ตัวที่ใช้จริงเป็นของ execution · `provider_switches` | ✅ Accepted |
 | [0026](0026-tool-identity-ceiling-is-namespace-bound.md) | เพดานเชิงชื่อ tool ผูกกับ namespace | **B** — ไม่มี `allow` ≠ `[]` · ต่อสาย capability→tool · ไม่ตรงเลย = reject ไม่ใช่ deny-all | ✅ Accepted |
 | [0027](0027-toolid-transformation-must-be-deterministic.md) | กฎการแปลงชื่อเป็น `ToolId` | **B** — คง pattern · การแปลงต้อง deterministic · ชนกัน = reject · ย้อนกลับได้ | ✅ Accepted |
-| [0028](0028-versioning-for-tool-response-contracts.md) | versioning ของ contract ที่ส่งผ่าน tool response | **D** — เลขสองที่ cache คนละแบบ · **ห้ามลบคีย์เก่าจนขึ้น major** · deprecation ไม่มีหน่วยเป็นเวลา | ✅ Accepted |
+| [0028](0028-versioning-for-tool-response-contracts.md) | versioning ของ contract ที่ส่งผ่าน tool response | **D** — เลขสองที่ cache คนละแบบ · **ห้ามลบคีย์เก่าจนขึ้น major** · deprecation ไม่มีหน่วยเป็นเวลา | ✅ Accepted · implement แล้ว (`contract 2`) |
 
 การเคาะบันทึกไว้ที่ [issue #1–#10](https://github.com/monthop-gmail/agent-platform/issues?q=is%3Aissue+label%3Aadr) — **ไฟล์บันทึกว่าตัดสินอะไร issue บันทึกว่าใครตัดสินและเมื่อไหร่**
 
