@@ -5,6 +5,7 @@
 **Depends on:** ADR-0001
 **Blocking:** —
 **Superseded in part by:** [ADR-0011](0011-conformance-automation.md) — คำตอบ "ตรวจตอน contract change ก่อน ยังไม่ทำ CI" ถูกแทนที่ด้วยการ automate เมื่อ 2026-08-18
+**ขยายโดย:** [ADR-0028](0028-versioning-for-tool-response-contracts.md) — กฎของหมวดนี้เขียนไว้สำหรับ contract ที่เป็น **ไฟล์** · contract ที่ส่งผ่าน **tool response** ใช้กลไกบังคับชุดนี้ไม่ได้ ดูข้อยกเว้นท้ายหมวด Deprecation
 
 ## Context
 
@@ -194,6 +195,12 @@ farm-agent             ? unknown   —
 ```
 
 vN ที่ยังมี consumer pin อยู่ **ห้ามปิด** ไม่ว่าครบกำหนดหรือไม่
+
+> **ข้อยกเว้น — contract ที่ส่งผ่าน tool response** ([ADR-0028](0028-versioning-for-tool-response-contracts.md))
+>
+> นาฬิกา *90 วันหลัง `vN+1` พร้อมใช้* **ไม่มีผล** กับช่องทางนี้ เพราะจุดที่ผู้เรียกย้ายจริงคือตอน reconnect ซึ่งฝั่งผู้ส่งมองไม่เห็น และ *แจ้ง consumer ที่ pin ไว้ทุกตัว* ก็ทำไม่ได้เมื่อ server เป็น stateless
+>
+> ที่นั่นใช้แทนว่า **คีย์เก่าอยู่ต่อจนกว่าจะขึ้น major** — ผูกกับ major ไม่ใช่กับวัน
 
 ## Decision
 
