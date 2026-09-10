@@ -47,6 +47,7 @@ ADR ในโฟลเดอร์นี้เป็น **authority** ของ�
 | [0027](0027-toolid-transformation-must-be-deterministic.md) | กฎการแปลงชื่อเป็น `ToolId` | **B** — คง pattern · การแปลงต้อง deterministic · ชนกัน = reject · ย้อนกลับได้ | ✅ Accepted |
 | [0028](0028-versioning-for-tool-response-contracts.md) | versioning ของ contract ที่ส่งผ่าน tool response | **D** — เลขสองที่ cache คนละแบบ · **ห้ามลบคีย์เก่าจนขึ้น major** · deprecation ไม่มีหน่วยเป็นเวลา | ✅ Accepted · implement แล้ว (`contract 2`) |
 | [0029](0029-the-cost-of-not-acting.md) | เพดานกั้น action ที่ความเร็วคือความปลอดภัย | **D** — `undoes` ที่ตรวจได้ + ข้อยกเว้นที่ประกาศพร้อมบังคับ audit · ห้ามยุบเป็นฟิลด์เดียว | ✅ Accepted |
+| [0030](0030-the-field-nobody-named.md) | `error/v1.details` เป็น open bag ที่ไม่มีใครเอ่ยชื่อ | **C** — เติมกฎให้สอดคล้องกับ `message` · ปฏิเสธ `propertyNames` enum เพราะบังคับผิดแกน | ✅ Accepted |
 
 การเคาะบันทึกไว้ที่ [issue #1–#10](https://github.com/monthop-gmail/agent-platform/issues?q=is%3Aissue+label%3Aadr) — **ไฟล์บันทึกว่าตัดสินอะไร issue บันทึกว่าใครตัดสินและเมื่อไหร่**
 
@@ -101,6 +102,8 @@ contracts/ P0 ✅ ── profiles/ ✅ ── planes/ ✅
 0028 (versioning ของ tool response) ✅
   ↓
 0029 (ต้นทุนของการไม่ทำ) ✅
+  ↓
+0030 (ฟิลด์ที่ไม่มีใครเอ่ยชื่อ) ✅
 ```
 
 ## ที่มา
