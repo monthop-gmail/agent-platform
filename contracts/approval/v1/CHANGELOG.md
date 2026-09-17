@@ -1,5 +1,13 @@
 # approval/v1
 
+## v1.2.2 — 2026-09-17
+
+`derived_from.semantics_version` `1.2` → `1.3` ตามต้นทาง · **สัญญาไม่ขยับ**
+
+RFC-0013 เพิ่ม invariant ให้ `event` · `approval` ขยับเพราะ `semantics_version` เป็นของ manifest ทั้งไฟล์ ไม่ได้แยกต่อ contract — เหมือนรอบ 1.2
+
+⚠️ แต่รอบนี้มีของที่เกี่ยวจริง: `reason` ของ `approval/v1` มี `minLength: 1` และ**เป็น leaf ที่ถือข้อความของคนตามนิยามของ RFC-0013** · ผู้ผลิต `devfactory-core` ประกาศ `metadata.approval.reason` ไว้ใน manifest ของตัวเองแล้ว · ถ้า ADR ที่จะเขียนถึง `transition.reason` ควรพิจารณา `approval/v1.reason` พร้อมกัน
+
 ## v1.2.1 — 2026-08-21
 
 `derived_from.semantics_version` `1.1` → `1.2` ตามต้นทาง · **สัญญาไม่ขยับแม้แต่ตัวอักษรเดียว**

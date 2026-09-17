@@ -1,5 +1,17 @@
 # event/v1
 
+## v1.7.1 — 2026-09-17
+
+`derived_from.semantics_version` `1.2` → `1.3` ตามต้นทาง · เพิ่ม `rfcs/0013` ในรายการที่มา
+
+[RFC-0013](https://github.com/monthop-gmail/devfactory-core/blob/main/rfcs/0013-audit-fields-that-hold-human-text.md) — ที่ **repo นี้เป็นผู้ยื่นขอเอง**ตาม ADR-0006 Rule 2 — ได้รับอนุมัติแล้ว · `semantics_version` ขยับเพราะเพิ่ม invariant ข้อใหม่: **leaf ที่อาจถือข้อความของคนต้องประกาศ ที่เหลือทุก leaf เป็นตัวชี้**
+
+### PR นี้แก้แค่ pointer
+
+`guarantees.rules` ยัง**ไม่ได้**เพิ่ม invariant ข้อใหม่ และ `transition.reason` ยังไม่ได้ถูกประกาศ — ทั้งสองอย่างเป็นการแก้ contract ซึ่งต้องมี ADR ที่ repo นี้ ไม่ใช่สิ่งที่ consumer ยื่นมาให้ · ข้อความที่เสนออยู่ใน PR
+
+ที่ทำได้ทันทีคือ pointer เพราะปล่อยไว้ drift check จะแดงทุกวัน
+
 ## v1.7.0 — 2026-08-22
 
 `EventType` +1 — **`JOB_SETTLED`**
