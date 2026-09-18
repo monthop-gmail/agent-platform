@@ -66,7 +66,7 @@ declared ยังไม่ทำให้เป็น consumer ตาม ADR-00
 
 ตอนนี้ไม่มีแถวไหนเป็น `declared` แล้ว — เก็บคำอธิบายไว้เพราะยังเป็นสถานะที่ใช้ได้
 
-🔗 **derived** = semantics เป็นของ `devfactory-core` ([ADR-0006 C2](../decisions/0006-contract-versioning.md)) · pin ปัจจุบัน `semantics_version: "1.1"` ตรงกับต้นทาง
+🔗 **derived** = semantics เป็นของ `devfactory-core` ([ADR-0006 C2](../decisions/0006-contract-versioning.md)) · pin ปัจจุบัน `semantics_version: "1.5"` ตรงกับต้นทาง
 
 **กฎ:** vN ที่ยังมี consumer pin อยู่ **ห้ามปิด** ไม่ว่าครบกำหนด 90 วันหรือไม่
 

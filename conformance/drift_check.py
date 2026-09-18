@@ -608,6 +608,47 @@ def check_plane_claims() -> None:
                     f"— ไม่พบคำอ้างที่ขัดกับของจริง")
 
 
+REG_SEMVER = re.compile(r"`semantics_version:\s*\"([\d.]+)\"`")
+
+
+def check_registry_semver_claim() -> None:
+    """`consumers.md` เขียนเป็น prose ว่า pin ปัจจุบันคือเวอร์ชันไหน — ไม่มีอะไรเทียบ
+
+    `check_derived` เทียบ pin ใน **ไฟล์ schema** กับต้นทาง · ประโยคในทะเบียนเป็นคนละที่
+    และค้างเป็นข้อมูลผิดได้เงียบ ๆ — **เกิดจริงแล้ว** บรรทัดนี้ค้างที่ `1.1` ข้าม `1.2`
+    (21 ส.ค.) มาจนถึง `1.3` (17 ก.ย.) คือผิดอยู่ 28 วันโดยไม่มีอะไรฟ้อง
+    เป็นรูปเดียวกับ `planes/knowledge.md` ที่ `check_plane_claims` ปิดไป
+
+    เทียบกับ pin ของ contract ที่ derive จริง ไม่ใช่กับต้นทาง — ถ้า pin ยังไม่ขยับ
+    ประโยคก็ไม่ควรขยับ · สองอันนี้ต้องตรงกันเสมอไม่ว่าจะ conform หรือไม่
+    """
+    reg = ROOT / "architecture/consumers.md"
+    claims = REG_SEMVER.findall(reg.read_text(encoding="utf-8"))
+    if not claims:
+        ok("regclaim", "ทะเบียนไม่ได้อ้าง semantics_version เป็น prose — ไม่มีอะไรต้องเทียบ")
+        return
+
+    pins = {}
+    for path in sorted(ROOT.glob("contracts/*/v*/*.schema.yaml")):
+        doc = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+        if df := doc.get("derived_from"):
+            if v := df.get("semantics_version"):
+                pins[f"{path.parent.parent.name}/{path.parent.name}"] = str(v)
+
+    if not pins:
+        warn("regclaim", "ไม่มี contract ที่ derive — ข้ามการตรวจ")
+        return
+
+    actual = sorted(set(pins.values()))
+    bad = [c for c in claims if [c] != actual]
+    if bad:
+        fail("regclaim", f"consumers.md อ้างว่า pin ปัจจุบันคือ {bad} "
+                         f"แต่ของจริงในไฟล์ schema คือ {actual} ({pins}) "
+                         f"— ทะเบียนที่ผูกพันกำลังรายงานข้อเท็จจริงผิด")
+    else:
+        ok("regclaim", f"ทะเบียนอ้าง semantics_version={actual[0]} ตรงกับ pin จริงของ {len(pins)} contract")
+
+
 def check_ghost_rows() -> None:
     """แถวที่เขียนว่า "ยังไม่มี repo" — ตรวจว่ายังจริงอยู่ไหม
 
@@ -680,6 +721,9 @@ def main() -> int:
 
     print("\n[5b] plane docs — คำอ้างเรื่อง repo ใน planes/ ตรงกับของจริงไหม")
     check_plane_claims()
+
+    print("\n[5c] registry claim — ประโยคเรื่อง semantics_version ตรงกับ pin จริงไหม")
+    check_registry_semver_claim()
 
     fails = [f for f in findings if f[0] == "FAIL"]
     warns = [f for f in findings if f[0] == "WARN"]
