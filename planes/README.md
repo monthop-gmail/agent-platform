@@ -16,7 +16,7 @@
 | [`evals`](evals.md) | สนามทดสอบ — scenario, evaluator, regression | `navi-security-agent` ❌ | ยังไม่มี format กลาง |
 | [`tools`](tools.md) | catalog ของ tool + MCP registration | ❌ | ✅ `tool/v1` `mcp/v1` |
 | [`policy`](policy.md) | ทำได้ไหม ต้องให้ใครอนุมัติ | ❌ | ✅ `policy/v1` `approval/v1` |
-| [`knowledge`](knowledge.md) | ingest, retrieval, citation, ACL | `enterprise-knowledge` ❌ | ใช้ `tool/v1` |
+| [`knowledge`](knowledge.md) | ingest, retrieval, citation, ACL | `enterprise-knowledge` 🚧 | ใช้ `tool/v1` |
 | [`workflow`](workflow.md) | orchestration ข้ามขั้น ข้าม agent | ❌ | ✅ `execution/v1` |
 | [`sandbox`](sandbox.md) | ที่ที่ command รันจริง + isolation | ❌ | ใช้ `capability/v1` |
 | [`observability`](observability.md) | trace, audit, cost, replay | ❌ | ✅ `event/v1` |

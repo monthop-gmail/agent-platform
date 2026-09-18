@@ -491,6 +491,146 @@ def repo_visible(repo: str) -> bool:
     return False
 
 
+PLANE_NAME = re.compile(r"`([\w.-]+)`")
+NO_REPO = "ยังไม่มี repo"
+
+
+def check_plane_claims() -> None:
+    """`planes/*.md` ก็อ้างว่า repo ไหนมีหรือไม่มี — แต่ไม่เคยมีอะไรมาเทียบ
+
+    `check_ghost_rows` อ่าน `architecture/consumers.md` อย่างเดียว · `planes/` พูดเรื่อง
+    เดียวกันคนละที่ และเพี้ยนจากกันได้โดยไม่มีอะไรฟ้อง — **เกิดจริงแล้วหนึ่งครั้ง**
+    `enterprise-knowledge` ถูกแก้ใน `consumers.md` เมื่อ 2026-08-21 แต่ `planes/knowledge.md`
+    ยังเขียนว่า "ยังไม่มี repo" ต่ออีก 28 วัน จนเจอด้วยตาคนตอนไปตอบคำถามของ repo นั้นเอง
+
+    สองกฎ เพราะกฎเดียวจับไม่ครบ:
+
+    1. บรรทัดที่มีคำว่า "ยังไม่มี repo" พร้อมชื่อใน backtick ที่ไม่ใช่ path
+       → ชื่อนั้นต้องมองไม่เห็นบน raw.githubusercontent
+    2. ถ้าแถว `| Implementation |` ของไฟล์ไหนชี้ไป repo ที่ **มีจริง**
+       ไฟล์นั้นห้ามมีคำว่า "ยังไม่มี repo" อยู่ที่ไหนอีกเลย
+       — ข้อนี้จับ prose ที่ไม่ได้เอ่ยชื่อ ซึ่งกฎข้อ 1 มองไม่เห็น
+
+    ⚠️ **ข้อจำกัดที่ต้องรู้** — บรรทัดที่พูดว่า "ยังไม่มี repo" โดยไม่เอ่ยชื่อ **และ**
+    อยู่ในไฟล์ที่ Implementation ยังไม่ชี้ไป repo จริง จะตรวจไม่ได้เลย
+    (`planes/tools.md` "tool registry ยังไม่มี repo") · เหมือน `repo_visible`
+    ที่ False ไม่ได้แปลว่าไม่มี repo — เขียนไว้ตรงนี้ ไม่ปล่อยให้เชื่อว่าครอบหมด
+    """
+    plane_dir = ROOT / "planes"
+    if not plane_dir.is_dir():
+        ok("plane", "ไม่มีโฟลเดอร์ planes/ — ข้าม")
+        return
+
+    reg = (ROOT / "architecture/consumers.md").read_text(encoding="utf-8")
+    owners = sorted({
+        m.group(1)
+        for line in reg.splitlines() if line.startswith("| [`")
+        for m in [re.search(r"github\.com/([\w.-]+)/[\w.-]+", line)] if m
+    })
+    if not owners:
+        warn("plane", "หา owner จากทะเบียนไม่ได้ — ข้ามการตรวจ")
+        return
+
+    def visible(name: str) -> str | None:
+        for owner in owners:
+            if repo_visible(f"{owner}/{name}"):
+                return f"{owner}/{name}"
+        return None
+
+    claims: list[tuple[str, int, str]] = []      # (ไฟล์, บรรทัด, ชื่อ) — กฎ 1
+    impl_live: list[tuple[str, str]] = []        # (ไฟล์, repo ที่มีจริง) — กฎ 2
+    checked = 0
+    try:
+        for md in sorted(plane_dir.glob("*.md")):
+            lines = md.read_text(encoding="utf-8").splitlines()
+            rel = f"planes/{md.name}"
+
+            for n, line in enumerate(lines, 1):
+                if NO_REPO not in line:
+                    continue
+                # legend ของตาราง — อธิบายสัญลักษณ์ ไม่ได้อ้างถึง repo ใด
+                if line.lstrip().startswith(("✅", "🚧", "❌")):
+                    continue
+                for name in PLANE_NAME.findall(line):
+                    if "/" in name or "." in name:
+                        continue           # path หรือชื่อ contract ไม่ใช่ชื่อ repo
+                    checked += 1
+                    if found := visible(name):
+                        claims.append((rel, n, found))
+
+            for n, line in enumerate(lines, 1):
+                if not line.startswith("| Implementation |"):
+                    continue
+                for name in PLANE_NAME.findall(line):
+                    if "/" in name or "." in name:
+                        continue
+                    if found := visible(name):
+                        impl_live.append((rel, found))
+                break
+    except urllib.error.URLError as exc:
+        warn("plane", f"ตรวจไม่ได้ — เน็ตไม่ถึง raw.githubusercontent.com ({exc.reason})")
+        return
+
+    bad = False
+    for rel, n, repo in claims:
+        bad = True
+        fail("plane", f"{rel}:{n}: เขียนว่า \"{NO_REPO}\" แต่ {repo} มีอยู่จริงแล้ว")
+
+    for rel, repo in impl_live:
+        body = (ROOT / rel).read_text(encoding="utf-8").splitlines()
+        for n, line in enumerate(body, 1):
+            if NO_REPO in line and not line.lstrip().startswith(("✅", "🚧", "❌")):
+                bad = True
+                fail("plane", f"{rel}:{n}: Implementation ชี้ไป {repo} ซึ่งมีจริงแล้ว "
+                              f"แต่บรรทัดนี้ยังบอกว่า \"{NO_REPO}\"")
+
+    if not bad:
+        ok("plane", f"ตรวจ {len(list(plane_dir.glob('*.md')))} ไฟล์ · "
+                    f"{checked} ชื่อที่อ้างว่ายังไม่มี repo · {len(impl_live)} plane ที่ implementation มีจริง "
+                    f"— ไม่พบคำอ้างที่ขัดกับของจริง")
+
+
+REG_SEMVER = re.compile(r"`semantics_version:\s*\"([\d.]+)\"`")
+
+
+def check_registry_semver_claim() -> None:
+    """`consumers.md` เขียนเป็น prose ว่า pin ปัจจุบันคือเวอร์ชันไหน — ไม่มีอะไรเทียบ
+
+    `check_derived` เทียบ pin ใน **ไฟล์ schema** กับต้นทาง · ประโยคในทะเบียนเป็นคนละที่
+    และค้างเป็นข้อมูลผิดได้เงียบ ๆ — **เกิดจริงแล้ว** บรรทัดนี้ค้างที่ `1.1` ข้าม `1.2`
+    (21 ส.ค.) มาจนถึง `1.3` (17 ก.ย.) คือผิดอยู่ 28 วันโดยไม่มีอะไรฟ้อง
+    เป็นรูปเดียวกับ `planes/knowledge.md` ที่ `check_plane_claims` ปิดไป
+
+    เทียบกับ pin ของ contract ที่ derive จริง ไม่ใช่กับต้นทาง — ถ้า pin ยังไม่ขยับ
+    ประโยคก็ไม่ควรขยับ · สองอันนี้ต้องตรงกันเสมอไม่ว่าจะ conform หรือไม่
+    """
+    reg = ROOT / "architecture/consumers.md"
+    claims = REG_SEMVER.findall(reg.read_text(encoding="utf-8"))
+    if not claims:
+        ok("regclaim", "ทะเบียนไม่ได้อ้าง semantics_version เป็น prose — ไม่มีอะไรต้องเทียบ")
+        return
+
+    pins = {}
+    for path in sorted(ROOT.glob("contracts/*/v*/*.schema.yaml")):
+        doc = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+        if df := doc.get("derived_from"):
+            if v := df.get("semantics_version"):
+                pins[f"{path.parent.parent.name}/{path.parent.name}"] = str(v)
+
+    if not pins:
+        warn("regclaim", "ไม่มี contract ที่ derive — ข้ามการตรวจ")
+        return
+
+    actual = sorted(set(pins.values()))
+    bad = [c for c in claims if [c] != actual]
+    if bad:
+        fail("regclaim", f"consumers.md อ้างว่า pin ปัจจุบันคือ {bad} "
+                         f"แต่ของจริงในไฟล์ schema คือ {actual} ({pins}) "
+                         f"— ทะเบียนที่ผูกพันกำลังรายงานข้อเท็จจริงผิด")
+    else:
+        ok("regclaim", f"ทะเบียนอ้าง semantics_version={actual[0]} ตรงกับ pin จริงของ {len(pins)} contract")
+
+
 def check_ghost_rows() -> None:
     """แถวที่เขียนว่า "ยังไม่มี repo" — ตรวจว่ายังจริงอยู่ไหม
 
@@ -560,6 +700,12 @@ def main() -> int:
     check_capability_scope()
     print("\n[5] ghost rows — แถวที่อ้างว่ายังไม่มี repo")
     check_ghost_rows()
+
+    print("\n[5b] plane docs — คำอ้างเรื่อง repo ใน planes/ ตรงกับของจริงไหม")
+    check_plane_claims()
+
+    print("\n[5c] registry claim — ประโยคเรื่อง semantics_version ตรงกับ pin จริงไหม")
+    check_registry_semver_claim()
 
     fails = [f for f in findings if f[0] == "FAIL"]
     warns = [f for f in findings if f[0] == "WARN"]
