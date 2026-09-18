@@ -4,7 +4,7 @@
 
 | | |
 | --- | --- |
-| Implementation | `enterprise-knowledge` — ยังไม่มี repo |
+| Implementation | [`enterprise-knowledge`](https://github.com/monthop-gmail/enterprise-knowledge) — repo เกิดแล้ว 2026-08-20 · ยังไม่ conform |
 | Contracts | `tool/v1` (`knowledge.search`) · `identity/v1` · `policy/v1` |
 | ADR | [0002](../decisions/0002-core-repository-naming.md) · [0007](../decisions/0007-multi-tenancy.md) |
 
@@ -47,4 +47,12 @@ agent เรียก `knowledge.search` เหมือน tool ทั่วไ
 
 ## สถานะ
 
-ยังไม่มี repo · [`profiles/knowledge-agent`](../profiles/knowledge-agent/profile.yaml) กำหนดกรอบอำนาจไว้แล้ว (อ่านอย่างเดียว)
+repo มีแล้วตั้งแต่ 2026-08-20 · **ยังไม่ conform** — ไม่มี `platform-contract.yaml` จึงยังไม่นับเป็น consumer ตาม [ADR-0006](../decisions/0006-contract-versioning.md) · สถานะล่าสุดอยู่ที่ [`architecture/consumers.md`](../architecture/consumers.md) ซึ่งเป็นทะเบียนที่ผูกพัน ไม่ใช่ไฟล์นี้
+
+[`profiles/knowledge-agent`](../profiles/knowledge-agent/profile.yaml) กำหนดกรอบอำนาจไว้แล้ว (อ่านอย่างเดียว)
+
+### `knowledge/v1` ยังไม่เกิด และเกณฑ์ข้อ 1 ชี้ไปทางอื่น
+
+ตารางข้างบนระบุ contract ของ plane นี้ว่าเป็น `tool/v1` (`knowledge.search`) · `identity/v1` · `policy/v1` — **ไม่ใช่สัญญาใหม่** ซึ่งตรงกับเกณฑ์รับ contract ใหม่ข้อ 1 ของ [ADR-0012](../decisions/0012-consent-contract.md) ที่ว่าถ้ามี contract เดิมตอบได้ ให้ขยายตัวนั้น
+
+แต่ปิดแค่ครึ่งเดียว — `tool/v1` ทำให้ `knowledge.search` เป็น `tool_call` ที่ policy เห็นและเพดานเชิงชื่อคุมได้ **แต่ไม่ได้นิยาม payload ของ tool แต่ละตัว** · รูปของ `SearchRequest` `SearchResponse` `Citation` `Provenance` จึงยังไม่มีเจ้าของ และยังติดเกณฑ์ข้อ 2 (consumer ≥ 2 ราย) เพราะ **วันนี้ยังไม่มีรายที่สอง** ([enterprise-knowledge#17](https://github.com/monthop-gmail/enterprise-knowledge/issues/17))
