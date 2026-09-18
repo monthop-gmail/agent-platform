@@ -61,6 +61,20 @@ python3 conformance/drift_check.py --local /opt/docker-test
 
 **ข้อ 4 อ่านแถวใน `consumers.md` จริง ๆ ไม่ใช่ค้นทั้งไฟล์** — เวอร์ชันแรกของ check นี้ถามแค่ว่าชื่อ contract โผล่ที่ไหนสักแห่งไหม ซึ่งได้ ✅ ปลอมเพราะคำว่า `approval` โผล่ในย่อหน้าอื่นอยู่แล้ว
 
+
+## [5b] `planes/*.md` — คำอ้างเรื่อง repo ที่ไม่เคยมีอะไรมาเทียบ
+
+`check_ghost_rows` อ่าน `architecture/consumers.md` อย่างเดียว · `planes/` พูดเรื่องเดียวกันคนละที่ และเพี้ยนจากกันได้โดยไม่มีอะไรฟ้อง
+
+**เกิดจริงแล้วหนึ่งครั้ง** — `enterprise-knowledge` ถูกแก้ใน `consumers.md` เมื่อ 21 ส.ค. แต่ `planes/knowledge.md` ยังเขียนว่า *"ยังไม่มี repo"* ต่ออีก **28 วัน** จนเจอด้วยตาคนตอนไปตอบคำถามของ repo นั้นเอง — ไม่ใช่ด้วย check
+
+สองกฎ เพราะกฎเดียวจับไม่ครบ:
+
+1. บรรทัดที่มีคำว่า *ยังไม่มี repo* พร้อมชื่อใน backtick ที่ไม่ใช่ path → ชื่อนั้นต้องมองไม่เห็นบน `raw.githubusercontent`
+2. ถ้าแถว `| Implementation |` ชี้ไป repo ที่ **มีจริง** ไฟล์นั้นห้ามมีคำว่า *ยังไม่มี repo* อยู่ที่ไหนอีกเลย — **ข้อนี้จับ prose ที่ไม่ได้เอ่ยชื่อ ซึ่งกฎข้อ 1 มองไม่เห็น** และเป็นรูปของเคสจริงข้างบนพอดี
+
+⚠️ **ข้อจำกัด** — บรรทัดที่พูดว่า *ยังไม่มี repo* โดยไม่เอ่ยชื่อ **และ** อยู่ในไฟล์ที่ Implementation ยังไม่ชี้ไป repo จริง จะตรวจไม่ได้เลย (`planes/tools.md` *"tool registry ยังไม่มี repo"*) · เหมือน `repo_visible` ที่ False ไม่ได้แปลว่าไม่มี repo — **เขียนไว้ตรงนี้ ไม่ปล่อยให้เชื่อว่าครอบหมด**
+
 ## ⚠️ เพิ่ม check ใหม่ต้องมี negative test
 
 check ที่ไม่เคยเห็นสถานะ FAIL คือ check ที่ยังไม่รู้ว่าทำงาน — และ check ที่หลวมอันตรายกว่าไม่มี check เพราะสร้างความมั่นใจปลอม
@@ -82,6 +96,9 @@ check ที่ไม่เคยเห็นสถานะ FAIL คือ chec
 | ถอด `decision` ออกจาก enum ปิด | `binding: closed=true แต่ไม่มี field ไหนผูกกับ enum นี้` (WARN) |
 | ใส่แถว `\| \`devfactory-core\` \| — \| ยังไม่มี repo` (repo ที่มีจริง) | `ghost: monthop-gmail/devfactory-core: ทะเบียนเขียนว่า "ยังไม่มี repo" แต่ repo มีอยู่จริงแล้ว` |
 | ใช้ `consumers.md` ของ `main` ตอนที่ `enterprise-knowledge` ยังเป็น ghost row | `ghost: monthop-gmail/enterprise-knowledge: …` — **เคสจริงที่เคยหลุด** |
+| `planes/gateway.md` แถว Implementation ชี้ไป `botforge` ที่มีจริง | `plane: planes/gateway.md:7: เขียนว่า "ยังไม่มี repo" แต่ monthop-gmail/botforge มีอยู่จริงแล้ว` |
+| `planes/knowledge.md` เขียน "ยังไม่มี repo" ใน prose **โดยไม่เอ่ยชื่อ** | `plane: planes/knowledge.md:50: Implementation ชี้ไป … แต่บรรทัดนี้ยังบอกว่า …` — **กฎข้อ 2 จับสิ่งที่กฎข้อ 1 มองไม่เห็น · เป็นเคสจริงที่ค้าง 28 วัน** |
+| legend `✅ contract พร้อม · 🚧 scaffold · ❌ ยังไม่มี repo` | **ต้องไม่ FAIL** — พิสูจน์ว่าคำอธิบายสัญลักษณ์ไม่ถูกอ่านเป็นคำอ้าง |
 | แถวชี้ `/blob/main/` ทั้งที่ manifest อยู่บน `v2` | `registry: … อ่าน platform-contract.yaml ที่ ref \`main\` ไม่ได้: HTTP Error 404` |
 | แถวชี้ ref ที่ไม่มีอยู่จริง | เหมือนกัน — **พิสูจน์ว่า ref ถูกใช้จริง ไม่ได้ถูกเมิน** |
 | `urlopen` โยน `URLError` (connection reset) | **WARN ไม่ใช่ FAIL** · และเรียกซ้ำ 3 ครั้งต่อ repo — พิสูจน์ว่า retry ทำงาน |
