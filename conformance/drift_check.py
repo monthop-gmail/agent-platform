@@ -558,9 +558,21 @@ def check_plane_claims() -> None:
     (`planes/tools.md` "tool registry ยังไม่มี repo") · เหมือน `repo_visible`
     ที่ False ไม่ได้แปลว่าไม่มี repo — เขียนไว้ตรงนี้ ไม่ปล่อยให้เชื่อว่าครอบหมด
     """
-    plane_dir = ROOT / "planes"
-    if not plane_dir.is_dir():
-        ok("plane", "ไม่มีโฟลเดอร์ planes/ — ข้าม")
+    # ── ไฟล์ที่เดิน ────────────────────────────────────────────────────
+    # เดิมเดินแต่ planes/*.md · `devfactory-core` ทักใน dis-b492ed20 seq 5 ว่า
+    # "รอให้มีคนชน เป็นกลยุทธ์ก็ต่อเมื่อมีคนที่จะชน" และการเอา check ที่เพิ่งเขียน
+    # ไปรันกับไฟล์ที่ยังไม่เคยรัน **ไม่ใช่การเดา ต้นทุนเกือบศูนย์ และไม่ต้องรอใคร**
+    # → ไล่แล้วพบว่า README.md อ้างว่า repo ไหนยังไม่มี โดยไม่มี check ไหนเดินไปถึง
+    #
+    # ⚠️ `architecture/consumers.md` ถูกกันออกโดยเจตนา — [5] เป็นเจ้าของไฟล์นั้น
+    # และแถวที่นั่นมีหมายเหตุเชิงประวัติที่ *อ้างถึง* คำว่า "ยังไม่มี repo"
+    # (แถว enterprise-knowledge เขียนว่าเคยถูกลงไว้แบบนั้น) ซึ่งไม่ใช่คำกล่าวอ้าง
+    docs = sorted((ROOT / "planes").glob("*.md"))
+    docs += [d for d in sorted((ROOT / "architecture").glob("*.md")) if d.name != "consumers.md"]
+    if (ROOT / "README.md").is_file():
+        docs.append(ROOT / "README.md")
+    if not docs:
+        ok("plane", "ไม่มีเอกสารให้ตรวจ — ข้าม")
         return
 
     reg = (ROOT / "architecture/consumers.md").read_text(encoding="utf-8")
@@ -583,9 +595,9 @@ def check_plane_claims() -> None:
     impl_live: list[tuple[str, str]] = []        # (ไฟล์, repo ที่มีจริง) — กฎ 2
     checked = 0
     try:
-        for md in sorted(plane_dir.glob("*.md")):
+        for md in docs:
             lines = md.read_text(encoding="utf-8").splitlines()
-            rel = f"planes/{md.name}"
+            rel = str(md.relative_to(ROOT))
 
             for n, line in enumerate(lines, 1):
                 if NO_REPO not in line:
@@ -627,8 +639,8 @@ def check_plane_claims() -> None:
                               f"แต่บรรทัดนี้ยังบอกว่า \"{NO_REPO}\"")
 
     if not bad:
-        ok("plane", f"ตรวจ {len(list(plane_dir.glob('*.md')))} ไฟล์ · "
-                    f"{checked} ชื่อที่อ้างว่ายังไม่มี repo · {len(impl_live)} plane ที่ implementation มีจริง "
+        ok("plane", f"เดิน {len(docs)} ไฟล์ (planes/ · architecture/ · README) · "
+                    f"ตรวจ {checked} ชื่อที่อ้างว่ายังไม่มี repo · {len(impl_live)} plane ที่ implementation มีจริง "
                     f"— ไม่พบคำอ้างที่ขัดกับของจริง")
 
 
