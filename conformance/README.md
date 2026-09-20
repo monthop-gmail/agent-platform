@@ -90,6 +90,7 @@ check ที่ไม่เคยเห็นสถานะ FAIL คือ chec
 | เพิ่มค่าใน `CapabilityId` แต่ไม่ใส่ใน `canonical_scope` | `capability: ไม่มีใครบอกว่า ['embedding'] อยู่ scope ไหน` — **เคสที่จะเกิดจริงที่สุด** |
 | ใส่ค่าเดียวในสอง scope | `capability: capability อยู่มากกว่าหนึ่ง scope: ['streaming']` |
 | `canonical_scope` มีค่าที่ไม่อยู่ใน enum แล้ว | `capability: canonical_scope มี ['gpu'] ที่ไม่อยู่ใน CapabilityId แล้ว` |
+| คืน `subject.type` ของ `approval/v1` เป็น enum ปิดที่เขียนคาไว้ (สภาพจริงก่อนแก้) | `binding: approval.subject_types: ต้นทาง closed=false แต่ field ['subject.type'] ผูกกับ enum ปิด` — **เคยเป็น ok ปลอมเพราะ check ดูแค่ property ระดับบนที่ $ref ไป $defs** |
 | `description` ซ้ำที่ระดับบนสุด (**เคสจริงที่ consumer เจอให้**) | `yaml: key ซ้ำ … capability.schema.yaml:72 \`description\`` |
 | key ซ้ำในระดับซ้อน (ใต้ `$defs`) | จับได้พร้อมบอก path — `\`CapabilityId\` ใต้ $defs` |
 | key ซ้ำใน profile instance | จับได้เหมือนกัน — check เดินทั้ง `contracts/` และ `profiles/` |

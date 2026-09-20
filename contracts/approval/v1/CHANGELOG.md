@@ -1,5 +1,31 @@
 # approval/v1
 
+## v1.3.0 — 2026-09-20
+
+`derived_from.semantics_version` `1.2` → `1.5` · **สองรอบที่ข้ามมาแตะใบนี้ทั้งคู่ ต่างจาก `v1.2.1` และ `v1.2.2` ที่ขยับ pointer เฉย ๆ** ([ADR-0034](../../../decisions/0034-semantics-1-5-leaf-declaration.md))
+
+### `1.4` — `subject.type` เป็นชุดเปิด และได้ค่า `record`
+
+ปิด [#73](https://github.com/monthop-gmail/agent-platform/issues/73) · [RFC-0016](https://github.com/monthop-gmail/devfactory-core/blob/main/rfcs/0016-approval-subject-types.md)
+
+ห้าค่าเดิมเป็นของ **ระบบที่รัน agent** ทั้งหมด ไม่มีค่าสำหรับ **บันทึกของโดเมน** · `care-agent-platform` เลือก `artifact` ให้คำสั่งหมอที่รอมีผล และ `tool_call` ให้คำขอลบข้อมูลตาม PDPA — **ทั้งคู่ validate ผ่าน และ audit event ของวัตถุเดียวกันใช้ `subject_type: record` อยู่แล้ว**
+
+> วันนี้ระบบเดียวกันอธิบายสิ่งเดียวกันด้วยคำสองคำ ขึ้นกับว่ากำลังเขียนลง `event/v1` หรือ `approval/v1`
+
+* `$defs.SubjectType` — 🔓 ชุดเปิด 6 ค่า · **ยืมนิยาม `record` จาก `event/v1` ทั้งดุ้น ไม่เขียนใหม่**
+* `$defs.SubjectTypeName` — pattern ที่ field อ้างจริง · รูปเดียวกับ `EventType` / `EventTypeName`
+* 🔒 **เจ้าของคนละคนกับ `event/v1` `SubjectType` ที่ชื่อเหมือนกัน** — ของ `event` อยู่ใน `platform_may_add_freely` คือ enum เป็นของเรา · ของที่นี่เป็น semantics ของต้นทาง เพิ่มค่าต้องมี RFC
+
+### `1.5` — `reason` เป็น leaf ที่ประกาศแล้ว
+
+[RFC-0017](https://github.com/monthop-gmail/devfactory-core/blob/main/rfcs/0017-the-leaf-rule-is-not-a-property-of-one-contract.md) ตอบคำถามที่เราถามไว้ที่ [`devfactory-core#46`](https://github.com/monthop-gmail/devfactory-core/issues/46) ว่ากฎ leaf ผูกใบนี้ด้วยหรือไม่ — **ผูก** เพราะ *"กฎนี้เป็นคุณสมบัติของข้อความที่ลบไม่ได้เมื่อเขียนลงไปแล้ว ไม่ใช่คุณสมบัติของ `event/v1`"*
+
+ข้อที่เราฝากให้คิดคู่กันแล้วเขาชี้ว่ากลับทาง: `required` + `minLength: 1` **เป็นเหตุผลให้มีกฎ ไม่ใช่เหตุผลไม่ให้มี** — `transition.reason` optional ผู้ผลิตเลิกส่งได้ · ที่นี่ไม่มีทางออกนั้น **สิ่งเดียวที่เปลี่ยนได้ตลอดอายุของมันคือคำตอบเรื่องชั้นของกฎการเก็บ**
+
+### ไม่ breaking
+
+`subject.type` **กว้างขึ้น ไม่ได้แคบลง** · `reason` ไม่แตะ `type` ไม่แตะ `required` ไม่แตะ `minLength` · payload ที่ valid กับ `v1.2.2` ยัง valid ทุกใบ
+
 ## v1.2.2 — 2026-09-17
 
 `derived_from.semantics_version` `1.2` → `1.3` ตามต้นทาง · **สัญญาไม่ขยับ**

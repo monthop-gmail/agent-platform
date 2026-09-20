@@ -199,15 +199,33 @@ def check_binding(name: str, doc: dict, frozen: dict) -> None:
     defs = doc.get("$defs", {})
 
     def bound_to_enum(expected: set[str]) -> list[str]:
-        """ชื่อ property ที่ $ref ไปยัง $defs ซึ่ง enum คลุม expected ทั้งชุด"""
-        hits = []
-        for prop, spec in (doc.get("properties") or {}).items():
-            ref = spec.get("$ref") if isinstance(spec, dict) else None
-            if not (isinstance(ref, str) and ref.startswith("#/$defs/")):
-                continue
-            target = defs.get(ref.split("/")[-1], {})
-            if isinstance(target, dict) and expected <= set(target.get("enum") or []):
-                hits.append(prop)
+        """ชื่อ property ที่ผูกกับ enum ปิดซึ่งคลุม expected ทั้งชุด
+
+        เดินลง `properties` ที่ซ้อนกันด้วย — **enum ที่เขียนคาไว้ที่ field ตรง ๆ
+        ก็เป็นการผูกเหมือนกัน** ไม่ใช่เฉพาะที่ `$ref` ไป `$defs`
+
+        เวอร์ชันแรกดูแค่ property ระดับบนที่ `$ref` ไป `$defs` · `approval/v1`
+        `subject.properties.type` เป็น enum ปิดที่เขียนคาไว้ **สองชั้นลงไป**
+        จึงมองไม่เห็น แล้วรายงานว่า "ไม่มี field ผูกกับ enum ปิด" ซึ่งเป็น ok ปลอม
+        ตอนที่ต้นทางประกาศ closed=false — **check ที่หลวมอันตรายกว่าไม่มี check**
+        """
+        hits: list[str] = []
+
+        def walk(props: dict, prefix: str) -> None:
+            for prop, spec in (props or {}).items():
+                if not isinstance(spec, dict):
+                    continue
+                path = f"{prefix}{prop}"
+                ref = spec.get("$ref")
+                if isinstance(ref, str) and ref.startswith("#/$defs/"):
+                    target = defs.get(ref.split("/")[-1], {})
+                    if isinstance(target, dict) and expected <= set(target.get("enum") or []):
+                        hits.append(path)
+                elif expected <= set(spec.get("enum") or []):
+                    hits.append(path)          # enum เขียนคาไว้ที่ field
+                walk(spec.get("properties") or {}, f"{path}.")
+
+        walk(doc.get("properties") or {}, "")
         return hits
 
     for key, block in frozen.items():

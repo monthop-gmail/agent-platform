@@ -1,5 +1,35 @@
 # event/v1
 
+## v1.8.0 — 2026-09-20
+
+`derived_from.semantics_version` `1.3` → `1.5` · **และรับ invariant เข้าตัวสัญญา ซึ่ง `v1.7.1` กันไว้ให้มี ADR ก่อน** ([ADR-0034](../../../decisions/0034-semantics-1-5-leaf-declaration.md))
+
+ปิด [#74](https://github.com/monthop-gmail/agent-platform/issues/74) ที่ชี้ว่า *สัญญาประกาศว่า pin `1.3` แต่ไม่ได้พกกฎของ RFC-0013 มา*
+
+### `guarantees` +1 — ข้อที่ 9
+
+> leaf ที่อาจถือข้อความของคนต้องถูกประกาศไว้ในสัญญา **ที่เหลือทุก leaf เป็นตัวชี้**
+
+`v1.6.1` ไม่ต้องแก้ไฟล์เลยเพราะ `guarantees` ของเราครอบ guarantee ใหม่อยู่แล้ว (8 ≥ 3) · **รอบนี้ไม่ถูกครอบ** ไม่มีข้อไหนใน 8 ข้อพูดถึง leaf
+
+คัดถ้อยคำจากต้นทางทั้งท่อน รวม**ข้อจำกัดที่ต้นทางย้ายเข้ามาอยู่ในบรรทัดเดียวกับ invariant** — *บังคับได้เฉพาะฝั่งผู้ผลิต validator บอกได้ว่ามี key อะไร บอกไม่ได้ว่าใครพิมพ์ค่านั้น* · ร่างที่เรายื่นแยกข้อนี้ไว้คนละหัวข้อ **ของเขาถูกกว่า** และตรงกับหลักที่เราใช้ใน [ADR-0030](../../../decisions/0030-the-field-nobody-named.md) เอง
+
+พร้อมข้อของ [RFC-0017](https://github.com/monthop-gmail/devfactory-core/blob/main/rfcs/0017-the-leaf-rule-is-not-a-property-of-one-contract.md) ว่ากฎนี้ **ไม่ใช่คุณสมบัติของ `event/v1`** แต่เป็นคุณสมบัติของข้อความที่ลบไม่ได้เมื่อเขียนลงไปแล้ว
+
+### `transition.reason` — leaf แรกที่ถูกประกาศ
+
+เดิม `{ type: string }` ไม่มีคำอธิบายเลยสักบรรทัด — รูปเดียวกับ `error/v1.details` ([ADR-0030](../../../decisions/0030-the-field-nobody-named.md)) และ `identity/v1.display_name` ([ADR-0031](../../../decisions/0031-the-field-everyone-thought-was-someone-elses.md)) **สองใบที่เป็นเหตุให้ RFC-0013 เกิด**
+
+เขียนความต่างจาก `approval/v1` `reason` ไว้ด้วย — **ตัวนี้ optional ผู้ผลิตเลิกส่งได้ อีกใบตัดไม่ได้เลย**
+
+### `platform_rules` +2
+
+การประกาศต้องเป็นสิ่งที่ตัว conformance check ของผู้ผลิตอ่านจริง · **`metadata` ไม่ได้ถูกยกเว้น** เพราะสัญญาไม่ได้ตั้งชื่อคีย์ในนั้น และข้อห้าม private reasoning **ไม่ครอบข้อความของคนที่ไม่ใช่ของโมเดล**
+
+### ไม่ breaking
+
+ไม่มี field ใหม่ · ไม่แตะ `required` · ไม่แตะ `type` · payload ที่ valid กับ `v1.7.1` ยัง valid ทุกใบ
+
 ## v1.7.1 — 2026-09-17
 
 `derived_from.semantics_version` `1.2` → `1.3` ตามต้นทาง · เพิ่ม `rfcs/0013` ในรายการที่มา
