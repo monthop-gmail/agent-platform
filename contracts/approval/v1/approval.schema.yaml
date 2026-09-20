@@ -139,6 +139,17 @@ properties:
       🔒 required meaning — ผู้มีอำนาจที่รับผิดชอบคำตัดสินนี้
       **invariant:** agent ออก `APPROVE` ให้งานของตัวเองไม่ได้ ("no agent has total authority")
       — `authority.id` ต้องไม่ใช่ `agent_id` ของงานที่กำลังอนุมัติ
+
+      ⚠️ **นี่คือ `Principal` — มันพา `display_name` มาด้วย และถ้า `type: human`
+      ค่านั้นคือชื่อคนจริง** · คำกำกับเต็มอยู่ที่ตัวฟิลด์ใน
+      [`identity/v1`](../../identity/v1/) ([ADR-0031](../../../decisions/0031-the-field-everyone-thought-was-someone-elses.md))
+      — ผู้ผลิตควรตัดออกที่จุด emit รวม `on_behalf_of` ที่ซ้อนกัน
+
+      เหตุที่เขียนซ้ำตรงนี้ทั้งที่คำเตือนเดินทางมากับ `Principal` อยู่แล้ว —
+      `care-agent-platform` ขยายตัวไล่ leaf ให้ครอบใบอนุมัติหลังกฎ leaf ขยายขอบเขต
+      มาถึง `approval/v1` (RFC-0017) แล้ว **ฟ้อง `$.authority.display_name` ในรอบแรกที่รัน**
+      · เป็นรูปเดียวกับ `actor.display_name` ที่เขาปิดไปเมื่อ 11 ก.ย. เป๊ะ ต่างกันแค่
+      อยู่คนละสัญญา และ **เขาไม่ได้ไปมองเพราะยังไม่มีอะไรบอกให้มอง**
   decided_at:
     type: string
     format: date-time
