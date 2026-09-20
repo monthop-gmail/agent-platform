@@ -51,6 +51,7 @@ ADR ในโฟลเดอร์นี้เป็น **authority** ของ�
 | [0031](0031-the-field-everyone-thought-was-someone-elses.md) | `Principal.display_name` อยู่ใน audit 112/112 ใบ | **D** — เขียนคำกำกับที่ต้นทางของฟิลด์ใน `identity/v1` · ตัดออกได้วันนี้เพราะเป็น optional อยู่แล้ว | ✅ Accepted |
 | [0032](0032-producer-ahead-of-contract.md) | ผู้ผลิตเดินก่อนสัญญาได้ตรงไหน | **C** — เดินก่อนได้เฉพาะตามแกนที่สัญญาประกาศไว้ (🔓 · optional) · นอกแกน = drift | ✅ Accepted |
 | [0033](0033-resource-must-carry-its-own-scope.md) | `policy/v1.resource` มีช่องแต่ไม่มีกฎ · ค่าจริงทั้งสี่ชนิด unique แคบกว่า tenant | **C** — ต้องพก namespace ที่ unique ภายใน tenant · ชนแล้ว reject · ย้อนกลับได้ | ✅ Accepted |
+| [0034](0034-semantics-1-5-leaf-declaration.md) | semantics `1.3`→`1.5` ในสามวัน · กฎ leaf ที่เราขอเอง กลับมาผูก `approval/v1` ด้วย | **C** — ประกาศที่ตัวฟิลด์ทั้งสองใบ + `subject.type` เป็นชุดเปิด + ปิดช่องของ binding check | 🕒 Proposed |
 
 การเคาะบันทึกไว้ที่ [issue #1–#10](https://github.com/monthop-gmail/agent-platform/issues?q=is%3Aissue+label%3Aadr) — **ไฟล์บันทึกว่าตัดสินอะไร issue บันทึกว่าใครตัดสินและเมื่อไหร่**
 
@@ -113,6 +114,8 @@ contracts/ P0 ✅ ── profiles/ ✅ ── planes/ ✅
 0032 (ผู้ผลิตเดินก่อนสัญญา) ✅
   ↓
 0033 (resource ต้องพกขอบเขตของตัวเอง) ✅
+  ↓
+0034 (รับ semantics 1.5 — กฎ leaf ผูกทั้งสองสัญญา) 🕒
 ```
 
 ## ที่มา

@@ -14,14 +14,55 @@ description: >-
 derived_from:
   repo: monthop-gmail/devfactory-core
   manifest: contract-semantics.yaml
-  semantics_version: "1.3"
+  semantics_version: "1.5"
   rfcs:
     - rfcs/0002-governance-decision-contract.md
+    - rfcs/0016-approval-subject-types.md
+    - rfcs/0017-the-leaf-rule-is-not-a-property-of-one-contract.md
   license: MIT
   # ตรวจ drift โดยเทียบ semantics_version ไม่ใช่ SHA ของไฟล์ RFC
   # RFC เป็น prose — แก้คำผิดทำให้ SHA เปลี่ยนโดยไม่มีอะไร drift จริง
 
 $defs:
+
+  SubjectType:
+    description: >-
+      🔓 **ชุดเปิด** — 6 ค่านี้คือ *ขั้นต่ำที่ต้องมี* ไม่ใช่ชุดทั้งหมด
+      (devfactory-core RFC-0016 · `semantics_version: "1.4"`)
+
+      🔒 **เป็น semantics ของ `devfactory-core`** — ต่างจาก `event/v1` `$defs.SubjectType`
+      ซึ่งชื่อเหมือนกันแต่ **เจ้าของคนละคน** · ของ `event` อยู่ใน `platform_may_add_freely`
+      คือ enum เป็นของ `agent-platform` · ของที่นี่ไม่ใช่ **เพิ่มค่าต้องมี RFC ที่ต้นทาง**
+
+      `record` = บันทึกของโดเมนที่ระบบเก็บไว้และต้องตามรอยได้ แต่**ไม่ได้เกิดจาก job**
+      · ชนิดที่แท้จริงอยู่ใน `metadata.record_type` — platform ไม่รู้จักชนิดของโดเมน
+      และไม่ควรรู้ · แยกจาก `artifact` ซึ่งเป็นผลผลิตของ execution
+      · **ยืมนิยามจาก `event/v1` ทั้งดุ้น ไม่เขียนใหม่** — นิยามที่สองจะพาปัญหาที่
+      RFC-0016 แก้กลับมา ([#73](https://github.com/monthop-gmail/agent-platform/issues/73))
+
+      ⚠️ **`$defs` นี้ไม่ใช่สิ่งที่ field `subject.type` อ้าง** — field อ้าง `SubjectTypeName`
+      เพราะถ้าอ้างที่นี่ ค่าที่อยู่นอกลิสต์จะ validate ไม่ผ่าน ซึ่งขัดกับ `closed: false`
+      ของต้นทางและกับ [ADR-0006 Rule 2](../../../decisions/0006-contract-versioning.md)
+      · รูปเดียวกับ `event/v1` `EventType` / `EventTypeName`
+    enum:
+      - job
+      - execution
+      - tool_call
+      - artifact
+      - deployment
+      - record
+
+  SubjectTypeName:
+    description: >-
+      สิ่งที่ field `subject.type` รับจริง — **ค่านอก `SubjectType` ใช้ได้**
+      บังคับแค่ *รูปแบบชื่อ* ไม่ใช่ตัวค่า เพื่อให้ vocabulary โตได้ตาม ADR-0006 Rule 2
+      โดยที่ชื่อยังอ่านรู้ว่าเป็นชนิดของสิ่งที่ถูกอนุมัติ ไม่ใช่ string อะไรก็ได้
+
+      consumer ที่เจอค่าที่ไม่รู้จักต้องถือว่า **ยังไม่รู้จัก** ไม่ใช่เดาว่าเป็นค่าที่ใกล้เคียง
+      — การเลือก "ค่าที่ผิดน้อยที่สุด" คือสิ่งที่ [#73](https://github.com/monthop-gmail/agent-platform/issues/73)
+      รายงานว่าเกิดขึ้นจริงสองครั้งในโดเมนเดียว และ payload valid ทั้งสองครั้ง
+    type: string
+    pattern: '^[a-z][a-z0-9_]{2,63}$'
   Decision:
     description: >-
       🔒 frozen · **ชุดปิด** — vocabulary เป็นของ devfactory-core
@@ -60,7 +101,7 @@ properties:
     required: [type, id]
     properties:
       type:
-        enum: [job, execution, tool_call, artifact, deployment]
+        $ref: '#/$defs/SubjectTypeName'
       id:
         $ref: https://schemas.agent-platform.internal/identity/v1/identity.schema.yaml#/$defs/Id
   execution_id:
@@ -76,6 +117,22 @@ properties:
     description: >-
       🔒 required meaning — เหตุผลที่ตัดสินอย่างนั้น
       ห้ามใส่ credential, PII หรือ private reasoning ของ model
+
+      📣 **leaf ที่ประกาศแล้วว่าถือข้อความของคนได้** — RFC-0017 วินิจฉัยว่ากฎ leaf
+      ของ RFC-0013 **ไม่ใช่คุณสมบัติของ `event/v1`** แต่เป็นคุณสมบัติของข้อความที่ลบไม่ได้
+      เมื่อเขียนลงไปแล้ว จึงผูกใบนี้ด้วย (`semantics_version` `1.5`
+      · [ADR-0034](../../../decisions/0034-semantics-1-5-leaf-declaration.md))
+
+      เหตุที่เป็นตัวชี้ไม่ได้ — `required` + `minLength: 1` และ `required_meaning`
+      ของต้นทางบังคับว่าต้องมี *"เหตุผลที่ตัดสินอย่างนั้น"* · **คำตัดสินที่ไม่มีเหตุผล
+      ไม่ auditable**
+
+      ⚠️ **ต่างจาก `event/v1` `transition.reason` ตรงที่ตัวนี้ตัดออกไม่ได้เลย**
+      อีกใบเป็น optional ผู้ผลิตที่เห็นว่าไม่คุ้มค่าเก็บเลิกส่งได้ · ที่นี่สัญญาบังคับให้
+      ประโยคนั้นมีอยู่ **สิ่งเดียวที่เปลี่ยนได้ตลอดอายุของมันคือคำตอบเรื่องชั้นของกฎการเก็บ**
+
+      🔒 **ผู้ผลิตต้องประกาศว่ากติกาการเก็บและการลบอยู่ชั้นไหน** — `agent-platform`
+      ประกาศแทนไม่ได้เพราะไม่ได้เป็นผู้เก็บใบอนุมัติของใคร
   authority:
     $ref: https://schemas.agent-platform.internal/identity/v1/identity.schema.yaml#/$defs/Principal
     description: >-
