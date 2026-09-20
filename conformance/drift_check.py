@@ -309,6 +309,30 @@ def check_registry(local: pathlib.Path | None) -> None:
 
         status = (man.get("conformance") or {}).get("status")
         verified = (man.get("conformance") or {}).get("last_verified")
+
+        # ── วันที่ในแถว ต้องตรงกับใบของเจ้าตัว ────────────────────────────
+        # manifest ถูกดึงมาแล้วข้างบน การเทียบข้อนี้จึง **ไม่เสียคำขอเน็ตเพิ่มเลย**
+        # ยกไว้เพราะ agent-platform#78 เสนอไม่ให้เพิ่ม check ด้วยเหตุผลว่าต้องพึ่งเน็ต
+        # ซึ่งจริงกับ [5c] แต่ไม่จริงกับที่นี่ — [2] พึ่งเน็ตอยู่แล้วโดยนิยาม
+        #
+        # เดิมอ่าน last_verified มาเพื่อถามข้อเดียวว่า "passing แล้วมีวันไหม"
+        # ไม่เคยถามว่า **วันที่เราเขียนไว้ในแถว ตรงกับที่เขาเขียนในใบไหม**
+        # → แถว devfactory-core ค้างที่ 2026-08-18 อยู่ 33 วัน
+        #   และแถว ecosystem-intelligence ค้าง 26 วัน โดยไม่มีใครรายงาน
+        if verified:
+            in_row = re.search(r"\|\s*(\d{4}-\d{2}-\d{2})\s*\|", row)
+            claimed = in_row.group(1) if in_row else None
+            if claimed is None:
+                fail("registry", f"{repo}: แถวไม่มีคอลัมน์ last_verified ที่อ่านได้")
+            elif claimed != str(verified).strip('"'):
+                fail(
+                    "registry",
+                    f"{repo}: แถวเขียน last_verified={claimed} แต่ใบของเขาเขียน {verified} "
+                    f"— ทะเบียนที่ผูกพันกำลังรายงานว่าตรวจครั้งล่าสุดเมื่อไหร่ผิด",
+                )
+            else:
+                ok("registry", f"{repo}: last_verified={claimed} ตรงกับใบของเขา")
+
         if status == "passing" and not verified:
             fail("registry", f"{repo}: conformance passing แต่ไม่มี last_verified")
         elif status and f"`{status}`" not in row:
