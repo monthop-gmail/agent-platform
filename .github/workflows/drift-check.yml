@@ -59,7 +59,7 @@ jobs:
       # ใบถูกปิดเองเมื่อเขียว — waiver ที่ค้างหลังเหตุถูกแก้จะกลืนการพังครั้งถัดไป
       # ที่จุดเดียวกัน (devfactory-core · dis-b492ed20 seq 2)
       - name: แจ้งเตือนเมื่อรอบตามเวลาแดง
-        if: github.event_name == 'schedule' && steps.drift.outcome == 'failure'
+        if: (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && steps.drift.outcome == 'failure'
         env:
           GH_TOKEN: ${{ github.token }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
@@ -85,7 +85,7 @@ jobs:
           fi
 
       - name: ปิดใบแจ้งเตือนเมื่อกลับมาเขียว
-        if: github.event_name == 'schedule' && steps.drift.outcome == 'success'
+        if: (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && steps.drift.outcome == 'success'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
