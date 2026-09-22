@@ -22,6 +22,8 @@ on:
 
 permissions:
   contents: read
+  # เปิดเฉพาะเพื่อเปิด/ปิดใบแจ้งเตือนของ scheduled run — ดูขั้น "แดงที่ไม่มีใครอ่าน" ข้างล่าง
+  issues: write
 
 jobs:
   drift:
@@ -39,5 +41,61 @@ jobs:
         # เพราะ ADR-0008 ห้ามไฟล์ dependency manifest ใน agent-platform
         run: pip install --no-cache-dir 'pyyaml==6.*' 'jsonschema==4.*' 'referencing==0.*'
 
+      # ⚠️ continue-on-error ตรงนี้เป็นกับดักที่ ecosystem-intelligence เพิ่งจ่ายค่าเรียนรู้ให้
+      # (sync ล้ม → รายงานเดินต่อ → job เขียว) · ขั้นสุดท้ายของ job นี้ **บังคับให้แดงซ้ำ**
+      # ถ้าเช็คล้ม · ห้ามลบขั้นนั้นออกโดยไม่ลบ continue-on-error ตรงนี้ไปด้วย
       - name: Run drift check
-        run: python3 conformance/drift_check.py
+        id: drift
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          python3 conformance/drift_check.py 2>&1 | tee drift-output.txt
+
+      # ── แดงที่ไม่มีใครอ่าน ────────────────────────────────────────────────
+      # push/PR มีคนรอ merge อยู่ปลายทาง · schedule ไม่มี
+      # 19 และ 21 ก.ย. 2026 รอบ schedule แดงทั้งสองคืนและไม่มีใครเห็นทั้งสองครั้ง
+      # คนพบคือคนที่บังเอิญรัน drift_check.py ในเครื่อง กับ handoff ของทีมอื่นที่มาบอก
+      #
+      # ใบถูกปิดเองเมื่อเขียว — waiver ที่ค้างหลังเหตุถูกแก้จะกลืนการพังครั้งถัดไป
+      # ที่จุดเดียวกัน (devfactory-core · dis-b492ed20 seq 2)
+      - name: แจ้งเตือนเมื่อรอบตามเวลาแดง
+        if: github.event_name == 'schedule' && steps.drift.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          TITLE="🔴 drift check รอบตามเวลาแดง"
+          NUM=$(gh issue list --state open --search "$TITLE in:title" --json number --jq '.[0].number // empty')
+          {
+            echo "รอบ \`schedule\` ล้มเมื่อ $(date -u '+%Y-%m-%d %H:%M UTC')"
+            echo
+            echo "\`\`\`"
+            grep -E '^  (FAIL|WARN)' drift-output.txt || tail -20 drift-output.txt
+            echo "\`\`\`"
+            echo
+            echo "[ผลรันเต็ม]($RUN_URL)"
+            echo
+            echo "> รอบตามเวลาไม่มีใครรออยู่ปลายทาง ต่างจาก PR — ใบนี้มีไว้ให้แดงมีที่ส่งเสียง"
+            echo "> ใบจะถูกปิดเองเมื่อรอบถัดไปเขียว"
+          } > body.md
+          if [ -n "$NUM" ]; then
+            gh issue comment "$NUM" --body-file body.md
+          else
+            gh issue create --title "$TITLE" --body-file body.md
+          fi
+
+      - name: ปิดใบแจ้งเตือนเมื่อกลับมาเขียว
+        if: github.event_name == 'schedule' && steps.drift.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          NUM=$(gh issue list --state open --search "🔴 drift check รอบตามเวลาแดง in:title" --json number --jq '.[0].number // empty')
+          [ -z "$NUM" ] && exit 0
+          gh issue close "$NUM" --comment "รอบตามเวลาเขียวแล้ว ปิดอัตโนมัติ · $(date -u '+%Y-%m-%d %H:%M UTC')"
+
+      # บังคับให้ job แดงซ้ำ — ขั้นข้างบนกลืนสถานะไว้เพื่อให้แจ้งเตือนได้เท่านั้น
+      - name: สรุปสถานะของเช็ค
+        if: steps.drift.outcome == 'failure'
+        run: |
+          echo "drift check ล้ม — ดูผลด้านบน" >&2
+          exit 1
