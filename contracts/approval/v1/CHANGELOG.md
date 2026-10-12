@@ -1,5 +1,45 @@
 # approval/v1
 
+## v1.4.0 — 2026-10-13
+
+`payload_digest` — ช่องที่ผูกใบอนุมัติเข้ากับ **เนื้อ** ของสิ่งที่จะเกิดขึ้น ([ADR-0035](../../../decisions/0035-approval-bound-to-an-id-is-not-bound-to-what-runs.md))
+
+คำขอมาจาก `ai-tools-mcp` (`ho-9694f90d` · `dis-514ae7a7` `seq 79` ข้อ 4) ซึ่ง**อ่านไฟล์นี้ทั้งไฟล์ก่อนขอ** แล้วชี้ว่าช่องที่ผูกใบเข้ากับงานมีสี่ช่องและเป็น id ทั้งหมด
+
+```text
+subject.id · execution_id · policy_id · correlation_id
+→ ทั้งสี่ตอบว่า "อนุมัติให้เรื่องไหน" ไม่มีช่องใดตอบว่า "ด้วยค่าอะไร"
+```
+
+> **ใบที่ผูกด้วย id อนุมัติ *คำขอ* · ใบที่ผูกด้วย digest อนุมัติ *สิ่งที่จะเกิดขึ้น***
+
+### ให้เกินที่ขอหนึ่งข้อ และนี่เป็นเจตนา
+
+ผู้ขอขอ "ช่องหนึ่งช่อง" และยกชื่อกับชนิดให้เราตัดสิน · ถ้าให้ตามตัวอักษรจะได้แฮชที่ไม่บอกว่าตัวเองคลุมอะไร — **ซึ่งรีโปนี้บันทึกบั๊กรูปนั้นไว้เองแล้ว** ที่ `model/v1` `platform_rules` ([ADR-0023](../../../decisions/0023-frozen-bindings-and-identity.md)):
+
+> *"checksum ที่คำนวณจาก manifest อย่างเดียว บอกได้แค่ว่า manifest เหมือนกัน ไม่ได้บอกว่าสิ่งที่รันเหมือนกัน"*
+
+`covers` จึง `required` และ `minItems: 1` · **แฮชที่คลุมไม่ครบแล้วไม่บอก แรงกว่าการไม่มีช่องเลย เพราะไม่มีช่องคือรู้ตัวว่าไม่มี**
+
+และเขียนความหมายของความว่างไว้ตรง ๆ ตามรูปของ `policy/v1` `Request.consent` — **ไม่มี `payload_digest` = ใบนี้ไม่ได้ผูกกับ payload ใด ไม่ได้แปลว่า payload ใดก็ได้** · ผู้ตรวจที่เทียบ digest *เฉพาะเมื่อมี* จะผ่านทุกใบที่ไม่ส่งมา ซึ่งคือทางที่น่าจะถูกใช้มากที่สุด
+
+### ไม่ breaking
+
+ช่องใหม่ optional · **`required` เจ็ดช่องไม่ขยับ · `guarantees` สี่ข้อไม่ขยับ · `$defs.Decision` ไม่ขยับ · `semantics_version` ยัง `1.5`**
+
+`semantics_version` ไม่ขยับเพราะ **นี่ไม่ใช่ semantics ของต้นทาง** — เป็น field ระดับ platform ตาม [ADR-0006 กฎข้อ 1](../../../decisions/0006-contract-versioning.md) รูปเดียวกับที่ `correlation_id` เข้ามา · ไล่หกประเภทของ Rule 2 แล้วไม่เข้าข้อไหน และข้อที่หก (*"เปิดทางให้ execution เดินได้โดยไม่มี APPROVE"*) **digest ทำตรงกันข้าม** คือทำให้ขอบเขตของ APPROVE หนึ่งใบแคบลง
+
+### ตรวจแล้ว 13 ทาง — 7 ทางเป็น negative
+
+```text
+valid     ไม่มี payload_digest เลย · ครบสามช่อง · sha512 · covers หนึ่งค่า
+rejected  ไม่มี covers · covers: [] · ไม่มี algorithm · algorithm: md5
+          value: '' · covers มีสตริงว่าง · digest เป็นสตริงเปล่า
+rejected  ขาด reason · decision: AUTO_APPROVE      ← invariant เดิมยังอยู่
+```
+
+drift check `--local`: `passed=43 FAIL=0 WARN=0`
+
 ## v1.3.1 — 2026-09-20
 
 คำกำกับที่ `authority` ว่ามันเป็น `Principal` ซึ่งพา `display_name` มาด้วย ([ADR-0034](../../../decisions/0034-semantics-1-5-leaf-declaration.md) Amendment 1)

@@ -180,6 +180,65 @@ properties:
       เป็น field ระดับ platform ตาม [ADR-0006 กฎข้อ 1](../../../decisions/0006-contract-versioning.md)
       — เพิ่มได้เองโดยไม่ต้องมี RFC ที่ repo ต้นทาง · `guarantees` ไม่ขยับ
 
+  payload_digest:
+    type: object
+    description: >-
+      ผูกใบอนุมัติเข้ากับ **เนื้อของสิ่งที่จะเกิดขึ้น** ไม่ใช่กับ id ของเรื่อง
+      ([ADR-0035](../../../decisions/0035-approval-bound-to-an-id-is-not-bound-to-what-runs.md))
+
+      `subject` `execution_id` `policy_id` `correlation_id` ทำแทนไม่ได้ — **ทั้งสี่ช่องเป็น id
+      ของเรื่อง ไม่ใช่ของเนื้อ** · ใบที่ผูกด้วย id อนุมัติ *คำขอ* · ใบที่ผูกด้วย digest อนุมัติ
+      *สิ่งที่จะเกิดขึ้น* — ต่างกันทันทีที่ argument เปลี่ยนระหว่างทางขณะที่ใบยังใช้ได้
+
+      เป็น field ระดับ platform ตาม [ADR-0006 กฎข้อ 1](../../../decisions/0006-contract-versioning.md)
+      — เพิ่มได้เองโดยไม่ต้องมี RFC ที่ repo ต้นทาง · `guarantees` ไม่ขยับ
+      · รูปเดียวกับที่ `correlation_id` เข้ามา · `semantics_version` จึงไม่ขยับด้วย
+
+      ⚠️ **ไม่มี field นี้ = ใบนี้ไม่ได้ผูกกับ payload ใด ไม่ได้แปลว่า payload ใดก็ได้**
+      ผู้ตรวจที่เทียบ digest *เฉพาะเมื่อมี* จะผ่านทุกใบที่ไม่ส่งมา ซึ่งคือทางที่น่าจะถูกใช้มากที่สุด
+      · รูปเดียวกับ `policy/v1` `Request.consent`
+
+      🔒 การเปลี่ยน payload หลังอนุมัติไม่ใช่การแก้ใบ — `decision` immutable ตาม guarantee ข้อ 1
+      ต้องเป็นใบใหม่ที่อ้าง `supersedes_approval_id` · **ใบที่แก้ digest ของตัวเอง
+      คือใบที่ทำลายเหตุผลที่ตัวเองมีอยู่**
+
+      วิธีคำนวณ digest **ไม่ใช่ของสัญญาใบนี้** — platform ไม่รู้จักโดเมนของผู้ผลิต
+      จึงกำหนดให้ไม่ได้และไม่ควร (เหตุผลเดียวกับ [ADR-0030](../../../decisions/0030-the-field-nobody-named.md)
+      `error/v1.details` และ [ADR-0033](../../../decisions/0033-resource-must-carry-its-own-scope.md) ข้อ 2)
+    required: [algorithm, value, covers]
+    properties:
+      algorithm:
+        enum: [sha256, sha512]
+        description: >-
+          รูปเดียวกับ `artifact/v1` `checksum.algorithm` — ประกาศที่นี่เพราะ
+          **แฮชที่ไม่บอกอัลกอริทึม ย้ายอัลกอริทึมวันหน้าไม่ได้** ต้องเดาจากความยาว
+      value:
+        type: string
+        minLength: 1
+      covers:
+        type: array
+        minItems: 1
+        items:
+          type: string
+          minLength: 1
+        description: >-
+          🔒 **ประกาศว่าแฮชคลุมอะไร และต้องเป็นสิ่งที่คำนวณจริง** ไม่ใช่สิ่งที่อยากให้คนเชื่อว่าคลุม
+
+          เหตุที่บังคับ — `model/v1` `platform_rules` บันทึกบั๊กรูปนี้ไว้แล้วว่า
+          *"checksum ที่คำนวณจาก manifest อย่างเดียว บอกได้แค่ว่า manifest เหมือนกัน
+          ไม่ได้บอกว่าสิ่งที่รันเหมือนกัน"* ([ADR-0023](../../../decisions/0023-frozen-bindings-and-identity.md))
+          · **แฮชที่คลุมไม่ครบแล้วไม่บอก ให้ความมั่นใจมากกว่าที่มันมีสิทธิ์ให้**
+          และแรงกว่าการไม่มีช่องเลย เพราะไม่มีช่องคือรู้ตัวว่าไม่มี
+
+          🔒 **ถ้าลำดับมีผลต่อค่าแฮช ลำดับในลิสต์นี้ต้องเป็นลำดับที่ป้อนเข้าไปจริง**
+          — สลับลำดับ = พฤติกรรมต่างกันภายใต้ความล้มเหลวเดียวกัน
+          ([ADR-0025](../../../decisions/0025-provider-switch-and-what-identity-covers.md))
+
+          `minItems: 1` เพราะลิสต์ว่างต้องแปลว่าว่าง ไม่ใช่แปลว่าคลุมทุกอย่าง
+
+          ⚠️ **enum ของค่าในลิสต์นี้เป็นของผู้ผลิต** — platform บังคับได้แค่ว่าต้องมี
+          · validator กลางตรวจไม่ได้ว่าลิสต์นี้พูดความจริง เกณฑ์ของผู้ผลิตต้องตรวจเอง
+
   supersedes_approval_id:
     $ref: https://schemas.agent-platform.internal/identity/v1/identity.schema.yaml#/$defs/Id
     description: >-
