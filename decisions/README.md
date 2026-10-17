@@ -54,6 +54,7 @@ ADR ในโฟลเดอร์นี้เป็น **authority** ของ�
 | [0034](0034-semantics-1-5-leaf-declaration.md) | semantics `1.3`→`1.5` ในสามวัน · กฎ leaf ที่เราขอเอง กลับมาผูก `approval/v1` ด้วย | **C** — ประกาศที่ตัวฟิลด์ทั้งสองใบ + `subject.type` เป็นชุดเปิด + ปิดช่องของ binding check | ✅ Accepted |
 | [0035](0035-approval-bound-to-an-id-is-not-bound-to-what-runs.md) | ทุกช่องที่ผูกใบอนุมัติเข้ากับงานเป็น id ล้วน · ไม่มีช่องใดแตะเนื้อของสิ่งที่จะรัน | **C** — `payload_digest` ตามกฎข้อ 1 · `{algorithm, value, covers}` · `covers` บังคับเพราะแฮชที่ไม่บอกขอบเขตเชื่อไม่ได้ | ✅ Accepted |
 | [0036](0036-a-checksum-that-cannot-be-verified.md) | `artifact/v1.checksum` รับ `{}` และ `{value}` ได้ · และ "ไม่มีใคร pin" ≠ "ไม่มีใครใช้" — `execution/v1` `$ref` มันไว้ | **D** — ลงครึ่งที่ไม่ breaking + ถาม consumer ก่อน · การบังคับต้องขึ้น `artifact/v2` ตามนิยาม breaking ของ ADR-0006 | ✅ Accepted |
+| [0037](0037-the-gate-that-reads-declarations-sees-only-those-who-declare.md) | ด่านที่อ่านคำประกาศ ครอบได้แค่คนที่ประกาศ · ADR-0034 ค้าง `Proposed` 27 วันหลังของขึ้น production | **C** — เดินจาก CHANGELOG ที่ชิปแล้ว → ADR ที่มันอ้าง (77%) ไม่ใช่จากบรรทัด `Blocking:` (17%) | ✅ Accepted |
 
 การเคาะบันทึกไว้ที่ [issue #1–#10](https://github.com/monthop-gmail/agent-platform/issues?q=is%3Aissue+label%3Aadr) — **ไฟล์บันทึกว่าตัดสินอะไร issue บันทึกว่าใครตัดสินและเมื่อไหร่**
 
@@ -122,6 +123,8 @@ contracts/ P0 ✅ ── profiles/ ✅ ── planes/ ✅
 0035 (ใบที่ผูกด้วย id ไม่ได้ผูกกับสิ่งที่จะรัน) ✅
   ↓
 0036 (checksum ที่ตรวจไม่ได้ · และทะเบียนที่นับการประกาศ ไม่ได้นับการเอื้อมถึง) ✅
+  ↓
+0037 (ด่านที่อ่านคำประกาศ ครอบได้แค่คนที่ประกาศ) ✅
 ```
 
 ## ที่มา

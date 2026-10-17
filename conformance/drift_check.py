@@ -731,6 +731,75 @@ def check_ghost_rows() -> None:
                     f"(⚠️ พิสูจน์ได้ทางเดียว: ไม่เห็น README ไม่ได้แปลว่าไม่มี repo)")
 
 
+ADR_CITE = re.compile(r"ADR-(\d{4})")
+ADR_VER_SECTION = re.compile(r"^## (v[\d.]+)", re.M)
+ADR_STATUS = re.compile(r"^\*\*Status:\*\*\s*\**\s*(\w+)", re.M)
+
+# ใบที่ "ถูกตัดสินแล้ว" — Superseded คือตัดสินแล้วถูกแทน บันทึกไม่ได้โกหก
+ADR_DECIDED = {"Accepted", "Superseded"}
+
+
+def check_adr_status() -> None:
+    """สัญญาที่ชิปแล้ว อ้าง ADR ที่ยังไม่ถูกตัดสิน — ไม่มีอะไรเทียบ
+
+    เกิดจริงแล้วและค้าง 27 วัน: `event/v1 v1.8.0` และ `approval/v1 v1.3.0`/`v1.3.1`
+    ขึ้นไปแล้วทั้งคู่ โดยที่ ADR-0034 ที่ทั้งสามรายการอ้างยังเป็น `Proposed`
+    (20 ก.ย. – 17 ต.ค.) · ใครตามลิงก์ไปอ่านจะเห็น `Proposed` แล้วสรุปได้ว่า
+    ของที่ตัวเอง pin อยู่ยังไม่ถูกตัดสิน ซึ่งไม่จริง — **บันทึกที่โกหกอยู่เงียบ ๆ**
+
+    🔒 ทิศของการเดินสำคัญกว่าตัวกฎ — เดินจาก **CHANGELOG ที่ชิปแล้ว → ADR ที่มันอ้าง**
+    ไม่ใช่จากบรรทัด `Blocking:` ของ ADR · วัดแล้วตอนออกแบบ: มีแค่ 6 ใบจาก 35
+    ที่ประกาศ `Blocking` เป็นเวอร์ชันชัด ๆ ส่วนที่เหลือชี้ไดเรกทอรี ชี้ issue
+    หรือเขียนว่า "vocabulary gate" — **ด่านที่อ่านคำประกาศ ครอบได้แค่คนที่ประกาศ** (17%)
+    ส่วนทิศนี้ครอบ 77% เพราะ `([ADR-00xx](...))` ใน CHANGELOG เป็นนิสัยที่ทำอยู่แล้วทุกใบ
+    เป็นความผิดตระกูลเดียวกับที่ `[5c]` และ ADR-0036 รายงานไว้ว่าทะเบียน
+    นับการประกาศ ไม่ได้นับการเอื้อมถึง
+
+    ⚠️ ความครอบคลุมถูกพิมพ์ทุกครั้ง ไม่ใช่เฉพาะตอนผิด — ใบที่ไม่ถูกอ้างใน CHANGELOG ไหนเลย
+    **ไม่ได้แปลว่าไม่มีผล** แปลว่าด่านนี้มองไม่เห็น และตัวเลขนั้นต้องอยู่ในผลลัพธ์
+    ไม่ใช่อยู่ในเอกสารแยก
+    """
+    status: dict[str, str] = {}
+    for p in sorted((ROOT / "decisions").glob("0*.md")):
+        m = ADR_STATUS.search(p.read_text(encoding="utf-8"))
+        status[p.name[:4]] = m.group(1) if m else "ไม่มีบรรทัด Status"
+
+    if not status:
+        warn("adrstatus", "ไม่พบ ADR ใน decisions/ — ข้ามการตรวจ")
+        return
+
+    rows: list[tuple[str, str, str, str]] = []
+    for ch in sorted(ROOT.glob("contracts/*/v*/CHANGELOG.md")):
+        contract = f"{ch.parts[-3]}/{ch.parts[-2]}"
+        parts = ADR_VER_SECTION.split(ch.read_text(encoding="utf-8"))
+        # parts[0] คือหัวไฟล์ก่อนเวอร์ชันแรก — ไม่ใช่ entry ที่ชิป จึงไม่นับ
+        for i in range(1, len(parts), 2):
+            ver, body = parts[i], parts[i + 1]
+            for num in sorted(set(ADR_CITE.findall(body))):
+                rows.append((contract, ver, num, status.get(num, "ไม่พบใบ")))
+
+    if not rows:
+        warn("adrstatus", "ไม่มี CHANGELOG entry ไหนอ้าง ADR — ด่านนี้ไม่มีอะไรตรวจ")
+        return
+
+    cited = {r[2] for r in rows}
+    coverage = f"{len(cited)}/{len(status)} ใบ ({len(cited) * 100 // len(status)}%)"
+    bad = [r for r in rows if r[3] not in ADR_DECIDED]
+
+    for contract, ver, num, st in bad:
+        fail("adrstatus", f"{contract} {ver} ชิปแล้วแต่อ้าง ADR-{num} ซึ่งเป็น `{st}` "
+                          f"— สัญญาที่อยู่ใน production อ้างใบที่ยังไม่ถูกตัดสิน "
+                          f"ผู้อ่านที่ตามลิงก์ไปจะสรุปผิดว่าของที่ตัวเอง pin ยังไม่ถูกตัดสิน")
+
+    if not bad:
+        ok("adrstatus", f"{len(rows)} CHANGELOG entry อ้าง ADR ที่ถูกตัดสินแล้วทุกรายการ "
+                        f"· ครอบคลุม {coverage} — ⚠️ ใบที่ไม่ถูกอ้างที่ไหนเลย "
+                        f"ด่านนี้มองไม่เห็น ไม่ได้แปลว่าไม่มีผล")
+    else:
+        warn("adrstatus", f"ความครอบคลุมของด่านนี้: {coverage} "
+                          f"— ใบที่ไม่ถูกอ้างใน CHANGELOG ไหนเลย ด่านนี้มองไม่เห็น")
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description="ecosystem drift check")
     ap.add_argument("--local", type=pathlib.Path, help="โฟลเดอร์ของ repo ต้นทางเมื่อรันแบบ offline")
@@ -760,6 +829,9 @@ def main() -> int:
 
     print("\n[5c] registry claim — ประโยคเรื่อง semantics_version ตรงกับ pin จริงไหม")
     check_registry_semver_claim()
+
+    print("\n[5d] ADR status — สัญญาที่ชิปแล้ว อ้างใบที่ถูกตัดสินแล้วไหม")
+    check_adr_status()
 
     fails = [f for f in findings if f[0] == "FAIL"]
     warns = [f for f in findings if f[0] == "WARN"]
