@@ -1,5 +1,85 @@
 # approval/v1
 
+## v1.4.0 — 2026-10-17
+
+`payload_digest` — ช่องที่ผูกใบอนุมัติเข้ากับ **เนื้อ** ของสิ่งที่จะเกิดขึ้น ([ADR-0035](../../../decisions/0035-approval-bound-to-an-id-is-not-bound-to-what-runs.md))
+
+คำขอมาจาก `ai-tools-mcp` (`ho-9694f90d` · `dis-514ae7a7` `seq 79` ข้อ 4) ซึ่ง**อ่านไฟล์นี้ทั้งไฟล์ก่อนขอ** แล้วชี้ว่าช่องที่ผูกใบเข้ากับงานมีสี่ช่องและเป็น id ทั้งหมด
+
+```text
+subject.id · execution_id · policy_id · correlation_id
+→ ทั้งสี่ตอบว่า "อนุมัติให้เรื่องไหน" ไม่มีช่องใดตอบว่า "ด้วยค่าอะไร"
+```
+
+> **ใบที่ผูกด้วย id อนุมัติ *คำขอ* · ใบที่ผูกด้วย digest อนุมัติ *สิ่งที่จะเกิดขึ้น***
+
+### ให้เกินที่ขอหนึ่งข้อ และนี่เป็นเจตนา
+
+ผู้ขอขอ "ช่องหนึ่งช่อง" และยกชื่อกับชนิดให้เราตัดสิน · ถ้าให้ตามตัวอักษรจะได้แฮชที่ไม่บอกว่าตัวเองคลุมอะไร — **ซึ่งรีโปนี้บันทึกบั๊กรูปนั้นไว้เองแล้ว** ที่ `model/v1` `platform_rules` ([ADR-0023](../../../decisions/0023-frozen-bindings-and-identity.md)):
+
+> *"checksum ที่คำนวณจาก manifest อย่างเดียว บอกได้แค่ว่า manifest เหมือนกัน ไม่ได้บอกว่าสิ่งที่รันเหมือนกัน"*
+
+`covers` จึง `required` และ `minItems: 1` · **แฮชที่คลุมไม่ครบแล้วไม่บอก แรงกว่าการไม่มีช่องเลย เพราะไม่มีช่องคือรู้ตัวว่าไม่มี**
+
+และเขียนความหมายของความว่างไว้ตรง ๆ ตามรูปของ `policy/v1` `Request.consent` — **ไม่มี `payload_digest` = ใบนี้ไม่ได้ผูกกับ payload ใด ไม่ได้แปลว่า payload ใดก็ได้** · ผู้ตรวจที่เทียบ digest *เฉพาะเมื่อมี* จะผ่านทุกใบที่ไม่ส่งมา ซึ่งคือทางที่น่าจะถูกใช้มากที่สุด
+
+### ไม่ breaking
+
+ช่องใหม่ optional · **`required` เจ็ดช่องไม่ขยับ · `guarantees` สี่ข้อไม่ขยับ · `$defs.Decision` ไม่ขยับ · `semantics_version` ยัง `1.5`**
+
+`semantics_version` ไม่ขยับเพราะ **นี่ไม่ใช่ semantics ของต้นทาง** — เป็น field ระดับ platform ตาม [ADR-0006 กฎข้อ 1](../../../decisions/0006-contract-versioning.md) รูปเดียวกับที่ `correlation_id` เข้ามา · ไล่หกประเภทของ Rule 2 แล้วไม่เข้าข้อไหน และข้อที่หก (*"เปิดทางให้ execution เดินได้โดยไม่มี APPROVE"*) **digest ทำตรงกันข้าม** คือทำให้ขอบเขตของ APPROVE หนึ่งใบแคบลง
+
+### รอบสอง (2026-10-17) — รีวิวจากนอกทีมจับได้สองแผลที่เราเขียนเอง
+
+`Grok · ai-collab-bot / reviewer` ตรวจ PR #89 ที่ head `6bc0a42` ด้วย `gh` แบบ read-only แล้วรายงานที่ `dis-514ae7a7` `seq 87` (`ENDORSE_WITH_GATES`) · สองข้อนี้ **ตรวจกับไฟล์แล้วจริงทั้งคู่** จึงแก้ก่อน merge
+
+**D4 · `value` ไม่มี `pattern`** — `{algorithm: sha256, value: "x"}` validate ผ่าน คือใบที่ประกาศว่ามี digest โดยไม่มี digest
+
+```yaml
+allOf:
+  - if:  { required: [algorithm], properties: { algorithm: { const: sha256 } } }
+    then: { properties: { value: { pattern: '^[0-9a-f]{64}$'  } } }
+  - if:  { required: [algorithm], properties: { algorithm: { const: sha512 } } }
+    then: { properties: { value: { pattern: '^[0-9a-f]{128}$' } } }
+```
+
+ล็อก **hex ตัวพิมพ์เล็ก** ด้วย ไม่ใช่แค่ความยาว — ผู้ตรวจเทียบ digest ด้วยการเทียบสตริง `ABC…` กับ `abc…` เป็นค่าเดียวกันทางคณิตศาสตร์แต่ไม่เท่ากันทางสตริง · **ปล่อยไว้สองรูป = ปฏิเสธผิดทั้งที่ทั้งสองฝ่ายคำนวณถูก** ซึ่งเป็นทางที่ทำให้คนเลิกเทียบ และการเลิกเทียบคือการกลับไปอยู่สภาพก่อนมีช่องนี้โดยที่ใบยังประกาศว่าผูกอยู่
+
+**D5 · ไม่มี `additionalProperties` ในไฟล์นี้เลยทั้งไฟล์** — ขณะที่ `consent/v1` `execution/v1` `agent/v1` `profile/v1` ใช้กันอยู่แล้วสี่ใบ · `agent/v1` `policy` เขียนเหตุผลไว้ตรง ๆ ว่ากัน `allow` ที่ถูกเติมเข้ามาภายหลัง ([ADR-0022](../../../decisions/0022-agent-may-narrow-its-own-scope.md)) — **ใบนี้เป็นใบที่หลุดมาตรฐานของบ้านตัวเอง**
+
+ปิดด้วย `additionalProperties: false` **เฉพาะในบล็อก `payload_digest`** · ที่ root ไม่แตะ เพราะ root ไม่มีมาตั้งแต่ต้นและการเพิ่มคือ breaking change กับผู้ผลิตที่มีอยู่ — บล็อกนี้ยังไม่มีผู้ผลิต จึงปิดได้ฟรีวันนี้ และจะไม่ฟรีอีก
+
+### 🔴 ช่องที่ยังเปิดอยู่ และ D5 ไม่ได้ปิด
+
+ตัวอย่างที่ `seq 87` ยกมาคือ `payload_digests` (เติม s) ซึ่งเป็นช่องสะกดผิด **ที่ root ไม่ใช่ในบล็อก** · `additionalProperties` ในบล็อกจับไม่ถึง
+
+```text
+{"payload_digests": {...}}   →  ยัง validate ผ่านวันนี้   (เคส K1 ในชุดตรวจ)
+```
+
+บันทึกเป็น PASS ที่รู้ตัว ไม่ใช่ PASS ที่เผลอ — **ปิดที่ root ต้องมี ADR และเป็น breaking** · ฝั่งที่จับได้วันนี้คือเกณฑ์ `A1.4` ของ `ai-tools-mcp` (ไม่มี digest แต่ operation มี target semantics → ปฏิเสธ) ซึ่ง `seq 87` ชี้ไว้เองว่าเป็นด่านที่กันกรณีนี้ · **สัญญาจับไม่ได้ แต่ผู้ตรวจจับได้ — และสองอย่างนี้ไม่ใช่สิ่งเดียวกัน**
+
+### ตรวจแล้ว 20 ทาง — 15 ทางเป็น negative
+
+```text
+valid     ไม่มี payload_digest · sha256 ครบสามช่อง · sha512 128 ตัว · covers หลายรายการ
+rejected  ไม่มี algorithm · ไม่มี value · ไม่มี covers · covers: [] · covers มีสตริงว่าง
+          algorithm: md5 · value: ''
+rejected  sha256 + 'x' · sha256 + ตัวพิมพ์ใหญ่ · sha256 + 63 ตัว
+          sha512 + 64 ตัว (ถูกของ sha256) · sha256 + อักษรที่ไม่ใช่ hex        ← D4
+rejected  ช่องเกินในบล็อก (coverz)                                             ← D5
+rejected  ขาด reason · decision: AUTO_APPROVE                        ← invariant เดิมยังอยู่
+PASS รู้ตัว  ช่องเกินที่ root (payload_digests)                        ← K1 · ช่องที่ยังเปิด
+```
+
+drift check `--local`: `passed=43 FAIL=0 WARN=0`
+
+### ที่ยังไม่ทำในใบนี้ และไม่ใช่การลืม
+
+`seq 87` เสนอ `D1` (ประกาศ canonical form เช่น RFC 8785 JCS) · `D2` (executor ต้องคำนวณ digest ใหม่ตอน dispatch) · `D3` (`required_covers` ต่อ capability)
+
+`D2`/`D3` เป็นของเกณฑ์ฝั่งผู้ตรวจ ไม่ใช่ของสัญญาใบนี้ · **`D1` เป็นของเราบางส่วน** — `covers` บอกว่าแฮชคลุมอะไร แต่ไม่มีช่องไหนบอกว่า *serialize อย่างไร* และความเงียบจะถูกอ่านว่า "แบบไหนก็ได้" ซึ่งเป็นรูปเดียวกับเหตุที่ `covers` ถูกบังคับ · เป็นข้อ scope จึงต้องมี ADR ของตัวเอง ไม่ยัดเข้าใบนี้
+
 ## v1.3.1 — 2026-09-20
 
 คำกำกับที่ `authority` ว่ามันเป็น `Principal` ซึ่งพา `display_name` มาด้วย ([ADR-0034](../../../decisions/0034-semantics-1-5-leaf-declaration.md) Amendment 1)
