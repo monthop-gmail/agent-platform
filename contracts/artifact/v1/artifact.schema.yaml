@@ -30,9 +30,66 @@ properties:
     minimum: 0
   checksum:
     type: object
+    description: >-
+      ⚠️ **ไม่มี `checksum` = ไม่ได้อ้างว่าเนื้อตรงกับที่ผลิต ไม่ได้แปลว่าเนื้อตรง**
+      ([ADR-0036](../../../decisions/0036-a-checksum-that-cannot-be-verified.md))
+      ผู้บริโภคที่เทียบ checksum *เฉพาะเมื่อมี* จะผ่านทุก artifact ที่ไม่ส่งช่องนี้
+      ซึ่งคือทางที่น่าจะถูกใช้มากที่สุด · รูปเดียวกับ `policy/v1` `Request.consent`
+      และ `approval/v1` `payload_digest`
+
+      🔴 **รูปของบล็อกนี้ยังหลวมอยู่ และวันนี้ปิดไม่ได้** — สามสภาพที่ต่างกันจริง
+      ยุบเป็นสภาพเดียวในสายตา validator
+
+      ```text
+      ไม่มี checksum เลย         valid    ← สภาพเดียวที่ซื่อสัตย์
+      checksum: {}               valid    ประกาศว่ามี checksum โดยไม่มี
+      checksum: {value: "abc"}   valid    แฮชที่ตรวจไม่ได้ เพราะไม่รู้อัลกอริทึม
+      ```
+
+      **`checksum` ที่ไม่มี `algorithm` ไม่ใช่หลักฐาน** — ตรวจไม่ได้ว่าถูกหรือผิด
+      consumer ต้องถือว่า *ไม่มี checksum* ไม่ใช่ *checksum ผ่าน*
+      · **`{}` ไม่ใช่ "ยังไม่คำนวณ"** — ถ้ายังไม่คำนวณ ให้ไม่ส่งช่องนี้
+
+      เหตุที่ยังไม่บังคับ: `required` · `additionalProperties: false` · `pattern` ที่ `value`
+      **เข้านิยาม breaking ของ [ADR-0006](../../../decisions/0006-contract-versioning.md)
+      ทั้งสามข้อ** (*"เข้มขึ้นใน validation"* · *"optional → required"*) จึงเป็นงานของ
+      `artifact/v2` ไม่ใช่ของเลขหลังจุด · และ `artifact/v1` ถูกเอื้อมถึงผ่าน
+      `execution/v1.artifacts[]` โดยผู้ผลิตที่ไม่เคย pin มันตรง ๆ — **การเข้มขึ้นจึงตกใส่คนได้จริง**
+
+      ⚠️ **`checksum` ที่ไม่มี `uri` ไม่มีตัวชี้ว่ามันคลุมอะไร** — `uri` ก็ optional เช่นกัน
+      จึงมีใบที่พกแฮชของสิ่งที่ตัวใบไม่ได้บอกว่าอยู่ไหน · และ `uri` ชี้ไป storage
+      ที่เนื้อเปลี่ยนได้โดยที่ `artifact_id` ไม่เปลี่ยน — `checksum` คือช่องเดียวที่จับข้อนั้นได้
+      `v2` ควรบังคับความสัมพันธ์นี้ `v1` บังคับไม่ได้
     properties:
       algorithm: { enum: [sha256, sha512] }
       value: { type: string }
+      covers:
+        type: array
+        minItems: 1
+        items:
+          type: string
+          minLength: 1
+        description: >-
+          🔒 **ประกาศว่าแฮชคลุมอะไร และต้องเป็นสิ่งที่คำนวณจริง** ไม่ใช่สิ่งที่อยากให้คนเชื่อว่าคลุม
+          ([ADR-0036](../../../decisions/0036-a-checksum-that-cannot-be-verified.md))
+          · รูปเดียวกับ `approval/v1` `payload_digest.covers` ซึ่งบังคับไว้ตั้งแต่วันแรก
+          ([ADR-0035](../../../decisions/0035-approval-bound-to-an-id-is-not-bound-to-what-runs.md))
+
+          เหตุที่ต้องมี — `model/v1` `platform_rules` บันทึกบั๊กรูปนี้ไว้แล้วว่า
+          *"checksum ที่คำนวณจาก manifest อย่างเดียว บอกได้แค่ว่า manifest เหมือนกัน
+          ไม่ได้บอกว่าสิ่งที่รันเหมือนกัน"* และ
+          [ADR-0023](../../../decisions/0023-frozen-bindings-and-identity.md) สรุปว่า
+          **checksum ที่อ้างมากกว่าสิ่งที่มันครอบ คือ false**
+
+          ⚠️ **ไม่มี `covers` = ไม่ได้ประกาศขอบเขต ไม่ได้แปลว่าคลุมทั้ง artifact**
+          · `optional` ในเวอร์ชันนี้เพราะการบังคับคือ breaking — **`v2` จะบังคับ**
+
+          🔒 ถ้าลำดับมีผลต่อค่าแฮช ลำดับในลิสต์นี้ต้องเป็นลำดับที่ป้อนเข้าไปจริง
+          ([ADR-0025](../../../decisions/0025-provider-switch-and-what-identity-covers.md))
+          · `minItems: 1` เพราะลิสต์ว่างต้องแปลว่าว่าง ไม่ใช่แปลว่าคลุมทุกอย่าง
+
+          ⚠️ **enum ของค่าในลิสต์นี้เป็นของผู้ผลิต** — platform บังคับได้แค่ว่าต้องมี
+          · validator กลางตรวจไม่ได้ว่าลิสต์นี้พูดความจริง เกณฑ์ของผู้ผลิตต้องตรวจเอง
   produced_by:
     $ref: https://schemas.agent-platform.internal/identity/v1/identity.schema.yaml#/$defs/Principal
   created_at:

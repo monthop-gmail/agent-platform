@@ -53,6 +53,7 @@ ADR ในโฟลเดอร์นี้เป็น **authority** ของ�
 | [0033](0033-resource-must-carry-its-own-scope.md) | `policy/v1.resource` มีช่องแต่ไม่มีกฎ · ค่าจริงทั้งสี่ชนิด unique แคบกว่า tenant | **C** — ต้องพก namespace ที่ unique ภายใน tenant · ชนแล้ว reject · ย้อนกลับได้ | ✅ Accepted |
 | [0034](0034-semantics-1-5-leaf-declaration.md) | semantics `1.3`→`1.5` ในสามวัน · กฎ leaf ที่เราขอเอง กลับมาผูก `approval/v1` ด้วย | **C** — ประกาศที่ตัวฟิลด์ทั้งสองใบ + `subject.type` เป็นชุดเปิด + ปิดช่องของ binding check | ✅ Accepted |
 | [0035](0035-approval-bound-to-an-id-is-not-bound-to-what-runs.md) | ทุกช่องที่ผูกใบอนุมัติเข้ากับงานเป็น id ล้วน · ไม่มีช่องใดแตะเนื้อของสิ่งที่จะรัน | **C** — `payload_digest` ตามกฎข้อ 1 · `{algorithm, value, covers}` · `covers` บังคับเพราะแฮชที่ไม่บอกขอบเขตเชื่อไม่ได้ | ✅ Accepted |
+| [0036](0036-a-checksum-that-cannot-be-verified.md) | `artifact/v1.checksum` รับ `{}` และ `{value}` ได้ · และ "ไม่มีใคร pin" ≠ "ไม่มีใครใช้" — `execution/v1` `$ref` มันไว้ | **D** — ลงครึ่งที่ไม่ breaking + ถาม consumer ก่อน · การบังคับต้องขึ้น `artifact/v2` ตามนิยาม breaking ของ ADR-0006 | ✅ Accepted |
 
 การเคาะบันทึกไว้ที่ [issue #1–#10](https://github.com/monthop-gmail/agent-platform/issues?q=is%3Aissue+label%3Aadr) — **ไฟล์บันทึกว่าตัดสินอะไร issue บันทึกว่าใครตัดสินและเมื่อไหร่**
 
@@ -119,6 +120,8 @@ contracts/ P0 ✅ ── profiles/ ✅ ── planes/ ✅
 0034 (รับ semantics 1.5 — กฎ leaf ผูกทั้งสองสัญญา) ✅
   ↓
 0035 (ใบที่ผูกด้วย id ไม่ได้ผูกกับสิ่งที่จะรัน) ✅
+  ↓
+0036 (checksum ที่ตรวจไม่ได้ · และทะเบียนที่นับการประกาศ ไม่ได้นับการเอื้อมถึง) ✅
 ```
 
 ## ที่มา
