@@ -1,9 +1,9 @@
 # ADR-0036: `artifact/v1.checksum` รับ `{}` และ `{value}` ได้ — และ "ไม่มีใคร pin" ไม่ได้แปลว่า "ไม่มีใครใช้"
 
-**Status:** **Proposed** (2026-10-17)
+**Status:** **Accepted** (2026-10-17)
 **Date:** 2026-10-17
 **Depends on:** [ADR-0006](0006-contract-versioning.md) นิยาม breaking · [ADR-0023](0023-frozen-bindings-and-identity.md) · [ADR-0025](0025-provider-switch-and-what-identity-covers.md) · [ADR-0032](0032-producer-ahead-of-contract.md) · [ADR-0035](0035-approval-bound-to-an-id-is-not-bound-to-what-runs.md)
-**Blocking:** `contracts/artifact/v1` → ยังไม่ตัดสิน (ดู Options — ทางที่บังคับได้ต้องขึ้น `artifact/v2`)
+**Blocking:** `contracts/artifact/v1` → `v1.1.0` (ครึ่งที่ไม่ breaking) · การบังคับทั้งหมดเป็นงานของ `artifact/v2` ที่ยังไม่เปิด
 
 ## Context
 
@@ -130,7 +130,7 @@ execution/v1 ถูก pin โดย   devfactory-core ✅ passing   ·   agent-
 
 ## Decision
 
-**เสนอ D · รอเจ้าของงานตัดสิน** — ใบนี้จึงเป็น `Proposed` ไม่ใช่ `Accepted`
+**รับ D** — เคาะ 2026-10-17 · ลงครึ่งที่ไม่ breaking เป็น `artifact/v1` `v1.1.0` และเข้าคิว `v2` ไว้โดยต้องถาม consumer ก่อน
 
 **เหตุผล:** คำถามที่ตัดสินเรื่องนี้ไม่ใช่ *"รูปไหนถูก"* (รูปที่ถูกคือรูปของ `payload_digest` และเรารู้แล้ว) แต่เป็น *"วันนี้มีใครส่งรูปเก่าอยู่หรือไม่"* — และ **เราตอบคำถามนั้นเองไม่ได้** เพราะ payload อยู่ที่ runtime ของทีมอื่น · D เป็นทางเดียวที่เดินหน้าได้โดยไม่ต้องเดาคำตอบนั้น และไม่ปล่อยให้ผู้อ่านเชื่อผิดระหว่างรอ
 
@@ -150,6 +150,30 @@ execution/v1 ถูก pin โดย   devfactory-core ✅ passing   ·   agent-
 ### `artifact/v1` `v1.0.0` → `v1.1.0` — ไม่ breaking
 
 เพิ่ม optional field (`covers`) · เพิ่มคำกำกับ · **ไม่แตะ `required` ไม่เพิ่ม `pattern` ไม่เพิ่ม `additionalProperties`** ตามนิยามของ ADR-0006
+
+### พิสูจน์ว่าไม่ breaking — รวมทางที่ผู้ผลิตใช้จริง
+
+ชุดตรวจ 15 เคส `FAIL=0` · เจ็ดเคสแรกคือ **ทุกรูปที่ valid ก่อน `v1.1.0` ต้องยัง valid**
+
+```text
+B1 ไม่มี checksum เลย            valid ✅     B5 algorithm อย่างเดียว          valid ✅
+B2 checksum: {}                 valid ✅     B6 สองช่องแบบเดิม ไม่มี covers    valid ✅
+B3 {value} ไม่มี algorithm       valid ✅     B7 ช่องเกินในบล็อก              valid ✅
+B4 {value: ''}                  valid ✅
+C1 covers หนึ่งรายการ            valid ✅     C3 covers: []                  invalid ✅
+C2 covers หลายรายการ             valid ✅     C4 covers: ['']                invalid ✅
+                                            C5 covers ไม่ใช่ array           invalid ✅
+R1 ขาด artifact_id              invalid ✅   R2 type นอก enum               invalid ✅
+```
+
+และเคสที่แบกคำกล่าวอ้างนี้ไว้จริง — **ทางที่ผู้ผลิตเอื้อมถึง `artifact/v1` คือผ่าน `execution/v1`** จึงต้องตรวจทางนั้นด้วย ไม่ใช่ตรวจแต่ตัว `artifact` เดี่ยว ๆ
+
+```text
+execution/v1 (context ครบ 4 id) + artifacts[0].checksum = {value: "abc"}
+→ valid ✅  ไม่ breaking
+```
+
+**ถ้าตรวจแต่ `artifact/v1` เดี่ยว ๆ ก็จะเป็นการวัดไม่ตรงจุดที่ของพัง** ซึ่งเป็นความผิดเดียวกับที่ใบนี้รายงานไว้ข้างบนเรื่องทะเบียน · ชุดตรวจอยู่ใน scratchpad ไม่ได้ commit ตาม [ADR-0011](0011-conformance-automation.md) — ตัวเลขนี้ตรวจซ้ำจากรีโปไม่ได้ ต้องรันเอง
 
 ## Consequences
 
